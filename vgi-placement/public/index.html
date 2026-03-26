@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#570B54">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="VGI Placement">
+  <link rel="apple-touch-icon" href="logo.jpg">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Campus Placement Dashboard · Vidyavahini</title>
+<link rel="icon" type="image/jpeg" href="logo.jpg"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Plus Jakarta Sans',sans-serif;
+  background:#1A0519;color:#fff;min-height:100vh;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+
+/* ── FLOATING FIXED LOGO + SLIDE TEXT ── */
+.fixed-logo-wrap{
+  position:fixed;top:20px;left:24px;z-index:500;
+  display:flex;align-items:center;
+  cursor:pointer;
+}
+.fixed-logo-img{
+  /* width/height set entirely by JS rAF lerp — no CSS transition on size */
+  width:54px;height:54px;border-radius:15px;
+  background:#fff;overflow:hidden;flex-shrink:0;
+  box-shadow:0 4px 24px rgba(0,0,0,0.35),0 0 0 1px rgba(255,255,255,0.08);
+  transition:box-shadow .25s ease; /* only shadow transitions via CSS */
+}
+.fixed-logo-img img{width:100%;height:100%;object-fit:contain;display:block;}
+
+/* Slide-out VGI text */
+.fixed-logo-text{
+  max-width:0;overflow:hidden;opacity:0;
+  white-space:nowrap;
+  font-size:15px;font-weight:900;letter-spacing:0.14em;
+  color:rgba(255,255,255,0.92);
+  margin-left:0;
+  transition:max-width .40s cubic-bezier(.4,0,.2,1),
+             opacity .30s ease,
+             margin-left .40s cubic-bezier(.4,0,.2,1);
+  pointer-events:none;
+  text-shadow:0 2px 10px rgba(0,0,0,0.50);
+}
+.fixed-logo-wrap:hover .fixed-logo-text{
+  max-width:140px;opacity:1;margin-left:13px;
+}
+.fixed-logo-wrap:hover .fixed-logo-img{
+  box-shadow:0 8px 32px rgba(109,14,106,0.55),0 0 0 1.5px rgba(211,182,210,0.28);
+}
+
+/* ── NAV — floats over hero gradient, no background of its own ── */
+.nav{
+  position:absolute;top:0;right:0;left:0;z-index:10;
+  padding:0 40px;height:48px;display:flex;align-items:center;justify-content:flex-end;
+}
+.nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-college{font-size:16px;font-weight:700;color:rgba(255,255,255,0.82);letter-spacing:-0.01em;}
+.nav-year{font-size:13px;font-weight:600;color:rgba(211,182,210,0.90);padding:3px 10px;border-radius:999px;background:rgba(109,14,106,0.22);border:1px solid rgba(211,182,210,0.22);margin-left:8px;}
+
+/* ── HERO — full viewport, nav is absolute so hero owns the whole space ── */
+.hero{
+  position:relative;
+  height:100vh;
+  display:flex;flex-direction:column;
+  justify-content:space-between;
+  overflow:hidden;
+}
+
+/* Mesh background — extends behind nav and carousel */
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 80% 65% at 20% 45%, rgba(109,14,106,0.48) 0%,transparent 60%),
+    radial-gradient(ellipse 70% 60% at 80% 50%, rgba(87,11,84,0.38) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 50% at 50% 20%, rgba(109,14,106,0.28) 0%,transparent 55%),
+    radial-gradient(ellipse 90% 70% at 50% 100%,rgba(42,10,40,0.65) 0%,transparent 55%);
+  pointer-events:none;
+}
+/* Cursor-following glow */
+.hero-cursor-glow{
+  position:absolute;inset:0;pointer-events:none;z-index:0;
+  will-change:background;
+}
+/* Grid lines */
+.hero::after{
+  content:'';position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 80% 100% at 50% 0%, black 30%, transparent 80%);
+  pointer-events:none;
+}
+
+/* Center content block */
+.hero-content{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:space-between;
+  text-align:center;
+  padding:32px 60px 28px;
+  position:relative;z-index:1;
+}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:10.5px;font-weight:700;letter-spacing:0.10em;color:rgba(255,255,255,0.5);
+  padding:4px 12px;border-radius:999px;
+  background:rgba(109,14,106,0.18);border:1px solid rgba(211,182,210,0.20);
+}
+/* Group 1 — tight internal spacing */
+.hero-top{
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+}
+.eyebrow-dot{width:5px;height:5px;border-radius:50%;background:#22C55E;box-shadow:0 0 6px #22C55E;animation:pulse 2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+
+.hero-title{
+  font-size:clamp(24px,4vw,46px);font-weight:900;line-height:1.08;
+  letter-spacing:-0.04em;
+}
+.hero-title .accent{
+  background:linear-gradient(135deg,#A76EA5,#8B3D89,#6D0E6A);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-sub{font-size:13.5px;color:rgba(255,255,255,0.55);font-weight:500;line-height:1.5;max-width:420px;margin-left:auto;margin-right:auto;}
+
+/* ── STAT TILES ── */
+.stat-row{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+  max-width:620px;width:100%;
+}
+.stat-tile{
+  background:rgba(109,14,106,0.10);border:1px solid rgba(211,182,210,0.14);
+  border-radius:12px;padding:10px 12px;text-align:left;
+  transition:all .2s;cursor:default;backdrop-filter:blur(6px);
+}
+.stat-tile:hover{background:rgba(109,14,106,0.18);border-color:rgba(211,182,210,0.28);}
+.stat-icon{font-size:13px;margin-bottom:5px;opacity:.7;}
+.stat-num{
+  font-size:22px;font-weight:900;line-height:1;letter-spacing:-0.04em;
+  margin-bottom:3px;color:#fff;transition:color .3s;
+}
+.stat-num.loaded{color:#fff;}
+.stat-lbl{font-size:9.5px;font-weight:700;letter-spacing:0.06em;color:rgba(255,255,255,0.45);}
+.stat-dot{display:inline-flex;gap:3px;margin-top:2px;}
+.stat-dot span{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,0.35);animation:blink 1.4s ease-in-out infinite;}
+.stat-dot span:nth-child(2){animation-delay:.2s;}
+.stat-dot span:nth-child(3){animation-delay:.4s;}
+@keyframes blink{0%,80%,100%{opacity:.2;}40%{opacity:1;}}
+
+/* ── PORTAL BUTTONS ── */
+.portal-buttons{
+  display:flex;gap:14px;justify-content:center;
+  flex-wrap:wrap;max-width:900px;width:100%;
+}
+.portal-btn{
+  flex:1;min-width:160px;
+  padding:12px 20px;border-radius:12px;
+  font-size:13px;font-weight:700;letter-spacing:-0.01em;
+  display:flex;align-items:center;gap:10px;
+  text-decoration:none;transition:all .22s;
+  cursor:pointer;border:none;
+}
+.portal-btn-icon{
+  width:38px;height:38px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;flex-shrink:0;
+}
+.portal-btn-text{display:flex;flex-direction:column;text-align:left;}
+.portal-btn-label{font-size:14px;font-weight:800;line-height:1.2;}
+.portal-btn-sub{font-size:11px;font-weight:500;opacity:.65;margin-top:2px;}
+
+/* Both cards identical and neutral by default */
+.btn-student,
+.btn-placement{
+  background:rgba(109,14,106,0.12);color:rgba(255,255,255,0.90);
+  border:1.5px solid rgba(211,182,210,0.18);
+  box-shadow:0 4px 16px rgba(0,0,0,0.20);
+}
+.btn-student .portal-btn-icon,
+.btn-placement .portal-btn-icon{background:rgba(211,182,210,0.12);}
+
+/* Student → blue on hover */
+.btn-student:hover{
+  background:linear-gradient(135deg,#570B54,#6D0E6A);color:#fff;
+  border-color:transparent;
+  transform:translateY(-3px);box-shadow:0 12px 44px rgba(109,14,106,0.50);
+}
+.btn-student:hover .portal-btn-icon{background:rgba(255,255,255,0.16);}
+
+/* Placement → indigo on hover */
+.btn-placement:hover{
+  background:linear-gradient(135deg,#570B54,#6D0E6A);color:#fff;
+  border-color:transparent;
+  transform:translateY(-3px);box-shadow:0 12px 44px rgba(87,11,84,0.50);
+}
+.btn-placement:hover .portal-btn-icon{background:rgba(255,255,255,0.16);}
+
+/* ── FOOTER — merged into hero bottom, no border ── */
+.footer{
+  text-align:center;padding:10px 40px 14px;
+  font-size:10.5px;color:rgba(255,255,255,0.18);
+  letter-spacing:0.05em;
+}
+
+/* ── COMPANIES CAROUSEL (anchored to hero bottom) ── */
+.companies-section{
+  position:relative;z-index:1;
+  padding:14px 0 0;
+  display:none;
+  width:100%;
+  border-top:1px solid rgba(211,182,210,0.07);
+  background:linear-gradient(to bottom,transparent,rgba(26,5,25,0.30));
+}
+.companies-label{
+  display:flex;align-items:center;justify-content:center;
+  gap:16px;margin-bottom:12px;
+}
+.companies-label-line{
+  height:1px;width:80px;
+  background:linear-gradient(90deg,transparent,rgba(211,182,210,0.20));
+}
+.companies-label-line.right{
+  background:linear-gradient(-90deg,transparent,rgba(211,182,210,0.20));
+}
+.companies-label-text{
+  font-size:10.5px;font-weight:700;letter-spacing:0.14em;
+  color:rgba(255,255,255,0.28);white-space:nowrap;
+}
+
+.ticker-wrap{
+  overflow:hidden;position:relative;margin-bottom:12px;
+}
+.ticker-wrap::before,.ticker-wrap::after{
+  content:'';position:absolute;top:0;bottom:0;width:140px;z-index:2;pointer-events:none;
+}
+.ticker-wrap::before{left:0;background:linear-gradient(90deg,#1A0519 20%,transparent 100%);}
+.ticker-wrap::after{right:0;background:linear-gradient(-90deg,#1A0519 20%,transparent 100%);}
+
+.ticker-row{
+  display:flex;gap:12px;width:max-content;
+  will-change:transform;
+}
+.ticker-row.dir-left{animation:tickLeft linear infinite;}
+.ticker-row.dir-right{animation:tickRight linear infinite;}
+.ticker-row:hover{animation-play-state:paused;}
+@keyframes tickLeft{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+@keyframes tickRight{from{transform:translateX(-50%);}to{transform:translateX(0);}}
+
+/* ── COMPANY CHIP ── */
+.co-chip{
+  display:flex;align-items:center;gap:11px;
+  padding:11px 18px 11px 12px;
+  border-radius:16px;
+  background:rgba(109,14,106,0.10);
+  border:1.5px solid rgba(211,182,210,0.10);
+  backdrop-filter:blur(10px);
+  white-space:nowrap;flex-shrink:0;
+  cursor:default;
+  transition:background .2s,border-color .2s,transform .2s,box-shadow .2s;
+}
+.co-chip:hover{
+  background:rgba(109,14,106,0.22);
+  border-color:rgba(211,182,210,0.26);
+  transform:translateY(-3px);
+  box-shadow:0 8px 28px rgba(109,14,106,0.28);
+}
+.co-chip-logo{
+  width:40px;height:40px;border-radius:10px;
+  background:#fff;overflow:hidden;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:800;
+}
+.co-chip-info{display:flex;flex-direction:column;gap:3px;}
+.co-chip-name{
+  font-size:13px;font-weight:700;
+  color:rgba(255,255,255,0.88);
+  max-width:130px;overflow:hidden;text-overflow:ellipsis;
+}
+.co-chip-status{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:10.5px;font-weight:600;
+}
+.sdot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.s-placed{color:#4ADE80;}
+.s-placed .sdot{background:#4ADE80;box-shadow:0 0 5px #4ADE80;animation:pulse 2s ease-in-out infinite;}
+.s-ongoing{color:#FCD34D;}
+.s-ongoing .sdot{background:#FCD34D;}
+.s-active{color:#93C5FD;}
+.s-active .sdot{background:#93C5FD;}
+.s-upcoming{color:rgba(255,255,255,0.30);}
+.s-upcoming .sdot{background:rgba(255,255,255,0.22);}
+
+/* ── RESPONSIVE ── */
+@media(max-width:700px){
+  .nav{padding:0 20px;}
+  .fixed-logo-wrap{top:14px;left:16px;}
+  .hero-content{padding:0 24px;}
+  .stat-row{grid-template-columns:repeat(2,1fr);}
+  .portal-buttons{flex-direction:column;}
+  .portal-btn{justify-content:flex-start;}
+  .companies-section{padding:16px 0 20px;}
+}
+@media(max-width:400px){
+  .stat-row{grid-template-columns:repeat(2,1fr);}
+  .hero-sub{font-size:14px;}
+  .hero-title{font-size:clamp(28px,8vw,40px);}
+}
+</style>
+</head>
+<body>
+
+<!-- ── FIXED FLOATING LOGO ── -->
+<div class="fixed-logo-wrap" id="fixed-logo-wrap">
+  <div class="fixed-logo-img" id="fixed-logo-img">
+    <img src="logo.jpg" alt="Vidyavahini"
+      onerror="this.style.display='none';var p=this.parentElement;p.style.background='linear-gradient(135deg,#570B54,#6D0E6A)';p.style.display='flex';p.style.alignItems='center';p.style.justifyContent='center';p.style.color='#fff';p.style.fontWeight='900';p.style.fontSize='22px';p.textContent='V';"/>
+  </div>
+  <span class="fixed-logo-text">VVFGC</span>
+</div>
+
+<!-- ── HERO — full viewport canvas including nav ── -->
+<section class="hero" id="hero">
+  <div class="hero-cursor-glow" id="hero-cursor-glow"></div>
+
+  <!-- Nav lives inside hero so it shares the gradient -->
+  <nav class="nav">
+    <span class="nav-college">Vidyavahini Group of Institutions</span>
+    <span class="nav-year">2025–26</span>
+  </nav>
+
+  <!-- Central content -->
+  <div class="hero-content">
+
+    <!-- Group 1: eyebrow + title + subtitle -->
+    <div class="hero-top">
+      <div class="hero-eyebrow">
+        <span class="eyebrow-dot"></span>
+        PLACEMENT SEASON 2025–26
+      </div>
+      <h1 class="hero-title">
+        Campus<br><span class="accent">Placement</span> Dashboard
+      </h1>
+      <p class="hero-sub">
+        Track company drives, registrations, and placements for
+        Vidyavahini First Grade Degree College.
+      </p>
+    </div>
+
+    <!-- Group 2: stat tiles -->
+    <div class="stat-row">
+      <div class="stat-tile" id="tile-companies">
+        <div class="stat-icon">🏢</div>
+        <div class="stat-num" id="st-companies"><span class="stat-dot"><span></span><span></span><span></span></span></div>
+        <div class="stat-lbl">COMPANIES</div>
+      </div>
+      <div class="stat-tile" id="tile-reg">
+        <div class="stat-icon">📋</div>
+        <div class="stat-num" id="st-reg"><span class="stat-dot"><span></span><span></span><span></span></span></div>
+        <div class="stat-lbl">REGISTRATIONS</div>
+      </div>
+      <div class="stat-tile" id="tile-drives">
+        <div class="stat-icon">✅</div>
+        <div class="stat-num" id="st-drives"><span class="stat-dot"><span></span><span></span><span></span></span></div>
+        <div class="stat-lbl">DRIVES DONE</div>
+      </div>
+      <div class="stat-tile" id="tile-placed">
+        <div class="stat-icon">🎉</div>
+        <div class="stat-num" id="st-placed"><span class="stat-dot"><span></span><span></span><span></span></span></div>
+        <div class="stat-lbl">PLACED</div>
+      </div>
+    </div>
+
+    <!-- Group 3: portal buttons -->
+    <div class="portal-buttons">
+      <a class="portal-btn btn-student" href="student.html">
+        <div class="portal-btn-icon">🎓</div>
+        <div class="portal-btn-text">
+          <span class="portal-btn-label">Student Portal</span>
+          <span class="portal-btn-sub">Track your applications</span>
+        </div>
+      </a>
+      <a class="portal-btn btn-placement" href="placement-dashboard.html">
+        <div class="portal-btn-icon">📊</div>
+        <div class="portal-btn-text">
+          <span class="portal-btn-label">Placement Cell</span>
+          <span class="portal-btn-sub">View full dashboard</span>
+        </div>
+      </a>
+    </div>
+
+  </div>
+
+  <!-- Carousel anchored to hero bottom -->
+  <div class="companies-section" id="companies-section">
+    <div class="companies-label">
+      <div class="companies-label-line"></div>
+      <span class="companies-label-text">COMPANIES HIRING FROM VIDYAVAHINI · 2025–26</span>
+      <div class="companies-label-line right"></div>
+    </div>
+    <div id="ticker-row-1-wrap" class="ticker-wrap"></div>
+    <div id="ticker-row-2-wrap" class="ticker-wrap"></div>
+    <!-- Footer merged into hero bottom -->
+    <div class="footer">Vidyavahini First Grade Degree College · Placement Cell · 2025–26</div>
+  </div>
+
+</section>
+
+<script src="shared.js"></script>
+<script>
+/* ═══════════════════════════════════════════
+   LOGO — smooth rAF lerp grow + slide text
+═══════════════════════════════════════════ */
+(function(){
+  const wrap = document.getElementById('fixed-logo-wrap');
+  const img  = document.getElementById('fixed-logo-img');
+  if(!wrap || !img) return;
+
+  const MIN_SZ = 54;
+  const MAX_SZ = 76;
+  const SCROLL_RANGE = 200;
+
+  let currentSz = MIN_SZ;
+  let targetSz  = MIN_SZ;
+  let rafId     = null;
+
+  function getTargetSize(){
+    const t = Math.min(window.scrollY / SCROLL_RANGE, 1);
+    const ease = 1 - Math.pow(1 - t, 2);
+    return MIN_SZ + (MAX_SZ - MIN_SZ) * ease;
+  }
+
+  function applySize(sz){
+    img.style.width        = sz.toFixed(2) + 'px';
+    img.style.height       = sz.toFixed(2) + 'px';
+    img.style.borderRadius = (sz * 0.27).toFixed(2) + 'px';
+    const p = (sz - MIN_SZ) / (MAX_SZ - MIN_SZ);
+    img.style.boxShadow =
+      `0 ${(4+p*10).toFixed(1)}px ${(24+p*20).toFixed(1)}px rgba(0,0,0,0.35),`+
+      `0 0 0 ${(1+p*0.5).toFixed(2)}px rgba(255,255,255,0.09),`+
+      `0 0 ${(p*32).toFixed(1)}px rgba(109,14,106,${(p*0.45).toFixed(2)})`;
+  }
+
+  function tick(){
+    rafId = null;
+    currentSz += (targetSz - currentSz) * 0.14; // lerp 14% per frame
+    applySize(currentSz);
+    if(Math.abs(targetSz - currentSz) > 0.05){
+      rafId = requestAnimationFrame(tick);
+    }
+  }
+
+  function scheduleUpdate(){
+    targetSz = getTargetSize();
+    if(!rafId) rafId = requestAnimationFrame(tick);
+  }
+
+  window.addEventListener('scroll', scheduleUpdate, {passive:true});
+  applySize(MIN_SZ);
+
+  wrap.addEventListener('click', function(e){
+    e.preventDefault();
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+})();
+
+/* ═══════════════════════════════════════════
+   CURSOR GLOW — follows mouse inside hero
+═══════════════════════════════════════════ */
+(function(){
+  const hero = document.getElementById('hero');
+  const glow = document.getElementById('hero-cursor-glow');
+  if(!hero || !glow) return;
+  let raf = null;
+  let tx=50, ty=50, cx=50, cy=50;
+
+  hero.addEventListener('mousemove', function(e){
+    const r = hero.getBoundingClientRect();
+    tx = ((e.clientX - r.left) / r.width  * 100);
+    ty = ((e.clientY - r.top)  / r.height * 100);
+    if(!raf) raf = requestAnimationFrame(step);
+  });
+
+  hero.addEventListener('mouseleave', function(){
+    // drift back to centre
+    tx=50; ty=50;
+    if(!raf) raf = requestAnimationFrame(step);
+  });
+
+  function step(){
+    raf = null;
+    // lerp for smooth lag
+    cx += (tx - cx) * 0.10;
+    cy += (ty - cy) * 0.10;
+    glow.style.background =
+      `radial-gradient(ellipse 55% 48% at ${cx.toFixed(2)}% ${cy.toFixed(2)}%,`+
+      `rgba(139,40,135,0.32) 0%,transparent 65%)`;
+    // keep animating until we're close enough
+    if(Math.abs(tx-cx) > 0.05 || Math.abs(ty-cy) > 0.05)
+      raf = requestAnimationFrame(step);
+  }
+})();
+
+/* ═══════════════════════════════════════════
+   COMPANY CAROUSEL
+═══════════════════════════════════════════ */
+const CONFIG_SHEET_ID_IDX = '__SHEET_ID__';
+const ADMIN_TAB_IDX       = 'ADMIN_MODE';
+
+const _CHIP_GRADS=[
+  ['#1e40af','#7c3aed'],['#0369a1','#0e7490'],['#065f46','#0891b2'],
+  ['#7c2d12','#b45309'],['#6b21a8','#db2777'],['#991b1b','#ea580c'],
+  ['#0f4c3a','#065f46'],['#3730a3','#1e40af']
+];
+const _CHIP_HINTS={
+  'tcs':'tcs.com','infosys':'infosys.com','wipro':'wipro.com',
+  'accenture':'accenture.com','cognizant':'cognizant.com',
+  'first source':'firstsource.com','firstsource':'firstsource.com',
+  'fyers':'fyers.in','rupeek':'rupeek.com','codeyoung':'codeyoung.com',
+  'interns elite':'internselite.com','genz':'genzeducatewing.com',
+  'cloud unicorn':'cloudunicorn.in','idea infinity':'ideainfinity.in',
+  'deloitte':'deloitte.com','kpmg':'kpmg.com','ibm':'ibm.com',
+  'oracle':'oracle.com','zoho':'zoho.com','freshworks':'freshworks.com',
+  'masters union':'mastersunion.org','master\'s union':'mastersunion.org',
+  'prop times':'proptimes.in','proptimes':'proptimes.in',
+  'technologics':'technologicsglobal.com','technologics global':'technologicsglobal.com'
+};
+function _chipGrad(i){const p=_CHIP_GRADS[i%_CHIP_GRADS.length];return`linear-gradient(135deg,${p[0]},${p[1]})`;}
+function _chipIni(n){return(n||'?').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'?';}
+function _chipDomain(name,web){
+  if(web){try{const u=web.startsWith('http')?web:'https://'+web;return new URL(u).hostname.replace(/^www\./,'');}catch(e){}}
+  const n=(name||'').toLowerCase();
+  for(const[k,v]of Object.entries(_CHIP_HINTS)){if(n.includes(k))return v;}
+  return n.replace(/[^a-z0-9]/g,'')+'.com';
+}
+
+/* Fetch ADMIN_MODE and merge website URLs into companies array */
+async function _mergeAdminWebsites(companies){
+  try{
+    const url=`https://docs.google.com/spreadsheets/d/${CONFIG_SHEET_ID_IDX}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(ADMIN_TAB_IDX)}`;
+    const res=await fetchWithTimeout(url,8000);
+    const text=await res.text();
+    if(text.trimStart().startsWith('<'))return;
+    const json=JSON.parse(text.replace(/^[^(]*\(/,'').replace(/\);\s*$/,''));
+    if(json.status==='error')return;
+    const cols=(json.table?.cols||[]).map(c=>(c.label||'').toLowerCase());
+    const iName=cols.findIndex(h=>h.includes('company')||h.includes('name'));
+    const iWeb =cols.findIndex(h=>h.includes('website')||h.includes('web')||h.includes('url'));
+    const nIdx=iName>=0?iName:0;
+    const wIdx=iWeb >=0?iWeb :1; // default col B
+    const gv=cell=>(cell&&cell.v!=null)?String(cell.v).trim():'';
+    for(const row of (json.table?.rows||[])){
+      const cells=row.c||[];
+      const nm=gv(cells[nIdx]);
+      const web=gv(cells[wIdx]);
+      if(!nm||!web)continue;
+      const match=companies.find(c=>c.name.toLowerCase().trim()===nm.toLowerCase().trim());
+      if(match)match.website=match.website||web; // don't overwrite existing
+    }
+  }catch(e){console.warn('[carousel] ADMIN_MODE merge failed:',e.message);}
+}
+
+function _makeChip(c){
+  const g=_chipGrad(c.id-1);
+  const letters=_chipIni(c.name);
+  // Start with gradient initials — logo swapped in asynchronously after verification
+  return `<div class="co-chip">
+    <div class="co-chip-logo" data-chip-logo="${c.id}" style="background:${g};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;">${letters}</div>
+    <div class="co-chip-info">
+      <span class="co-chip-name">${c.name}</span>
+
+    </div>
+  </div>`;
+}
+
+/* Probe a URL: resolves true only if image loads AND has real pixels (>4×4).
+   No crossOrigin — favicons don't serve CORS headers and we don't need pixel data. */
+function _probeImg(url){
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.onload=function(){resolve(this.naturalWidth>4 && this.naturalHeight>4);};
+    img.onerror=()=>resolve(false);
+    setTimeout(()=>resolve(false), 6000);
+    img.src=url;
+  });
+}
+
+/* Try sources in order, verified pixel-by-pixel, then apply to all matching chips */
+async function _resolveChipLogo(c){
+  const d=_chipDomain(c.name,c.website);
+  const sources=[
+    `https://logo.clearbit.com/${d}?size=80`,
+    `https://${d}/favicon.ico`,
+    `https://www.google.com/s2/favicons?domain=${d}&sz=64`,
+  ];
+  for(const src of sources){
+    const ok=await _probeImg(src);
+    if(ok){
+      document.querySelectorAll(`[data-chip-logo="${c.id}"]`).forEach(cell=>{
+        // Clear initials styling, insert verified image
+        cell.removeAttribute('style');
+        cell.textContent='';
+        const img=document.createElement('img');
+        img.src=src;
+        img.style.cssText='width:100%;height:100%;object-fit:contain;padding:4px;';
+        cell.appendChild(img);
+      });
+      return;
+    }
+  }
+  // All sources failed — gradient initials remain, no change needed
+}
+
+function _setTickerSpeed(rowEl, pxPerSec){
+  const w = rowEl.scrollWidth / 2;
+  rowEl.style.animationDuration = (w / pxPerSec).toFixed(1) + 's';
+}
+
+function buildCarousel(companies){
+  if(!companies||!companies.length) return;
+  const sec = document.getElementById('companies-section');
+  if(!sec) return;
+  const row1 = companies.filter((_,i)=>i%2===0);
+  const row2 = companies.filter((_,i)=>i%2!==0);
+  function buildRow(list, dir, wrapId){
+    if(!list.length) return;
+    const html = list.map(_makeChip).join('');
+    const row  = document.createElement('div');
+    row.className = `ticker-row ${dir}`;
+    row.innerHTML  = html + html;
+    const wrap = document.getElementById(wrapId);
+    if(wrap){ wrap.innerHTML=''; wrap.appendChild(row); }
+    requestAnimationFrame(()=>_setTickerSpeed(row, dir==='dir-left' ? 45 : 36));
+  }
+  buildRow(row1, 'dir-left',  'ticker-row-1-wrap');
+  if(row2.length) buildRow(row2, 'dir-right', 'ticker-row-2-wrap');
+  else document.getElementById('ticker-row-2-wrap').style.display='none';
+  sec.style.display = 'block';
+
+  // After DOM is rendered, probe and verify logos for every company concurrently
+  companies.forEach(c => _resolveChipLogo(c));
+}
+
+function updateChipStatus(id, key){
+  const map = {
+    placed:  {cls:'s-placed',  label:'Placed ✓'},
+    ongoing: {cls:'s-ongoing', label:'Ongoing'},
+    active:  {cls:'s-active',  label:'Registered'},
+    upcoming:{cls:'s-upcoming',label:'Upcoming'}
+  };
+  const s = map[key] || map.upcoming;
+  document.querySelectorAll(`[data-chip-id="${id}"]`).forEach(el=>{
+    el.className = `co-chip-status ${s.cls}`;
+    el.innerHTML = `<span class="sdot"></span>${s.label}`;
+  });
+}
+
+/* ═══════════════════════════════════════════
+   STATS LOADER
+═══════════════════════════════════════════ */
+
+const setNum = (id, val) => {
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.textContent = val;
+};
+
+function countValidRows(json){
+  const table = json && json.table;
+  if(!table || !table.rows) return 0;
+  const cols = (table.cols || []).map(c => (c.label || '').toLowerCase());
+  const iName  = cols.findIndex(h => h.includes('name'));
+  const iEmail = cols.findIndex(h => h.includes('email') || h.includes('mail'));
+  return table.rows.filter(row => {
+    const name  = (iName  >= 0 && row.c && row.c[iName]  && row.c[iName].v)  ? String(row.c[iName].v).trim()  : '';
+    const email = (iEmail >= 0 && row.c && row.c[iEmail] && row.c[iEmail].v) ? String(row.c[iEmail].v).trim() : '';
+    return name || email;
+  }).length;
+}
+
+async function loadIndexStats(){
+  let companies = [], totalReg = 0, drivesDone = 0, totalSel = 0;
+  try{
+    companies = await loadConfig();
+    // ← Fetch ADMIN_MODE websites BEFORE building carousel so logos are correct
+    await _mergeAdminWebsites(companies);
+    setNum('st-companies', companies.length);
+    buildCarousel(companies);
+  }catch(e){
+    setNum('st-companies', '—');
+    setNum('st-reg', '—');
+    setNum('st-drives', '—');
+    setNum('st-placed', '—');
+    console.warn('[index stats]', e);
+    return;
+  }
+
+  // Fetch all companies concurrently, collect results, then set numbers once
+  const results = await Promise.allSettled(companies.map(async c => {
+    const fetchTab = async (tab) => {
+      if(!tab) return 0;
+      const url = `https://docs.google.com/spreadsheets/d/${c.sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tab)}`;
+      try {
+        const res = await fetchWithTimeout(url, 8000);
+        const text = await res.text();
+        if(text.trimStart().startsWith('<')) return 0;
+        const json = JSON.parse(text.replace(/^[^(]*\(/,'').replace(/\);?\s*$/,''));
+        if(json.status === 'error') return 0;
+        return countValidRows(json);
+      } catch(e) { return 0; }
+    };
+    const [reg, int_, sel] = await Promise.all([
+      fetchTab(c.tabReg),
+      fetchTab(c.tabInt),
+      fetchTab(c.tabSel),
+    ]);
+    return { c, reg, int_, sel };
+  }));
+
+  // Process all results and update stats + carousel in one pass
+  results.forEach(r => {
+    if(r.status !== 'fulfilled' || !r.value) return;
+    const { c, reg, int_, sel } = r.value;
+    totalReg += reg;
+    totalSel += sel;
+    if(sel > 0 || int_ > 0) drivesDone++;
+
+  });
+
+  // Animate numbers in once all data is ready
+  animateCount('st-reg',    totalReg);
+  animateCount('st-drives', drivesDone);
+  animateCount('st-placed', totalSel);
+}
+
+function animateCount(id, target){
+  const el = document.getElementById(id);
+  if(!el || isNaN(target)) return;
+  // Clear any loading dots first
+  el.innerHTML = '0';
+  const start = 0;
+  const diff = target - start;
+  if(diff === 0){ el.textContent = '0'; return; }
+  let frame = 0;
+  const frames = 40;
+  const step = () => {
+    frame++;
+    const progress = frame / frames;
+    const ease = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+    el.textContent = Math.round(start + diff * ease);
+    if(frame < frames) requestAnimationFrame(step);
+    else el.textContent = target;
+  };
+  requestAnimationFrame(step);
+}
+
+loadIndexStats();
+</script>
+  <script>
+    if('serviceWorker' in navigator){
+      window.addEventListener('load',()=>{
+        navigator.serviceWorker.register('sw.js')
+          .then(r=>console.log('[PWA] SW registered'))
+          .catch(e=>console.warn('[PWA] SW failed:',e));
+      });
+    }
+  </script>
+</body>
+</html>

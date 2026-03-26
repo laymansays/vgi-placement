@@ -1,0 +1,25 @@
+{
+  "name": "VGI Placement",
+  "short_name": "VGI Placement",
+  "description": "Vidyavahini First Grade Degree College — Campus Placement Portal",
+  "start_url": "student.html",
+  "scope": "",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#570B54",
+  "background_color": "#570B54",
+  "icons": [
+    {
+      "src": "logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}

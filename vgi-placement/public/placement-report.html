@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Placement Visual Report · VVFGC</title>
+<link rel="icon" type="image/jpeg" href="logo.jpg"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Inter',sans-serif;
+  background:linear-gradient(150deg,#0F172A 0%,#1A1030 50%,#2D0A2C 100%);
+  color:#fff;min-height:100vh;-webkit-font-smoothing:antialiased;
+}
+
+/* ── TOP BAR ── */
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  background:rgba(15,10,28,0.88);backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(211,182,210,0.12);
+  padding:0 24px;height:60px;
+  display:flex;align-items:center;gap:16px;
+}
+.topbar-logo{
+  width:36px;height:36px;border-radius:10px;overflow:hidden;flex-shrink:0;
+  background:#fff;box-shadow:0 4px 16px rgba(109,14,106,0.40);
+}
+.topbar-logo img{width:100%;height:100%;object-fit:contain;display:block;}
+.topbar-title{font-size:15px;font-weight:800;letter-spacing:-0.02em;flex:1;}
+.topbar-title span{color:rgba(255,255,255,0.45);font-weight:500;margin-left:6px;font-size:13px;}
+
+/* dropdown */
+.dropdown-wrap{display:flex;align-items:center;gap:10px;}
+.dropdown-label{font-size:11px;font-weight:700;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
+select#co-select{
+  background:rgba(255,255,255,0.07);border:1.5px solid rgba(211,182,210,0.22);
+  color:#fff;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;
+  padding:7px 36px 7px 12px;border-radius:10px;cursor:pointer;outline:none;
+  -webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 8L2 4h8z' fill='%23aaa'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;
+  min-width:220px;transition:border-color .15s;
+}
+select#co-select:focus{border-color:rgba(211,182,210,0.55);}
+select#co-select option{background:#1A1030;color:#fff;}
+
+.btn-dl{
+  padding:8px 18px;border-radius:10px;font-size:12.5px;font-weight:700;
+  background:linear-gradient(135deg,#570B54,#6D0E6A);color:#fff;
+  border:none;cursor:pointer;font-family:'Inter',sans-serif;
+  box-shadow:0 4px 16px rgba(109,14,106,0.35);
+  transition:all .2s;white-space:nowrap;
+}
+.btn-dl:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(109,14,106,0.50);}
+.btn-dl:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+
+.btn-back{
+  padding:7px 14px;border-radius:10px;font-size:12px;font-weight:600;
+  background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.7);
+  border:1.5px solid rgba(255,255,255,0.12);cursor:pointer;
+  font-family:'Inter',sans-serif;text-decoration:none;
+  transition:all .15s;white-space:nowrap;
+}
+.btn-back:hover{background:rgba(255,255,255,0.12);color:#fff;}
+
+/* ── LOADING / ERROR ── */
+#loading-wrap{
+  position:fixed;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:16px;
+  background:linear-gradient(150deg,#0F172A,#1A1030,#2D0A2C);
+  z-index:500;transition:opacity .3s;
+}
+#loading-wrap.hidden{opacity:0;pointer-events:none;}
+.spinner{
+  width:44px;height:44px;border-radius:50%;
+  border:3px solid rgba(211,182,210,0.15);
+  border-top-color:#6D0E6A;
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-text{font-size:13px;color:rgba(255,255,255,0.55);font-weight:500;}
+#error-wrap{
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  gap:12px;padding:60px 24px;text-align:center;min-height:60vh;
+}
+#error-wrap.show{display:flex;}
+.error-msg{font-size:13px;color:rgba(255,255,255,0.55);max-width:440px;line-height:1.6;}
+
+/* ── MAIN CANVAS AREA ── */
+#app{display:none;padding-top:72px;}
+#app.ready{display:block;}
+
+.report-wrap{
+  max-width:1200px;margin:0 auto;padding:28px 24px 60px;
+}
+
+/* Canvas card */
+.canvas-card{
+  background:rgba(255,255,255,0.03);border:1px solid rgba(211,182,210,0.10);
+  border-radius:20px;padding:24px;margin-bottom:20px;
+  box-shadow:0 8px 48px rgba(0,0,0,0.35);overflow:hidden;
+}
+.canvas-card canvas{
+  width:100%;height:auto;border-radius:12px;display:block;
+}
+
+/* Section title */
+.section-label{
+  font-size:11px;font-weight:700;color:rgba(255,255,255,0.35);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;
+}
+
+/* Overall company grid cards */
+.company-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+  gap:12px;margin-top:8px;
+}
+.co-mini-card{
+  background:rgba(255,255,255,0.04);border:1px solid rgba(211,182,210,0.10);
+  border-radius:14px;padding:16px;cursor:pointer;transition:all .2s;
+}
+.co-mini-card:hover{background:rgba(109,14,106,0.18);border-color:rgba(211,182,210,0.25);transform:translateY(-2px);}
+.co-mini-card.active{background:rgba(109,14,106,0.22);border-color:rgba(211,182,210,0.40);}
+.co-mini-name{font-size:13px;font-weight:700;color:#fff;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.co-mini-bar{height:5px;background:rgba(255,255,255,0.08);border-radius:99px;margin-bottom:8px;overflow:hidden;}
+.co-mini-bar-fill{height:100%;border-radius:99px;transition:width .4s;}
+.co-mini-stats{display:flex;gap:12px;}
+.co-mini-stat{font-size:10px;color:rgba(255,255,255,0.45);font-weight:500;}
+.co-mini-stat strong{color:#fff;font-weight:700;margin-right:3px;}
+
+/* Overall aggregate row */
+.agg-row{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;
+}
+.agg-tile{
+  background:rgba(255,255,255,0.04);border:1px solid rgba(211,182,210,0.10);
+  border-radius:14px;padding:18px 20px;
+}
+.agg-tile-num{font-size:32px;font-weight:900;letter-spacing:-0.04em;line-height:1;}
+.agg-tile-lbl{font-size:10.5px;font-weight:600;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:.06em;margin-top:6px;}
+
+@media(max-width:640px){
+  .agg-row{grid-template-columns:repeat(2,1fr);}
+  .topbar{padding:0 14px;gap:10px;}
+  select#co-select{min-width:140px;}
+}
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div id="loading-wrap">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loading-text">Loading placement data…</div>
+</div>
+
+<!-- Error -->
+<div id="error-wrap">
+  <div style="font-size:36px">⚠️</div>
+  <div class="error-msg" id="error-msg"></div>
+  <a href="placement-dashboard.html" class="btn-back">← Back to Dashboard</a>
+</div>
+
+<!-- App -->
+<div id="app">
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="topbar-logo">
+      <img src="logo.jpg" alt="VG" onerror="this.style.display='none'"/>
+    </div>
+    <div class="topbar-title">
+      Visual Analytics Report
+      <span id="topbar-sub">Overall</span>
+    </div>
+    <div class="dropdown-wrap">
+      <span class="dropdown-label">View</span>
+      <select id="co-select" onchange="onDropdownChange(this.value)">
+        <option value="overall">📊 Overall — All Companies</option>
+      </select>
+    </div>
+    <button class="btn-dl" id="btn-dl" onclick="downloadCurrentPDF()">⬇ Download PDF</button>
+    <a href="placement-dashboard.html" class="btn-back">← Dashboard</a>
+  </div>
+
+  <div class="report-wrap" id="report-wrap">
+    <!-- rendered dynamically -->
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   CONFIG  (mirrors placement-dashboard.html)
+═══════════════════════════════════════════════════════ */
+const CONFIG_SHEET_ID = '__SHEET_ID__';
+const CONFIG_TAB      = 'CONFIG_TAB';
+const ADMIN_DATA_TAB  = 'ADMIN_MODE';
+const CACHE_TTL       = 60000;
+
+let COMPANIES  = [];
+let ADMIN_DATA = {};
+let currentView = 'overall'; // 'overall' | company id (number)
+
+/* ═══════════════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════════════ */
+function xe(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmtDate(d){
+  if(!d) return '—';
+  try{ return new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}); }catch{ return d; }
+}
+function extractSheetId(raw){
+  if(!raw) return '';
+  raw = String(raw).trim();
+  try{ raw=decodeURIComponent(raw); }catch(e){}
+  const m = raw.match(/\/d\/([a-zA-Z0-9_-]{20,})/);
+  if(m) return m[1];
+  if(/^[a-zA-Z0-9_-]{20,}$/.test(raw)) return raw;
+  return '';
+}
+async function fetchWithTimeout(url, ms=9000){
+  const ctrl=new AbortController();
+  const tid=setTimeout(()=>ctrl.abort(),ms);
+  try{ const r=await fetch(url,{signal:ctrl.signal}); clearTimeout(tid); return r; }
+  catch(e){ clearTimeout(tid); throw e; }
+}
+function parseCSV(csv){
+  const rows=[]; let cur='',inQ=false,row=[];
+  for(let i=0;i<csv.length;i++){
+    const ch=csv[i];
+    if(ch==='"'){if(inQ&&csv[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
+    else if(ch===','&&!inQ){row.push(cur.trim());cur='';}
+    else if((ch==='\n'||ch==='\r')&&!inQ){
+      if(ch==='\r'&&csv[i+1]==='\n')i++;
+      row.push(cur.trim());rows.push(row);row=[];cur='';
+    }else cur+=ch;
+  }
+  if(cur||row.length){row.push(cur.trim());rows.push(row);}
+  return rows.filter(r=>r.some(c=>c));
+}
+
+/* ═══════════════════════════════════════════════════════
+   DATA LOADING
+═══════════════════════════════════════════════════════ */
+async function fetchGviz(sheetId, tabName){
+  const url=`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tabName)}`;
+  const r=await fetchWithTimeout(url,9000);
+  const t=await r.text();
+  if(t.trimStart().startsWith('<')) throw new Error(`Tab "${tabName}" not public`);
+  return JSON.parse(t.replace(/^[^(]*\(/,'').replace(/\);\s*$/,''));
+}
+async function fetchCSV(sheetId, tabName){
+  const url=`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tabName)}`;
+  const r=await fetchWithTimeout(url,9000);
+  const t=await r.text();
+  if(t.trimStart().startsWith('<')) throw new Error(`Tab "${tabName}" not public`);
+  return t;
+}
+
+function parseConfig(json){
+  const table=json.table;
+  if(!table||!table.rows) return [];
+  const cols=(table.cols||[]).map(c=>(c.label||'').toLowerCase().trim());
+  const ci=(...ks)=>{ for(const k of ks){ const i=cols.findIndex(c=>c.includes(k)); if(i!==-1)return i; } return -1; };
+  const iComp=ci('company')!==-1?ci('company'):0;
+  const iSheet=ci('sheet')!==-1?ci('sheet'):1;
+  const iReg=ci('reg')!==-1?ci('reg'):2;
+  const iInt=ci('int','interview','attended')!==-1?ci('int','interview','attended'):3;
+  const iSel=ci('sel','select')!==-1?ci('sel','select'):4;
+  const companies=[];
+  table.rows.forEach((row,idx)=>{
+    const cells=row.c||[];
+    const val=i=>(cells[i]&&cells[i].v!=null)?String(cells[i].v).trim():'';
+    const fmt=i=>(cells[i]&&cells[i].f)?String(cells[i].f).trim():'';
+    const name=val(iComp);
+    if(!name||name.toLowerCase()==='company') return;
+    const sid=extractSheetId(val(iSheet))||extractSheetId(fmt(iSheet));
+    if(!sid) return;
+    const tabReg=val(iReg)||'Registered Students';
+    let tabInt=val(iInt)||null, tabSel=val(iSel)||null;
+    if(tabInt&&tabInt.toLowerCase()===tabReg.toLowerCase()) tabInt=null;
+    if(tabSel&&tabSel.toLowerCase()===tabReg.toLowerCase()) tabSel=null;
+    if(tabInt&&tabSel&&tabInt.toLowerCase()===tabSel.toLowerCase()) tabSel=null;
+    companies.push({
+      id:idx+1, name, sheetId:sid, tabReg, tabInt, tabSel,
+      website:'',interviewMode:'',driveDate:'',roles:[],
+      poc:{name:'',designation:'',email:'',phone:''},
+      studentsRegistered:[],studentsInterviewed:[],studentsSelected:[],
+      _loaded:false
+    });
+  });
+  return companies;
+}
+
+function parseAdminData(csv){
+  const rows=parseCSV(csv);
+  if(rows.length<2) return {};
+  const hdr=rows[0].map(h=>h.toLowerCase().replace(/[^a-z0-9]/g,''));
+  const col=k=>hdr.findIndex(h=>h.includes(k));
+  const iComp=col('company'),iWeb=col('website'),iMode=col('interview');
+  const iDriveDate=col('drive');
+  const iPocName=col('pocname')!==-1?col('pocname'):col('name');
+  const iRoles=col('role');
+  const data={};
+  rows.slice(1).forEach(r=>{
+    const name=(r[iComp]||'').trim(); if(!name) return;
+    const roles=(r[iRoles]||'').split(',').map(s=>s.trim()).filter(Boolean);
+    data[name.toLowerCase()]={
+      website:r[iWeb]||'', interviewMode:r[iMode]||'',
+      driveDate:r[iDriveDate]||'', roles,
+      poc:{name:r[iPocName]||'',designation:'',email:'',phone:''}
+    };
+  });
+  return data;
+}
+
+function mergeAdminData(){
+  COMPANIES.forEach(c=>{
+    const ad=ADMIN_DATA[c.name.toLowerCase()];
+    if(!ad) return;
+    c.website=ad.website; c.interviewMode=ad.interviewMode;
+    c.driveDate=ad.driveDate; c.roles=ad.roles; c.poc=ad.poc;
+  });
+}
+
+function parseStudents(json){
+  const table=json.table;
+  if(!table||!table.rows) return [];
+  const cols=(table.cols||[]).map(c=>(c.label||'').toLowerCase());
+  const detect=ks=>cols.findIndex(h=>ks.some(k=>h.includes(k)));
+  const iName=detect(['name']), iEmail=detect(['email','mail']);
+  const iStatus=detect(['status','join','joined']);
+  const iOffer=detect(['offer','letter']);
+  const val=(row,i)=>{
+    if(i===-1||!row.c||!row.c[i]) return '';
+    const c=row.c[i]; return String(c.v!=null?c.v:(c.f||'')).trim();
+  };
+  return table.rows.map((row,i)=>({
+    id:`#${String(i+1).padStart(3,'0')}`,
+    name:val(row,iName), email:val(row,iEmail),
+    joinStatus:val(row,iStatus)||'Pending',
+    offerLetter:val(row,iOffer)||'',
+  })).filter(s=>s.name||s.email);
+}
+
+async function loadStudentsForCompany(co){
+  if(co._loaded) return;
+  const fetchTab=async(tab,key)=>{
+    if(!tab){ co[key]=[]; return; }
+    try{
+      const json=await fetchGviz(co.sheetId,tab);
+      co[key]=parseStudents(json);
+    }catch(e){ co[key]=[]; }
+  };
+  await Promise.all([
+    fetchTab(co.tabReg,'studentsRegistered'),
+    fetchTab(co.tabInt,'studentsInterviewed'),
+    fetchTab(co.tabSel,'studentsSelected'),
+  ]);
+  co._loaded=true;
+}
+
+/* ═══════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════ */
+async function init(){
+  setLoading('Loading config…');
+  try{
+    const configJson=await fetchGviz(CONFIG_SHEET_ID,CONFIG_TAB);
+    COMPANIES=parseConfig(configJson);
+    if(!COMPANIES.length) throw new Error('No companies found in config.');
+
+    setLoading('Loading admin data…');
+    try{ const csv=await fetchCSV(CONFIG_SHEET_ID,ADMIN_DATA_TAB); ADMIN_DATA=parseAdminData(csv); }
+    catch(e){ ADMIN_DATA={}; }
+    mergeAdminData();
+
+    // Build dropdown
+    const sel=document.getElementById('co-select');
+    COMPANIES.forEach(c=>{
+      const o=document.createElement('option');
+      o.value=c.id; o.textContent=c.name;
+      sel.appendChild(o);
+    });
+
+    // Show app
+    document.getElementById('loading-wrap').classList.add('hidden');
+    document.getElementById('app').classList.add('ready');
+
+    // Load all student data in background, rendering overall as data arrives
+    setLoading('Loading student data…');
+    renderOverall(); // show structure while data loads
+
+    await Promise.allSettled(COMPANIES.map(async co=>{
+      await loadStudentsForCompany(co);
+      if(currentView==='overall') renderOverall();
+    }));
+    if(currentView==='overall') renderOverall();
+
+  }catch(e){
+    document.getElementById('loading-wrap').classList.add('hidden');
+    const ew=document.getElementById('error-wrap');
+    ew.classList.add('show');
+    document.getElementById('error-msg').textContent=e.message||'Unknown error';
+  }
+}
+
+function setLoading(txt){ document.getElementById('loading-text').textContent=txt; }
+
+/* ═══════════════════════════════════════════════════════
+   DROPDOWN
+═══════════════════════════════════════════════════════ */
+function onDropdownChange(val){
+  currentView=val==='overall'?'overall':parseInt(val);
+  const sub=document.getElementById('topbar-sub');
+  if(val==='overall'){ sub.textContent='Overall'; renderOverall(); }
+  else{
+    const co=COMPANIES.find(c=>c.id===parseInt(val));
+    sub.textContent=co?co.name:'';
+    renderCompany(co);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   CANVAS HELPERS (shared)
+═══════════════════════════════════════════════════════ */
+function setupCtx(cv){
+  const X=cv.getContext('2d');
+  const F=(sz,wt='normal')=>{ X.font=`${wt} ${sz}px Inter,Helvetica,sans-serif`; };
+  const txt=(t,x,y,col='#0f172a',sz=13,wt='normal',align='left')=>{
+    F(sz,wt); X.fillStyle=col; X.textAlign=align; X.fillText(String(t),x,y);
+  };
+  const rr=(x,y,w,h,r,fill,stroke)=>{
+    if(w<=0||h<=0) return;
+    X.beginPath();
+    if(X.roundRect) X.roundRect(x,y,w,h,r);
+    else { X.moveTo(x+r,y);X.lineTo(x+w-r,y);X.quadraticCurveTo(x+w,y,x+w,y+r);X.lineTo(x+w,y+h-r);X.quadraticCurveTo(x+w,y+h,x+w-r,y+h);X.lineTo(x+r,y+h);X.quadraticCurveTo(x,y+h,x,y+h-r);X.lineTo(x,y+r);X.quadraticCurveTo(x,y,x+r,y);X.closePath(); }
+    if(fill){ X.fillStyle=fill; X.fill(); }
+    if(stroke){ X.strokeStyle=stroke; X.lineWidth=1.5; X.stroke(); }
+  };
+  return {X,F,txt,rr};
+}
+
+function rateCol(pv){ return pv>=70?'#16A34A':pv>=40?'#D97706':'#DC2626'; }
+const p=(n,d)=>d>0?Math.round(n/d*100):0;
+const ps=(n,d)=>d>0?Math.round(n/d*100)+'%':'N/A';
+
+async function loadLogo(){
+  try{
+    const r=await fetch('logo.jpg'); if(!r.ok) return null;
+    const bl=await r.blob();
+    const b64=await new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.readAsDataURL(bl);});
+    return await new Promise(res=>{const i=new Image();i.onload=()=>res(i);i.onerror=()=>res(null);i.src=b64;});
+  }catch(e){ return null; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   DRAW: SHARED HEADER
+═══════════════════════════════════════════════════════ */
+function drawHeader(X, txt, rr, PW, logoImg, title, subtitle, rightTop, rightSub){
+  const g=X.createLinearGradient(0,0,PW,0);
+  g.addColorStop(0,'#3b0764'); g.addColorStop(1,'#6D0E6A');
+  X.fillStyle=g; X.fillRect(0,0,PW,80);
+  if(logoImg){ X.save(); X.beginPath(); if(X.roundRect)X.roundRect(16,10,60,60,10); else X.rect(16,10,60,60); X.clip(); X.drawImage(logoImg,16,10,60,60); X.restore(); }
+  txt('Vidyavahini First Grade Degree College',90,32,'#fff',15,'700');
+  txt(title,90,54,'rgba(255,255,255,.65)',11);
+  txt(rightTop,PW-18,32,'#FCD34D',13,'700','right');
+  if(rightSub) txt(rightSub,PW-18,54,'rgba(255,255,255,.55)',10,'normal','right');
+}
+
+/* ═══════════════════════════════════════════════════════
+   DRAW: KPI TILES ROW
+═══════════════════════════════════════════════════════ */
+function drawKPITiles(X, txt, rr, PW, kpis, y){
+  const tileW=(PW-40)/kpis.length-10, tileH=90;
+  kpis.forEach((k,i)=>{
+    const tx=20+i*(tileW+10);
+    rr(tx,y,tileW,tileH,10,k.col+'18','');
+    rr(tx,y,5,tileH,3,k.col,'');
+    txt(k.icon,tx+18,y+30,'',18,'normal');
+    txt(String(k.n),tx+18,y+62,k.col,28,'900');
+    txt(k.lbl,tx+18,y+78,'#64748b',11,'600');
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   DRAW: FUNNEL BARS
+═══════════════════════════════════════════════════════ */
+function drawFunnel(X, txt, rr, chartX, chartY, chartW, chartH, stages){
+  rr(chartX,chartY,chartW,chartH,12,'#f8fafc','#e2e8f0');
+  txt('Placement Funnel',chartX+16,chartY+24,'#1e1b2e',13,'700');
+  const maxN=Math.max(...stages.map(s=>s.n),1);
+  const fPL=chartX+16,fPR=chartX+chartW-16,fPT=chartY+54,fPB=chartY+chartH-26;
+  const fCW=fPR-fPL,fCH=fPB-fPT;
+  const fBW=Math.floor(fCW/stages.length),fGap=Math.floor(fBW*.25),fbw=fBW-fGap;
+  stages.forEach((s,i)=>{
+    const bh=Math.round(s.n/maxN*fCH)||0;
+    const fx=fPL+i*fBW+fGap/2,fy=fPT+fCH-bh;
+    if(bh>0){
+      const gr=X.createLinearGradient(fx,fy,fx,fy+bh);
+      gr.addColorStop(0,s.c);gr.addColorStop(1,s.c+'77');
+      X.fillStyle=gr;X.beginPath();if(X.roundRect)X.roundRect(fx,fy,fbw,bh,5);else X.rect(fx,fy,fbw,bh);X.fill();
+    }
+    txt(String(s.n),fx+fbw/2,bh>0?fy-8:fPT+fCH-8,s.c,14,'800','center');
+    if(bh>22&&i>0&&stages[i-1].n>0) txt(p(s.n,stages[i-1].n)+'%',fx+fbw/2,fy+18,'#fff',10,'700','center');
+    txt(s.l,fx+fbw/2,fPB+16,'#64748b',10,'600','center');
+    if(i<stages.length-1) txt('›',fx+fbw+fGap/2-6,fPT+fCH/2+6,'#94a3b8',16,'400','center');
+  });
+  X.strokeStyle='#e2e8f0';X.lineWidth=1.5;
+  X.beginPath();X.moveTo(fPL,fPB);X.lineTo(fPR,fPB);X.stroke();
+}
+
+/* ═══════════════════════════════════════════════════════
+   DRAW: CONVERSION METRICS PANEL
+═══════════════════════════════════════════════════════ */
+function drawMetrics(X, txt, rr, mX, mY, mW, mH, metrics){
+  rr(mX,mY,mW,mH,12,'#f8fafc','#e2e8f0');
+  txt('Conversion Metrics',mX+16,mY+26,'#1e1b2e',13,'700');
+  metrics.forEach((m,i)=>{
+    const my=mY+46+i*Math.floor((mH-50)/metrics.length);
+    const pv=p(m.n,m.d),col=rateCol(pv);
+    rr(mX+16,my,mW-32,22,5,'#f1f5f9','');
+    const bw=Math.round((mW-32)*pv/100);
+    if(bw>0) rr(mX+16,my,bw,22,5,col+'33','');
+    rr(mX+16,my,4,22,2,col,'');
+    txt(m.l,mX+26,my+15,'#374151',10,'600');
+    txt(ps(m.n,m.d),mX+mW-18,my+15,col,13,'800','right');
+    txt(m.n+'/'+m.d,mX+mW-62,my+15,'#94a3b8',9,'normal','right');
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   DRAW: JOINING DONUT + LEGEND
+═══════════════════════════════════════════════════════ */
+function drawDonut(X, txt, rr, dX, dY, dW, dH, jnd, njnd, pend, sel){
+  rr(dX,dY,dW,dH,12,'#f8fafc','#e2e8f0');
+  txt('Joining Status',dX+16,dY+24,'#1e1b2e',13,'700');
+  const dcx=dX+60,dcy=dY+60,dr=28;
+  const parts=[[jnd,'#16A34A'],[njnd,'#DC2626'],[pend,'#D97706']];
+  let startA=-Math.PI/2;
+  const tot=jnd+njnd+pend||1;
+  parts.forEach(([n,col])=>{
+    const sw=n/tot*Math.PI*2;
+    if(n>0){ X.beginPath();X.moveTo(dcx,dcy);X.arc(dcx,dcy,dr,startA,startA+sw);X.closePath();X.fillStyle=col;X.fill(); }
+    startA+=sw;
+  });
+  X.beginPath();X.arc(dcx,dcy,dr*.56,0,Math.PI*2);X.fillStyle='#f8fafc';X.fill();
+  txt(ps(jnd,sel),dcx,dcy+5,'#1e1b2e',11,'800','center');
+  [['Joined',jnd,'#16A34A'],['Not Joined',njnd,'#DC2626'],['Pending',pend,'#D97706']].forEach(([lbl,n,col],i)=>{
+    const ly=dY+38+i*18;
+    rr(dX+100,ly-8,9,9,2,col,'');
+    txt(lbl,dX+116,ly,'#374151',10,'500');
+    txt(String(n),dX+dW-18,ly,col,12,'800','right');
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   DRAW: OVERALL CONVERSION HERO TILE
+═══════════════════════════════════════════════════════ */
+function drawHeroTile(X, txt, rr, hX, hY, hW, hH, jnd, reg){
+  const ovP=p(jnd,reg), ovCol=rateCol(ovP);
+  const hg=X.createLinearGradient(hX,hY,hX,hY+hH);
+  hg.addColorStop(0,ovCol+'22');hg.addColorStop(1,ovCol+'08');
+  rr(hX,hY,hW,hH,12,'',ovCol+'33');
+  X.fillStyle=hg;X.beginPath();if(X.roundRect)X.roundRect(hX,hY,hW,hH,12);else X.rect(hX,hY,hW,hH);X.fill();
+  rr(hX,hY,hW,4,0,ovCol,'');
+  txt('Overall Conversion',hX+hW/2,hY+24,'#64748b',11,'600','center');
+  txt(ps(jnd,reg),hX+hW/2,hY+66,ovCol,42,'900','center');
+  txt('Registered → Joined',hX+hW/2,hY+82,'#94a3b8',9,'500','center');
+}
+
+/* ═══════════════════════════════════════════════════════
+   DRAW: ARC CARDS ROW (page 2 style)
+═══════════════════════════════════════════════════════ */
+function drawArcCards(X, txt, rr, P2, PW, cards){
+  const cPad=16,cW=(PW-cPad*(cards.length+1))/cards.length,cH=108,cY=P2+76;
+  cards.forEach((cd,i)=>{
+    const cx=cPad+i*(cW+cPad),pv=p(cd.n,cd.d),col=rateCol(pv);
+    rr(cx,cY,cW,cH,10,'#ffffff','#e2e8f0');
+    rr(cx,cY,cW,4,0,col,'');
+    const arcR=26,acx=cx+cW/2,acy=cY+52;
+    X.strokeStyle='#f1f5f9';X.lineWidth=7;
+    X.beginPath();X.arc(acx,acy,arcR,-Math.PI/2,Math.PI*1.5);X.stroke();
+    const sw=(pv/100)*Math.PI*2;
+    X.strokeStyle=col;X.lineWidth=7;X.lineCap='round';
+    X.beginPath();X.arc(acx,acy,arcR,-Math.PI/2,-Math.PI/2+sw);X.stroke();
+    X.lineCap='butt';
+    txt(ps(cd.n,cd.d),acx,acy+5,col,13,'900','center');
+    txt(cd.l1,cx+10,cY+92,'#94a3b8',9,'500');
+    txt('→ '+cd.l2,cx+cW-10,cY+92,'#374151',9,'600','right');
+    txt(cd.n+'/'+cd.d,acx,cY+102,'#94a3b8',8,'400','center');
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   DRAW: HORIZONTAL STACKED BAR (joining breakdown)
+═══════════════════════════════════════════════════════ */
+function drawStackedBar(X, txt, rr, cPad, jbY, PW, jnd, njnd, pend, sel){
+  rr(cPad,jbY,PW-cPad*2,56,10,'#ffffff','#e2e8f0');
+  txt('Joining Breakdown',cPad+16,jbY+20,'#1e1b2e',12,'700');
+  const barX=cPad+16,barW=PW-cPad*2-32,barH=14,barY=jbY+28;
+  rr(barX,barY,barW,barH,7,'#f1f5f9','');
+  const tot=jnd+njnd+pend||1;
+  let bx=barX;
+  [[jnd,'#16A34A'],[njnd,'#DC2626'],[pend,'#D97706']].forEach(([n,col],i)=>{
+    const w=Math.round(n/tot*barW);
+    if(w>4){
+      X.fillStyle=col;
+      if(i===0){X.beginPath();if(X.roundRect)X.roundRect(bx,barY,w,barH,[7,0,0,7]);else X.rect(bx,barY,w,barH);X.fill();}
+      else if(i===2){X.beginPath();if(X.roundRect)X.roundRect(bx,barY,w,barH,[0,7,7,0]);else X.rect(bx,barY,w,barH);X.fill();}
+      else X.fillRect(bx,barY,w,barH);
+    }
+    bx+=w;
+  });
+  [['Joined',jnd,'#16A34A'],['Not Joined',njnd,'#DC2626'],['Pending',pend,'#D97706']].forEach(([lbl,n,col],i)=>{
+    const lx=barX+i*(barW/3);
+    rr(lx,jbY+44,8,8,2,col,'');
+    txt(lbl+': '+n+' ('+ps(n,sel)+')',lx+12,jbY+52,'#374151',9,'600');
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   OVERALL: UNIQUE PLACED HELPER
+═══════════════════════════════════════════════════════ */
+function getUniquePlaced(){
+  const seen=new Map();
+  COMPANIES.forEach(co=>{
+    (co.studentsSelected||[]).forEach(s=>{
+      const key=(s.email||s.name||'').toLowerCase().trim();
+      if(!key) return;
+      if(!seen.has(key)) seen.set(key,{name:s.name||'',email:s.email||'',companies:[],joinStatus:s.joinStatus||'Pending'});
+      else{ const e=seen.get(key); if(e.joinStatus==='Pending'&&s.joinStatus&&s.joinStatus!=='Pending') e.joinStatus=s.joinStatus; }
+      seen.get(key).companies.push(co.name);
+    });
+  });
+  return [...seen.values()];
+}
+
+/* ═══════════════════════════════════════════════════════
+   RENDER: OVERALL VIEW
+═══════════════════════════════════════════════════════ */
+async function renderOverall(){
+  const wrap=document.getElementById('report-wrap');
+  const DATE=new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+
+  // Aggregates
+  const totalReg=COMPANIES.reduce((s,c)=>s+c.studentsRegistered.length,0);
+  const totalAtt=COMPANIES.reduce((s,c)=>s+c.studentsInterviewed.length,0);
+  const totalSel=COMPANIES.reduce((s,c)=>s+c.studentsSelected.length,0);
+  const allSel=COMPANIES.flatMap(c=>c.studentsSelected);
+  const totalJnd=allSel.filter(s=>s.joinStatus==='Joined').length;
+  const totalNjnd=allSel.filter(s=>s.joinStatus==='Not Joined').length;
+  const totalPend=totalSel-totalJnd-totalNjnd;
+  const uniq=getUniquePlaced();
+  const uniquePlaced=uniq.length;
+  const uniqueJnd=uniq.filter(s=>s.joinStatus==='Joined').length;
+  const drivesDone=COMPANIES.filter(c=>c.studentsSelected.length>0||c.studentsInterviewed.length>0).length;
+
+  /* ── CANVAS 1: Aggregate KPIs + Funnel + Metrics + Donut ── */
+  const SC=2.8, PW=297*SC, PH=210*SC;
+  const cv1=document.createElement('canvas');
+  cv1.width=PW; cv1.height=PH;
+  const {X:X1,txt:t1,rr:r1}=setupCtx(cv1);
+
+  const logoImg=await loadLogo();
+
+  // White bg
+  X1.fillStyle='#ffffff'; X1.fillRect(0,0,PW,PH);
+
+  // Watermark
+  if(logoImg){X1.save();X1.globalAlpha=0.04;X1.drawImage(logoImg,PW/2-110,PH/2-110,220,220);X1.restore();}
+
+  // Header
+  drawHeader(X1,t1,r1,PW,logoImg,'Placement Analytics Report — Overall','All Companies · '+DATE,
+    drivesDone+' Drives · '+COMPANIES.length+' Companies','');
+
+  // 5 KPI tiles
+  const kpis=[
+    {n:COMPANIES.length,lbl:'Companies',col:'#7C3AED',icon:'🏢'},
+    {n:totalReg,lbl:'Registered',col:'#7C3AED',icon:'📋'},
+    {n:totalAtt,lbl:'Attended',col:'#2563EB',icon:'🎯'},
+    {n:totalSel,lbl:'Total Selections',col:'#059669',icon:'✅'},
+    {n:uniquePlaced,lbl:'Unique Placed',col:'#0891B2',icon:'🎓'},
+  ];
+  drawKPITiles(X1,t1,r1,PW,kpis,95);
+
+  // Funnel
+  const chartX=20,chartY=210,chartW=PW*0.52-20,chartH=192;
+  drawFunnel(X1,t1,r1,chartX,chartY,chartW,chartH,[
+    {n:totalReg,c:'#7C3AED',l:'Registered'},
+    {n:totalAtt,c:'#2563EB',l:'Attended'},
+    {n:totalSel,c:'#059669',l:'Selected'},
+    {n:totalJnd,c:'#16A34A',l:'Joined'},
+  ]);
+
+  // Metrics
+  const mX=PW*0.52,mY=210,mW=PW-mX-20,mH=chartH;
+  drawMetrics(X1,t1,r1,mX,mY,mW,mH,[
+    {l:'Reg → Attended',n:totalAtt,d:totalReg},
+    {l:'Att → Selected',n:totalSel,d:totalAtt},
+    {l:'Sel → Joined',n:totalJnd,d:totalSel},
+    {l:'Att → Joined',n:totalJnd,d:totalAtt},
+    {l:'Reg → Joined',n:totalJnd,d:totalReg},
+    {l:'Unique Placed',n:uniquePlaced,d:totalSel},
+  ]);
+
+  // Donut + hero tile
+  const dX=20,dY=chartY+chartH+16,dW=(PW-40)/2-8,dH=100;
+  drawDonut(X1,t1,r1,dX,dY,dW,dH,totalJnd,totalNjnd,totalPend,totalSel);
+  drawHeroTile(X1,t1,r1,dX+dW+16,dY,(PW-40)/2-8,dH,totalJnd,totalReg);
+
+  /* ── CANVAS 2: Company-by-company breakdown ── */
+  // Each company = one horizontal bar row
+  const sorted=[...COMPANIES].sort((a,b)=>b.studentsSelected.length-a.studentsSelected.length);
+  const maxSel=Math.max(...sorted.map(c=>c.studentsSelected.length),1);
+  const rowH=28, cv2H=80+sorted.length*rowH+40;
+  const cv2=document.createElement('canvas');
+  cv2.width=PW; cv2.height=cv2H;
+  const {X:X2,txt:t2,rr:r2}=setupCtx(cv2);
+  X2.fillStyle='#ffffff'; X2.fillRect(0,0,PW,cv2H);
+
+  // Section header
+  r2(0,0,PW,50,0,'#f8fafc','');
+  r2(0,0,PW,3,0,'#6D0E6A','');
+  t2('Company-wise Breakdown',20,32,'#1e1b2e',14,'700');
+  t2('Sorted by placements · '+DATE,PW-18,32,'#94a3b8',10,'500','right');
+
+  // Column headers
+  const namW=PW*0.22,regW=50,attW=50,selW=50,jndW=60,barAreaX=namW+regW+attW+selW+jndW+30,barAreaW=PW-barAreaX-80,pctW=60;
+  t2('Company',18,68,'#64748b',9,'700');
+  t2('Reg',namW,68,'#7C3AED',9,'700','center');
+  t2('Att',namW+regW,68,'#2563EB',9,'700','center');
+  t2('Sel',namW+regW+attW,68,'#059669',9,'700','center');
+  t2('Jnd',namW+regW+attW+selW,68,'#16A34A',9,'700','center');
+  t2('Conversion',barAreaX+barAreaW/2,68,'#64748b',9,'700','center');
+  t2('Reg→Jnd',PW-pctW/2,68,'#64748b',9,'700','center');
+
+  X2.strokeStyle='#e2e8f0';X2.lineWidth=1;
+  X2.beginPath();X2.moveTo(0,74);X2.lineTo(PW,74);X2.stroke();
+
+  sorted.forEach((co,i)=>{
+    const ry=80+i*rowH;
+    if(i%2===0){X2.fillStyle='#fafafa';X2.fillRect(0,ry-2,PW,rowH);}
+    const reg=co.studentsRegistered.length,att=co.studentsInterviewed.length,
+          sel=co.studentsSelected.length,
+          jnd=co.studentsSelected.filter(s=>s.joinStatus==='Joined').length;
+    const pv=p(jnd,reg), col=rateCol(pv);
+
+    // Company name
+    const nm=(co.name||'').length>22?(co.name||'').slice(0,22)+'…':co.name||'—';
+    t2(nm,14,ry+rowH/2+4,'#1e1b2e',10,'600');
+
+    // Stat numbers
+    t2(String(reg),namW,ry+rowH/2+4,'#7C3AED',10,'700','center');
+    t2(String(att),namW+regW,ry+rowH/2+4,'#2563EB',10,'700','center');
+    t2(String(sel),namW+regW+attW,ry+rowH/2+4,'#059669',10,'700','center');
+    t2(String(jnd),namW+regW+attW+selW,ry+rowH/2+4,'#16A34A',10,'700','center');
+
+    // Horizontal bar
+    r2(barAreaX,ry+4,barAreaW,rowH-10,4,'#f1f5f9','');
+    const bw=Math.round(barAreaW*sel/Math.max(maxSel,1));
+    if(bw>0){ r2(barAreaX,ry+4,bw,rowH-10,4,'#059669'+'55',''); }
+    const jbw=Math.round(barAreaW*jnd/Math.max(maxSel,1));
+    if(jbw>0){ r2(barAreaX,ry+4,jbw,rowH-10,4,'#16A34A',''); }
+
+    // Pct label
+    t2(ps(jnd,reg),PW-pctW/2,ry+rowH/2+4,col,10,'800','center');
+  });
+
+  // Footer note
+  t2('★ Joined count based on status set in Selected Students tab   ·   Unique Placed: '+uniquePlaced,18,cv2H-10,'#94a3b8',9,'400');
+
+  /* ── CANVAS 3: Arc cards page ── */
+  const cv3=document.createElement('canvas');
+  cv3.width=PW; cv3.height=PH;
+  const {X:X3,txt:t3,rr:r3}=setupCtx(cv3);
+  X3.fillStyle='#ffffff'; X3.fillRect(0,0,PW,PH);
+  if(logoImg){X3.save();X3.globalAlpha=0.04;X3.drawImage(logoImg,PW/2-110,PH/2-110,220,220);X3.restore();}
+
+  // Page 2 dark header
+  const g3=X3.createLinearGradient(0,0,PW,0);
+  g3.addColorStop(0,'#1e1b2e');g3.addColorStop(1,'#3b0764');
+  X3.fillStyle=g3;X3.fillRect(0,0,PW,64);
+  if(logoImg){X3.save();X3.beginPath();if(X3.roundRect)X3.roundRect(16,8,48,48,8);else X3.rect(16,8,48,48);X3.clip();X3.drawImage(logoImg,16,8,48,48);X3.restore();}
+  t3('Overall Placement Summary',72,28,'#fff',15,'800');
+  t3('Vidyavahini First Grade Degree College  ·  '+DATE,72,48,'rgba(255,255,255,.5)',10);
+  t3('All Companies · '+drivesDone+' Drives Done',PW-18,28,'rgba(255,255,255,.45)',9,'600','right');
+
+  // 5 big stat tiles in a row
+  const bigTiles=[
+    {n:COMPANIES.length,lbl:'Companies',col:'#7C3AED'},
+    {n:totalReg,lbl:'Registered',col:'#7C3AED'},
+    {n:totalAtt,lbl:'Attended',col:'#2563EB'},
+    {n:totalSel,lbl:'Selected',col:'#059669'},
+    {n:uniquePlaced,lbl:'Unique Placed',col:'#0891B2'},
+  ];
+  const btPad=12,btW=(PW-btPad*(bigTiles.length+1))/bigTiles.length,btH=72,btY=76;
+  bigTiles.forEach((bt,i)=>{
+    const bx=btPad+i*(btW+btPad);
+    const hc=parseInt(bt.col.slice(1),16);
+    X3.fillStyle=bt.col;if(X3.roundRect)X3.roundRect(bx,btY,btW,btH,8);else X3.rect(bx,btY,btW,btH);X3.fill();
+    t3(String(bt.n),bx+btW/2,btY+40,'#fff',22,'900','center');
+    t3(bt.lbl,bx+btW/2,btY+58,'rgba(255,255,255,.75)',9,'600','center');
+  });
+
+  // Arc conversion cards
+  drawArcCards(X3,t3,r3,64,PW,[
+    {l1:'Reg',l2:'Att',n:totalAtt,d:totalReg},
+    {l1:'Att',l2:'Sel',n:totalSel,d:totalAtt},
+    {l1:'Sel',l2:'Jnd',n:totalJnd,d:totalSel},
+    {l1:'Att',l2:'Jnd',n:totalJnd,d:totalAtt},
+    {l1:'Reg',l2:'Jnd',n:totalJnd,d:totalReg},
+  ]);
+
+  // Stacked joining bar
+  drawStackedBar(X3,t3,r3,16,PH*0.56,PW,totalJnd,totalNjnd,totalPend,totalSel);
+
+  // Unique vs raw note
+  t3('Unique Placed: '+uniquePlaced+' students (de-duplicated across companies)   |   Raw selections: '+totalSel,16,PH-12,'#94a3b8',9,'400');
+
+  /* ── RENDER to DOM ── */
+  wrap.innerHTML=`
+    <div class="section-label">Aggregate Overview — All Companies</div>
+    <div class="canvas-card"><canvas id="cv-overall-1"></canvas></div>
+    <div class="section-label">Company-wise Performance</div>
+    <div class="canvas-card"><canvas id="cv-overall-2"></canvas></div>
+    <div class="section-label">Conversion Summary</div>
+    <div class="canvas-card"><canvas id="cv-overall-3"></canvas></div>
+  `;
+  copyCanvas(cv1, document.getElementById('cv-overall-1'));
+  copyCanvas(cv2, document.getElementById('cv-overall-2'));
+  copyCanvas(cv3, document.getElementById('cv-overall-3'));
+
+  // Store for PDF
+  window._currentCanvases=[cv1,cv2,cv3];
+  window._currentPDFName='VVFGC_Overall_Placement_Analytics';
+}
+
+function copyCanvas(src, dst){
+  dst.width=src.width; dst.height=src.height;
+  dst.getContext('2d').drawImage(src,0,0);
+}
+
+/* ═══════════════════════════════════════════════════════
+   RENDER: COMPANY VIEW (mirrors downloadAnalyticsPDF exactly)
+═══════════════════════════════════════════════════════ */
+async function renderCompany(co){
+  if(!co){ renderOverall(); return; }
+  // Load data if not yet loaded
+  if(!co._loaded){
+    document.getElementById('report-wrap').innerHTML=`<div style="padding:80px;text-align:center;color:rgba(255,255,255,.5);font-size:14px;">Loading ${xe(co.name)} data…</div>`;
+    await loadStudentsForCompany(co);
+  }
+
+  const wrap=document.getElementById('report-wrap');
+  const DATE=new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+
+  const reg=co.studentsRegistered.length,att=co.studentsInterviewed.length,sel=co.studentsSelected.length;
+  const jnd=co.studentsSelected.filter(s=>s.joinStatus==='Joined').length;
+  const njnd=co.studentsSelected.filter(s=>s.joinStatus==='Not Joined').length;
+  const pend=sel-jnd-njnd;
+
+  const SC=2.8,PW=297*SC,PH=210*SC;
+  const logoImg=await loadLogo();
+
+  /* ── CANVAS 1: header, KPIs, funnel, metrics, donut, hero ── */
+  const cv1=document.createElement('canvas'); cv1.width=PW; cv1.height=PH;
+  const {X:X1,txt:t1,rr:r1}=setupCtx(cv1);
+  X1.fillStyle='#ffffff'; X1.fillRect(0,0,PW,PH);
+  if(logoImg){X1.save();X1.globalAlpha=0.04;X1.drawImage(logoImg,PW/2-110,PH/2-110,220,220);X1.restore();}
+
+  drawHeader(X1,t1,r1,PW,logoImg,'Placement Analytics Report',co.name+' · '+DATE,
+    (co.driveDate?'📅 '+fmtDate(co.driveDate):''),
+    (co.interviewMode?'🖥 '+co.interviewMode:''));
+
+  drawKPITiles(X1,t1,r1,PW,[
+    {n:reg,lbl:'Registered',col:'#7C3AED',icon:'📋'},
+    {n:att,lbl:'Attended',col:'#2563EB',icon:'🎯'},
+    {n:sel,lbl:'Selected',col:'#059669',icon:'✅'},
+    {n:jnd,lbl:'Joined',col:'#16A34A',icon:'🎉'},
+  ],95);
+
+  const chartX=20,chartY=215,chartW=PW*0.55-30,chartH=192;
+  drawFunnel(X1,t1,r1,chartX,chartY,chartW,chartH,[
+    {n:reg,c:'#7C3AED',l:'Registered'},
+    {n:att,c:'#2563EB',l:'Attended'},
+    {n:sel,c:'#059669',l:'Selected'},
+    {n:jnd,c:'#16A34A',l:'Joined'},
+  ]);
+
+  const mX=PW*0.55,mY=215,mW=PW-mX-20,mH=chartH;
+  drawMetrics(X1,t1,r1,mX,mY,mW,mH,[
+    {l:'Reg → Attended',n:att,d:reg},
+    {l:'Att → Selected',n:sel,d:att},
+    {l:'Sel → Joined',n:jnd,d:sel},
+    {l:'Att → Joined',n:jnd,d:att},
+    {l:'Reg → Joined',n:jnd,d:reg},
+  ]);
+
+  const dX=20,dY=chartY+chartH+16,dW=(PW-40)/2-8,dH=96;
+  drawDonut(X1,t1,r1,dX,dY,dW,dH,jnd,njnd,pend,sel);
+  drawHeroTile(X1,t1,r1,dX+dW+16,dY,(PW-40)/2-8,dH,jnd,reg);
+
+  /* ── CANVAS 2: summary page ── */
+  const cv2=document.createElement('canvas'); cv2.width=PW; cv2.height=PH;
+  const {X:X2,txt:t2,rr:r2}=setupCtx(cv2);
+  X2.fillStyle='#ffffff'; X2.fillRect(0,0,PW,PH);
+  if(logoImg){X2.save();X2.globalAlpha=0.04;X2.drawImage(logoImg,PW/2-110,PH/2-110,220,220);X2.restore();}
+
+  // Page 2 dark header
+  const g2=X2.createLinearGradient(0,0,PW,0);
+  g2.addColorStop(0,'#1e1b2e');g2.addColorStop(1,'#3b0764');
+  X2.fillStyle=g2;X2.fillRect(0,0,PW,64);
+  if(logoImg){X2.save();X2.beginPath();if(X2.roundRect)X2.roundRect(16,8,48,48,8);else X2.rect(16,8,48,48);X2.clip();X2.drawImage(logoImg,16,8,48,48);X2.restore();}
+  t2(xe(co.name),72,28,'#fff',15,'800');
+  t2('Placement Summary  ·  '+DATE,72,48,'rgba(255,255,255,.5)',10);
+  t2('VIDYAVAHINI FIRST GRADE DEGREE COLLEGE',PW-18,28,'rgba(255,255,255,.3)',9,'600','right');
+
+  // Big stat tiles
+  const tiles=[{n:reg,lbl:'Registered',col:'#7C3AED'},{n:att,lbl:'Attended',col:'#2563EB'},{n:sel,lbl:'Selected',col:'#059669'},{n:jnd,lbl:'Joined',col:'#16A34A'}];
+  const tPad=16,tW=(PW-tPad*(tiles.length+1))/tiles.length,tH=72,tY=76;
+  tiles.forEach((t,i)=>{
+    const bx=tPad+i*(tW+tPad);
+    X2.fillStyle=t.col;if(X2.roundRect)X2.roundRect(bx,tY,tW,tH,8);else X2.rect(bx,tY,tW,tH);X2.fill();
+    t2(String(t.n),bx+tW/2,tY+40,'#fff',22,'900','center');
+    t2(t.lbl,bx+tW/2,tY+58,'rgba(255,255,255,.75)',9,'600','center');
+  });
+
+  // Arc cards
+  drawArcCards(X2,t2,r2,64,PW,[
+    {l1:'Reg',l2:'Att',n:att,d:reg},
+    {l1:'Att',l2:'Sel',n:sel,d:att},
+    {l1:'Sel',l2:'Jnd',n:jnd,d:sel},
+    {l1:'Att',l2:'Jnd',n:jnd,d:att},
+    {l1:'Reg',l2:'Jnd',n:jnd,d:reg},
+  ]);
+
+  // Stacked bar
+  drawStackedBar(X2,t2,r2,16,PH*0.56,PW,jnd,njnd,pend,sel);
+
+  // Mini selected students table
+  const shown=co.studentsSelected.slice(0,Math.min(12,co.studentsSelected.length));
+  if(shown.length>0){
+    const stY=PH*0.72,stH=30+shown.length*24;
+    r2(16,stY,PW-32,stH,10,'#ffffff','#e2e8f0');
+    t2('Selected Students',28,stY+20,'#1e1b2e',12,'700');
+    X2.fillStyle='#f8fafc'; X2.fillRect(16,stY+28,PW-32,18);
+    const cols2=[['#',26],['Name',(PW-32)*0.33],['Email',(PW-32)*0.38],['Status',(PW-32)*0.15]];
+    let hx=28; cols2.forEach(([lbl,w])=>{t2(lbl,hx,stY+40,'#94a3b8',8,'700');hx+=w;});
+    shown.forEach((s,i)=>{
+      const ry=stY+52+i*24;
+      if(i%2===0){X2.fillStyle='#f8fafc';X2.fillRect(17,ry-12,PW-34,22);}
+      const st=s.joinStatus||'Pending';
+      const sc=st==='Joined'?'#16A34A':st==='Not Joined'?'#DC2626':'#D97706';
+      let rx=28; 
+      t2(String(i+1)+'.',rx,ry,'#94a3b8',8); rx+=cols2[0][1];
+      t2((s.name||'—').slice(0,32),rx,ry,'#1e1b2e',9,'500'); rx+=cols2[1][1];
+      t2((s.email||'—').slice(0,36),rx,ry,'#64748b',8); rx+=cols2[2][1];
+      r2(rx-2,ry-10,50,12,3,sc+'22','');
+      t2(st,rx+2,ry,sc,8,'700');
+    });
+    if(co.studentsSelected.length>shown.length)
+      t2('+ '+(co.studentsSelected.length-shown.length)+' more students…',28,stY+54+shown.length*24,'#94a3b8',9,'400');
+  }
+
+  /* ── DOM ── */
+  wrap.innerHTML=`
+    <div class="section-label">${xe(co.name)} — Page 1: Funnel &amp; Conversion</div>
+    <div class="canvas-card"><canvas id="cv-co-1"></canvas></div>
+    <div class="section-label">${xe(co.name)} — Page 2: Summary &amp; Students</div>
+    <div class="canvas-card"><canvas id="cv-co-2"></canvas></div>
+  `;
+  copyCanvas(cv1,document.getElementById('cv-co-1'));
+  copyCanvas(cv2,document.getElementById('cv-co-2'));
+
+  window._currentCanvases=[cv1,cv2];
+  window._currentPDFName='VVFGC_'+co.name.replace(/[^a-zA-Z0-9]/g,'_')+'_Analytics';
+}
+
+/* ═══════════════════════════════════════════════════════
+   PDF DOWNLOAD
+═══════════════════════════════════════════════════════ */
+async function downloadCurrentPDF(){
+  const btn=document.getElementById('btn-dl');
+  if(!window._currentCanvases||!window._currentCanvases.length){ alert('Nothing to export yet.'); return; }
+  if(!window.jspdf){ alert('PDF library not loaded yet. Please wait a moment and try again.'); return; }
+  btn.disabled=true; btn.textContent='⏳ Generating…';
+  try{
+    const {jsPDF}=window.jspdf;
+    const DATE=new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+    const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+    window._currentCanvases.forEach((cv,i)=>{
+      if(i>0) doc.addPage();
+      // Scale canvas to A4 landscape (297×210mm)
+      const aspectH=cv.height/cv.width*297;
+      if(aspectH<=210){
+        doc.addImage(cv.toDataURL('image/png'),'PNG',0,(210-aspectH)/2,297,aspectH);
+      } else {
+        // taller canvas — split into pages of 297×210
+        const pxPerPage=Math.round(cv.width/297*210);
+        const pages=Math.ceil(cv.height/pxPerPage);
+        for(let pg=0;pg<pages;pg++){
+          if(pg>0||(i>0&&pg===0)) doc.addPage();
+          const tmp=document.createElement('canvas');
+          tmp.width=cv.width; tmp.height=Math.min(pxPerPage,cv.height-pg*pxPerPage);
+          tmp.getContext('2d').drawImage(cv,0,pg*pxPerPage,cv.width,tmp.height,0,0,cv.width,tmp.height);
+          doc.addImage(tmp.toDataURL('image/png'),'PNG',0,0,297,210);
+        }
+      }
+    });
+    doc.save((window._currentPDFName||'VVFGC_Report')+'_'+DATE.replace(/ /g,'-')+'.pdf');
+  }catch(e){ alert('PDF generation failed: '+e.message); }
+  btn.disabled=false; btn.textContent='⬇ Download PDF';
+}
+
+/* ── BOOT ── */
+init();
+</script>
+</body>
+</html>

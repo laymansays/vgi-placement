@@ -1,0 +1,3002 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#570B54">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="VGI Placement">
+  <link rel="apple-touch-icon" href="logo.jpg">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<link rel="icon" type="image/jpeg" href="logo.jpg"/>
+<title>Placement Cell Analytics · Vidyavahini First Grade Degree College</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Inter',sans-serif;font-size:14.5px;line-height:1.6;
+  background:var(--bg);color:var(--text);min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── LIGHT THEME ── */
+:root{
+  --bg:#F8FAFC;
+  --bg2:#FFFFFF;
+  --bg3:#F1F5F9;
+  --bg4:#E2E8F0;
+  --border:#E2E8F0;
+  --border2:#CBD5E1;
+  --border3:#94A3B8;
+  --text:#0F172A;
+  --text2:#1E293B;
+  --text3:#64748B;
+  --text4:#94A3B8;
+
+  --navy:#1E293B;
+  --navy2:#334155;
+  --navy-bg:rgba(30,41,59,0.06);
+  --navy-border:rgba(30,41,59,0.14);
+
+  --blue:#6D0E6A;
+  --blue2:#570B54;
+  --blue-bg:rgba(109,14,106,0.08);
+  --blue-border:rgba(109,14,106,0.20);
+
+  --green:#059669;
+  --green-bg:rgba(5,150,105,0.08);
+  --green-border:rgba(5,150,105,0.22);
+  --amber:#D97706;
+  --amber-bg:rgba(217,119,6,0.08);
+  --amber-border:rgba(217,119,6,0.22);
+  --red:#DC2626;
+  --red-bg:rgba(220,38,38,0.08);
+  --red-border:rgba(220,38,38,0.18);
+
+  --nav-bg:#FFFFFF;
+  --card-bg:#FFFFFF;
+  --card-hover:#F8FAFF;
+  --modal-bg:#FFFFFF;
+
+  --shadow:0 1px 3px rgba(0,0,0,0.04),0 4px 16px rgba(15,23,42,0.07);
+  --shadow2:0 1px 3px rgba(15,23,42,0.06),0 2px 8px rgba(15,23,42,0.05);
+  --shadow3:0 8px 32px rgba(15,23,42,0.12),0 2px 8px rgba(0,0,0,0.05);
+  --shadowxl:0 20px 60px rgba(15,23,42,0.16),0 4px 16px rgba(0,0,0,0.08);
+
+  --r1:24px;--r2:16px;--r3:10px;--r4:6px;--r5:999px;
+  --admin:#C2410C;
+  --admin-bg:rgba(194,65,12,0.08);
+  --admin-border:rgba(194,65,12,0.22);
+}
+
+/* ── DARK THEME ── */
+[data-theme="dark"]{
+  --bg:#0B0E14;--bg2:#111827;--bg3:#1B1B2E;--bg4:#252035;
+  --border:rgba(148,163,184,0.09);--border2:rgba(148,163,184,0.14);--border3:rgba(148,163,184,0.24);
+  --text:#E2E8F0;--text2:#94A3B8;--text3:#4B5568;--text4:#334155;
+  --navy:#E2E8F0;--navy2:#CBD5E1;--navy-bg:rgba(226,232,240,0.06);--navy-border:rgba(226,232,240,0.14);
+  --blue:#A76EA5;--blue2:#C49EC3;--blue-bg:rgba(109,14,106,0.12);--blue-border:rgba(109,14,106,0.28);
+  --green:#10B981;--green-bg:rgba(16,185,129,0.12);--green-border:rgba(16,185,129,0.28);
+  --amber:#F59E0B;--amber-bg:rgba(245,158,11,0.12);--amber-border:rgba(245,158,11,0.28);
+  --red:#EF4444;--red-bg:rgba(239,68,68,0.12);--red-border:rgba(239,68,68,0.28);
+  --nav-bg:#111827;--card-bg:#111827;--card-hover:#1B1B2E;--modal-bg:#111827;
+  --shadow:0 1px 4px rgba(0,0,0,0.5),0 4px 18px rgba(0,0,0,0.4);
+  --shadow2:0 1px 4px rgba(0,0,0,0.35);
+  --shadow3:0 8px 32px rgba(0,0,0,0.6);
+  --shadowxl:0 20px 60px rgba(0,0,0,0.7);
+  --admin:#FB923C;--admin-bg:rgba(251,146,60,0.12);--admin-border:rgba(251,146,60,0.28);
+}
+
+/* ── NAVBAR ── */
+.navbar{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  background:var(--nav-bg);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  height:64px;display:flex;align-items:center;
+  justify-content:space-between;padding:0 40px;
+  box-shadow:0 1px 0 var(--border);
+}
+.nav-brand{display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;}
+.nav-logo{
+  width:38px;height:38px;border-radius:10px;flex-shrink:0;
+  background:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;font-weight:800;color:#fff;letter-spacing:-0.02em;
+}
+.nav-name{display:flex;flex-direction:column;line-height:1.2;}
+.nav-name span:first-child{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-0.01em;}
+.nav-name span:last-child{font-size:10px;color:var(--text3);letter-spacing:0.04em;font-weight:500;}
+.nav-right{display:flex;align-items:center;gap:8px;}
+.btn-icon{
+  background:none;border:1px solid var(--border2);border-radius:var(--r4);
+  padding:6px 10px;cursor:pointer;font-size:13px;color:var(--text3);
+  transition:all .15s;line-height:1.4;font-weight:500;
+}
+.btn-icon:hover{background:var(--bg3);border-color:var(--border3);color:var(--text);}
+.btn-admin-toggle{
+  display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:var(--r4);
+  border:1px solid var(--border2);background:none;cursor:pointer;
+  font-size:12px;font-weight:600;color:var(--text3);transition:all .15s;font-family:inherit;
+}
+.btn-admin-toggle:hover,.btn-admin-toggle.active{
+  background:var(--admin-bg);border-color:var(--admin-border);color:var(--admin);
+}
+.admin-dot{width:6px;height:6px;border-radius:50%;background:var(--text4);transition:background .2s;flex-shrink:0;}
+.btn-admin-toggle.active .admin-dot{background:var(--admin);}
+.nav-crumb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text3);}
+.crumb{cursor:pointer;transition:color .15s;font-weight:500;}.crumb:hover{color:var(--blue);}
+.crumb-sep{opacity:.4;font-size:10px;margin:0 1px;}
+.crumb-active{font-weight:600;color:var(--text);}
+
+/* ── ADMIN / REFRESH BARS ── */
+.admin-bar{
+  background:var(--admin-bg);border-bottom:1px solid var(--admin-border);
+  padding:8px 40px;display:flex;align-items:center;
+  justify-content:space-between;gap:12px;
+  font-size:12px;font-weight:600;color:var(--admin);
+}
+.admin-bar-actions{display:flex;gap:8px;align-items:center;}
+.refresh-bar{
+  background:var(--blue-bg);border-bottom:1px solid var(--border);
+  padding:6px 40px;font-size:12px;color:var(--text3);
+  display:none;align-items:center;gap:8px;
+}
+.refresh-bar.show{display:flex;}
+.spin{animation:spin .8s linear infinite;display:inline-block;}
+
+/* ── BUTTONS ── */
+.btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 18px;border-radius:var(--r3);
+  border:1px solid transparent;font-size:13px;font-weight:600;
+  cursor:pointer;transition:all .18s;font-family:inherit;white-space:nowrap;
+}
+.btn-sm{padding:5px 14px;font-size:12px;}
+.btn-xs{padding:3px 10px;font-size:11px;}
+.btn-primary{background:var(--navy);color:#fff;}.btn-primary:hover{background:var(--navy2);}
+.btn-navy{background:var(--navy);color:#fff;}.btn-navy:hover{background:var(--navy2);}
+.btn-blue{background:var(--blue);color:#fff;}.btn-blue:hover{background:var(--blue2);}
+.btn-outline{background:none;border-color:var(--border2);color:var(--text2);}.btn-outline:hover{background:var(--bg3);border-color:var(--border3);}
+.btn-admin{background:var(--admin);color:#fff;}.btn-admin:hover{filter:brightness(1.1);}
+.btn-admin-outline{background:none;border:1px solid var(--admin-border);color:var(--admin);}.btn-admin-outline:hover{background:var(--admin-bg);}
+.btn-danger{background:var(--red);color:#fff;}.btn-danger:hover{filter:brightness(1.1);}
+.btn-ghost{background:none;border:none;color:var(--text3);padding:5px 9px;cursor:pointer;}.btn-ghost:hover{color:var(--text);background:var(--bg3);}
+.btn-nav-home-pd{
+  display:inline-flex;align-items:center;line-height:1;
+  padding:6px 10px;border:1.5px solid var(--border2);border-radius:8px;
+  background:none;font-size:15px;font-weight:600;color:var(--text3);
+  text-decoration:none;font-family:inherit;transition:all .15s;
+}
+.btn-nav-home-pd:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg);}
+.btn-primary-inv{
+  display:inline-flex;align-items:center;gap:8px;padding:10px 24px;
+  border-radius:var(--r3);border:1.5px solid rgba(255,255,255,0.35);
+  background:rgba(255,255,255,0.12);color:#fff;
+  font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit;width:fit-content;
+}
+.btn-primary-inv:hover{background:rgba(255,255,255,0.22);border-color:rgba(255,255,255,0.60);}
+
+/* ── LOADING ── */
+#loading-screen{
+  position:fixed;inset:0;background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:20px;z-index:1000;transition:opacity .4s;
+}
+#loading-screen.hide{opacity:0;pointer-events:none;}
+.loader-logo{
+  width:64px;height:64px;border-radius:18px;
+  background:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;font-weight:800;color:#fff;
+  animation:pulse 2s ease-in-out infinite;
+  box-shadow:0 8px 32px rgba(109,14,106,0.35);
+}
+.loader-text{font-size:20px;font-weight:700;color:var(--text);text-align:center;letter-spacing:-0.02em;}
+.loader-sub{font-size:12.5px;color:var(--text3);text-align:center;margin-top:3px;}
+.loader-dots span{animation:blink 1.4s infinite;display:inline-block;}
+.loader-dots span:nth-child(2){animation-delay:.22s;}
+.loader-dots span:nth-child(3){animation-delay:.44s;}
+
+/* ── ERROR ── */
+#error-screen{display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:60px 24px;text-align:center;}
+#error-screen.show{display:flex;}
+.error-icon{font-size:40px;}
+.error-title{font-size:22px;font-weight:700;color:var(--text);letter-spacing:-0.02em;}
+.error-msg{font-size:13.5px;color:var(--text3);max-width:480px;line-height:1.7;}
+
+/* ── APP SHELL ── */
+#app{display:none;}#app.ready{display:block;padding-top:64px;}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   HOME VIEW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.home-wrap{
+  width:100%;
+  padding:0 40px;
+}
+.home-banner{
+  display:grid;grid-template-columns:1fr 320px;
+  border-radius:var(--r1);overflow:hidden;
+  box-shadow:var(--shadowxl);margin:36px 0 36px;
+}
+.home-banner-left{
+  background:linear-gradient(135deg,#0F172A 0%,#1E1525 40%,#6D0E6A 100%);
+  padding:52px 56px;display:flex;flex-direction:column;justify-content:center;
+  position:relative;overflow:hidden;
+}
+.home-banner-left::before{
+  content:'';position:absolute;top:-100px;right:-100px;
+  width:360px;height:360px;border-radius:50%;
+  background:radial-gradient(circle,rgba(99,179,237,0.08) 0%,transparent 70%);
+  pointer-events:none;
+}
+.home-eyebrow{
+  font-size:11px;font-weight:700;color:rgba(211,182,210,0.90);
+  letter-spacing:0.15em;margin-bottom:16px;
+  display:flex;align-items:center;gap:10px;
+}
+.home-eyebrow::before{content:'';display:block;width:24px;height:2px;background:rgba(211,182,210,0.55);border-radius:2px;}
+.home-title{
+  font-size:clamp(28px,2.8vw,42px);line-height:1.1;
+  font-weight:800;color:#FFFFFF;margin-bottom:14px;letter-spacing:-0.03em;
+}
+.home-title em{font-style:normal;color:#D3B6D2;}
+.home-sub{font-size:14px;color:rgba(255,255,255,0.50);line-height:1.75;max-width:340px;margin-bottom:32px;font-weight:400;}
+.home-banner-right{
+  background:var(--card-bg);
+  display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;
+  border-left:1px solid var(--border);
+}
+.stat-tile{
+  padding:28px 24px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;justify-content:flex-end;
+  cursor:pointer;transition:all .2s;position:relative;overflow:hidden;
+}
+.stat-tile:nth-child(2),.stat-tile:nth-child(4){border-right:none;}
+.stat-tile:nth-child(3),.stat-tile:nth-child(4){border-bottom:none;}
+.stat-tile:hover{background:var(--blue-bg);}
+.stat-tile:hover .stat-tile-num{color:var(--blue);}
+.stat-tile:active{transform:scale(0.98);}
+.stat-tile-icon{font-size:18px;margin-bottom:8px;opacity:.45;}
+.stat-tile-num{font-size:44px;line-height:1;font-weight:800;color:var(--navy);margin-bottom:4px;letter-spacing:-0.04em;transition:color .2s;}
+.stat-tile-lbl{font-size:11.5px;color:var(--text3);font-weight:600;letter-spacing:0.02em;}
+.stat-tile-hint{font-size:10px;color:var(--blue);margin-top:4px;font-weight:600;opacity:0;transition:opacity .2s;}
+/* PDF hover button — on stat-tile and d-stat */
+.tile-pdf-btn{
+  position:absolute;top:10px;right:10px;
+  opacity:0;pointer-events:none;
+  transition:opacity .18s;
+  padding:4px 9px;border-radius:6px;border:1.5px solid var(--border2);
+  background:var(--bg2);color:var(--text2);
+  font-size:10.5px;font-weight:700;font-family:inherit;
+  cursor:pointer;white-space:nowrap;z-index:2;
+  display:inline-flex;align-items:center;gap:4px;
+}
+.stat-tile:hover .tile-pdf-btn,
+.d-stat:hover .tile-pdf-btn{ opacity:1; pointer-events:auto; }
+.tile-pdf-btn:hover{ background:#6D0E6A;color:#fff;border-color:#6D0E6A; }
+.stat-tile:hover .stat-tile-hint{opacity:1;}
+
+/* ── SECTION ── */
+.section{
+  width:100%;
+  padding:0 40px 56px;
+}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.section-title{font-size:20px;font-weight:700;color:var(--text);letter-spacing:-0.02em;}
+.section-divider{width:100%;height:1px;background:var(--border);margin-bottom:20px;}
+
+/* ── FILTER CHIPS ── */
+.filters{display:flex;gap:6px;flex-wrap:wrap;}
+.filter-chip{
+  padding:5px 16px;border-radius:var(--r5);
+  border:1.5px solid var(--border2);background:var(--card-bg);
+  font-size:12px;font-weight:600;color:var(--text3);
+  cursor:pointer;transition:all .15s;font-family:inherit;
+}
+.filter-chip:hover{border-color:var(--blue-border);color:var(--blue);background:var(--blue-bg);}
+.filter-chip.active{background:var(--blue);border-color:var(--blue);color:#fff;}
+
+/* ── COMPANY LIST ── */
+.company-list{
+  display:flex;flex-direction:column;
+  border:1px solid var(--border);border-radius:var(--r2);
+  overflow:hidden;box-shadow:var(--shadow2);background:var(--card-bg);
+}
+.company-row{
+  display:grid;grid-template-columns:52px 1fr auto auto;align-items:center;gap:16px;
+  padding:16px 22px;background:var(--card-bg);border-bottom:1px solid var(--border);
+  cursor:pointer;transition:all .15s;position:relative;
+}
+.company-row:last-child{border-bottom:none;}
+.company-row:hover{background:var(--blue-bg);}
+.company-row::before{
+  content:'';position:absolute;left:0;top:18%;bottom:18%;width:3px;
+  background:linear-gradient(180deg,var(--blue),#6D0E6A);
+  border-radius:0 3px 3px 0;transform:scaleY(0);
+  transition:transform .2s cubic-bezier(.4,0,.2,1);transform-origin:center;
+}
+.company-row:hover::before{transform:scaleY(1);}
+/* Company avatar — shows logo, falls back to monogram */
+.co-avatar{
+  width:48px;height:48px;border-radius:10px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;background:#fff;
+  border:1.5px solid var(--border);
+  box-shadow:0 1px 4px rgba(0,0,0,0.06);
+}
+.co-avatar img{width:100%;height:100%;object-fit:contain;padding:6px;display:block;}
+.co-avatar .co-ini{
+  width:100%;height:100%;display:none;align-items:center;justify-content:center;
+  font-size:14px;font-weight:800;color:#fff;letter-spacing:-0.01em;
+}
+.co-info{min-width:0;}
+.co-name{font-weight:700;font-size:14px;color:var(--text);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.co-funnel{display:flex;gap:2px;height:3px;border-radius:3px;overflow:hidden;background:var(--bg4);width:min(160px,100%);}
+.co-funnel-r{background:#A76EA5;transition:width .45s;}
+.co-funnel-i{background:#F59E0B;transition:width .45s;}
+.co-funnel-s{background:#10B981;transition:width .45s;}
+.co-counts{display:flex;gap:22px;align-items:center;}
+.co-count{text-align:right;}
+.co-count-num{font-size:22px;font-weight:800;color:var(--navy);line-height:1;letter-spacing:-0.02em;transition:color .15s;}
+.co-count-lbl{font-size:10px;color:var(--text4);margin-top:2px;font-weight:600;letter-spacing:0.03em;}
+
+/* ── STATUS PILLS ── */
+.s-pill{font-size:11px;font-weight:700;padding:3px 12px;border-radius:var(--r5);white-space:nowrap;}
+.s-completed{background:#D1FAE5;color:#065F46;}
+.s-results_awaited{background:#FEF3C7;color:#92400E;}
+.s-registered_sent{background:#F0E4EF;color:#41083F;}
+.s-upcoming{background:#F1F5F9;color:#64748B;}
+.s-pill-inv{font-size:11px;font-weight:700;padding:3px 12px;border-radius:var(--r5);white-space:nowrap;background:rgba(255,255,255,0.16);color:rgba(255,255,255,0.92);border:1px solid rgba(255,255,255,0.24);}
+
+/* ── DASHBOARD SUMMARY ── */
+.dash-summary{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;
+}
+.dash-sum-tile{
+  background:var(--card-bg);border:1px solid var(--border);
+  border-radius:var(--r2);padding:20px 24px;box-shadow:var(--shadow2);
+}
+.dash-sum-num{font-size:32px;font-weight:800;color:var(--navy);line-height:1;letter-spacing:-0.03em;}
+.dash-sum-lbl{font-size:11.5px;color:var(--text3);margin-top:5px;font-weight:600;letter-spacing:0.02em;}
+.empty-state{text-align:center;padding:64px 24px;color:var(--text3);}
+.empty-icon{font-size:32px;margin-bottom:14px;opacity:.5;}
+.empty-title{font-size:20px;font-weight:700;color:var(--text2);margin-bottom:6px;letter-spacing:-0.02em;}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   DETAIL VIEW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.detail-wrap{
+  width:100%;
+  padding:32px 40px 64px;
+}
+.d-hero{
+  background:linear-gradient(135deg,#0F172A 0%,#1E1525 40%,#6D0E6A 100%);
+  border-radius:var(--r1);padding:34px 40px;margin-bottom:20px;
+  display:flex;gap:24px;align-items:flex-start;position:relative;overflow:hidden;
+  box-shadow:0 8px 40px rgba(109,14,106,0.22);
+}
+.d-hero::before{content:'';position:absolute;top:-100px;right:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(99,179,237,0.07) 0%,transparent 70%);pointer-events:none;}
+/* Hero company logo (large) */
+.d-avatar{
+  width:68px;height:68px;border-radius:14px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+  background:rgba(255,255,255,0.14);border:1.5px solid rgba(255,255,255,0.24);
+  box-shadow:0 4px 12px rgba(0,0,0,0.18);
+}
+.d-avatar img{width:100%;height:100%;object-fit:contain;padding:8px;display:block;}
+.d-avatar .co-ini{width:100%;height:100%;display:none;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;}
+.d-name{font-size:28px;font-weight:800;color:#fff;margin-bottom:10px;line-height:1.1;letter-spacing:-0.03em;}
+.d-badges{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.mode-pill{font-size:11px;font-weight:600;padding:3px 12px;border-radius:var(--r5);background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.80);border:1px solid rgba(255,255,255,0.18);}
+.d-link{font-size:12px;color:rgba(255,255,255,0.80);text-decoration:none;font-weight:600;padding:3px 12px;border:1px solid rgba(255,255,255,0.26);border-radius:var(--r5);transition:all .15s;}
+.d-link:hover{background:rgba(255,255,255,0.16);color:#fff;}
+.live-badge{font-size:11px;font-weight:600;color:rgba(255,255,255,0.55);padding:3px 12px;border-radius:var(--r5);background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.14);cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s;}
+.live-badge:hover{color:#fff;border-color:rgba(255,255,255,0.35);}
+
+/* Clickable stat boxes */
+.d-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:14px;margin-bottom:18px;}
+.d-stat{
+  background:var(--card-bg);border:1.5px solid var(--border);
+  border-radius:var(--r2);padding:22px 24px;cursor:pointer;transition:all .2s;
+  position:relative;overflow:hidden;box-shadow:var(--shadow2);
+}
+.d-stat::after{content:'View list ↗';position:absolute;bottom:9px;right:14px;font-size:9.5px;color:var(--blue);font-weight:700;opacity:0;transition:opacity .2s;letter-spacing:0.03em;}
+.d-stat:hover{border-color:var(--blue);background:var(--blue-bg);transform:translateY(-2px);box-shadow:0 6px 24px rgba(109,14,106,0.14);}
+.d-stat:hover::after{opacity:1;}
+body.admin-mode .d-stat::after{content:'Edit list ↗';}
+body.admin-mode .d-stat{background:var(--admin-bg);}
+.d-stat-num{font-size:44px;font-weight:800;color:var(--navy);line-height:1;margin-bottom:5px;letter-spacing:-0.04em;}
+.d-stat-lbl{font-size:12px;color:var(--text3);font-weight:600;letter-spacing:0.02em;}
+
+/* Info cards */
+.d-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:18px;}
+.d-card{
+  background:var(--card-bg);border:1px solid var(--border);
+  border-top:3px solid transparent;border-radius:var(--r2);
+  padding:20px 22px;position:relative;box-shadow:var(--shadow2);transition:box-shadow .2s;
+}
+.d-card:hover{box-shadow:var(--shadow3);}
+.d-card:nth-child(1){border-top-color:#6D0E6A;}
+.d-card:nth-child(2){border-top-color:#D97706;}
+.d-card:nth-child(3){border-top-color:#059669;}
+.d-card-lbl{font-size:11px;font-weight:700;color:var(--text3);padding-bottom:10px;margin-bottom:12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;letter-spacing:0.05em;}
+.d-field{display:flex;flex-direction:column;gap:2px;margin-bottom:10px;}
+.d-field:last-child{margin-bottom:0;}
+.d-field-k{font-size:10px;color:var(--text4);font-weight:700;letter-spacing:0.05em;}
+.d-field-v{font-size:13.5px;color:var(--text2);font-weight:500;line-height:1.4;}
+.d-field-v.empty{color:var(--text4);font-style:italic;}
+.edit-chip{font-size:10px;background:var(--admin-bg);color:var(--admin);border:1px solid var(--admin-border);border-radius:var(--r5);padding:2px 9px;cursor:pointer;margin-left:auto;font-weight:700;transition:all .15s;}
+.edit-chip:hover{background:var(--admin);color:#fff;}
+.roles-wrap{display:flex;flex-wrap:wrap;gap:7px;}
+.role-chip{font-size:12px;font-weight:600;padding:4px 12px;border-radius:var(--r5);background:var(--blue-bg);color:#41083F;border:1px solid var(--blue-border);}
+
+/* ── JD CARDS ── */
+.jd-section{margin-bottom:18px;}
+.jd-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.jd-section-title{font-size:16px;font-weight:700;color:var(--text);letter-spacing:-0.01em;}
+.jd-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;}
+.jd-card{
+  background:var(--card-bg);border:1.5px solid var(--border);border-radius:var(--r2);
+  padding:20px;cursor:pointer;transition:all .22s;position:relative;overflow:hidden;
+  box-shadow:var(--shadow2);
+}
+.jd-card:hover{border-color:var(--blue);box-shadow:0 6px 28px rgba(109,14,106,0.15);transform:translateY(-3px);}
+.jd-card-accent{position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#6D0E6A,#6D0E6A);}
+.jd-card-role{font-size:15px;font-weight:700;color:var(--text);margin-bottom:14px;line-height:1.3;padding-right:8px;}
+.jd-card-field{display:flex;gap:8px;margin-bottom:7px;align-items:flex-start;}
+.jd-card-key{font-size:9.5px;font-weight:700;color:var(--text4);letter-spacing:0.08em;flex-shrink:0;margin-top:2px;min-width:58px;}
+.jd-card-val{font-size:12.5px;color:var(--text2);font-weight:500;line-height:1.4;}
+.jd-card-pdf{display:flex;align-items:center;gap:7px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);font-size:12px;font-weight:700;color:var(--blue);}
+.jd-card-no-pdf{font-size:11px;color:var(--text4);font-style:italic;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.jd-empty{color:var(--text4);font-size:13px;font-style:italic;padding:8px 0;}
+.file-upload-zone{
+  border:2px dashed var(--border2);border-radius:var(--r3);
+  padding:22px;text-align:center;cursor:pointer;transition:all .18s;background:var(--bg3);
+}
+.file-upload-zone:hover{border-color:var(--blue);background:var(--blue-bg);}
+.file-upload-label{font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;}
+.file-upload-label b{color:var(--blue);}
+
+/* ── STUDENT TABLES ── */
+.student-section{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--r2);margin-bottom:14px;overflow:hidden;box-shadow:var(--shadow2);}
+.student-section-head{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;border-bottom:1px solid var(--border);background:var(--bg3);}
+.student-section-head-left{display:flex;align-items:center;gap:10px;}
+.btn-pdf-download{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 12px;border-radius:7px;border:1.5px solid var(--border2);
+  background:var(--bg2);color:var(--text2);
+  font-size:11.5px;font-weight:700;font-family:inherit;
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.btn-pdf-download:hover{background:#6D0E6A;color:#fff;border-color:#6D0E6A;}
+.student-section-title{font-size:13.5px;font-weight:700;color:var(--text2);}
+.student-count{font-size:22px;font-weight:800;color:var(--navy);line-height:1;letter-spacing:-0.03em;}
+.student-table{width:100%;border-collapse:collapse;font-size:13.5px;}
+.student-table th{background:var(--bg3);padding:9px 20px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);border-bottom:1px solid var(--border);letter-spacing:0.04em;}
+.student-table td{padding:10px 20px;border-bottom:1px solid var(--border);color:var(--text2);}
+.student-table tr:last-child td{border-bottom:none;}
+.student-table tbody tr:nth-child(even) td{background:rgba(109,14,106,0.02);}
+.student-table tbody tr:hover td{background:var(--blue-bg);}
+.no-data{text-align:center;padding:28px;color:var(--text4);font-size:13px;font-style:italic;}
+
+/* ── MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.45);
+  backdrop-filter:blur(8px);z-index:500;
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  opacity:0;pointer-events:none;transition:opacity .22s;
+}
+.modal-overlay.open{opacity:1;pointer-events:auto;}
+.modal{
+  background:var(--modal-bg);border:1px solid var(--border);
+  border-radius:var(--r2);width:100%;max-width:560px;max-height:88vh;
+  overflow-y:auto;transform:translateY(14px);
+  transition:transform .24s cubic-bezier(.34,1.56,.64,1),opacity .22s;
+  box-shadow:var(--shadowxl);opacity:0;
+}
+.modal.modal-wide{max-width:740px;}
+.modal-overlay.open .modal{transform:translateY(0);opacity:1;}
+body.admin-mode .modal{border-top:3px solid var(--admin);}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--modal-bg);z-index:2;}
+.modal-title{font-size:17px;font-weight:700;color:var(--text);letter-spacing:-0.02em;}
+.modal-close{background:none;border:none;width:28px;height:28px;border-radius:var(--r4);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;color:var(--text3);transition:all .15s;}
+.modal-close:hover{background:var(--bg3);color:var(--text);}
+.modal-body{padding:20px 22px;}
+.modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;}
+
+/* Popup helpers */
+.popup-list{display:flex;flex-direction:column;border:1px solid var(--border);border-radius:var(--r3);overflow:hidden;}
+.popup-row{display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;}
+.popup-row:last-child{border-bottom:none;}
+.popup-row:hover{background:var(--blue-bg);}
+.popup-row-name{font-size:14px;font-weight:600;color:var(--text);}
+.popup-row-sub{font-size:11.5px;color:var(--text3);margin-top:2px;}
+.popup-company-select{width:100%;padding:10px 14px;border:1.5px solid var(--border2);border-radius:var(--r3);background:var(--bg3);color:var(--text);font-size:13.5px;font-family:inherit;margin-bottom:16px;cursor:pointer;}
+.popup-company-select:focus{outline:none;border-color:var(--blue);}
+
+/* Forms */
+.form-row{margin-bottom:16px;}
+.form-label{display:block;font-size:12px;font-weight:700;color:var(--text3);margin-bottom:6px;letter-spacing:0.03em;}
+.form-input,.form-textarea,.form-select{width:100%;padding:9px 13px;border:1.5px solid var(--border2);border-radius:var(--r3);background:var(--bg3);color:var(--text);font-size:13.5px;font-family:inherit;transition:all .15s;}
+.form-input:focus,.form-textarea:focus,.form-select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-bg);}
+.form-textarea{resize:vertical;min-height:80px;font-family:'JetBrains Mono',monospace;font-size:12px;}
+.form-hint{font-size:11.5px;color:var(--text4);margin-top:4px;}
+.pin-row{display:flex;gap:10px;justify-content:center;margin:20px 0;}
+.pin-cell{width:52px;height:56px;border:1.5px solid var(--border2);border-radius:var(--r3);font-size:24px;font-weight:800;text-align:center;background:var(--bg3);color:var(--text);transition:all .15s;-webkit-text-security:disc;}
+.pin-cell:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-bg);}
+.pin-error{text-align:center;font-size:12.5px;color:var(--red);min-height:18px;margin-top:4px;}
+.paste-zone{background:var(--admin-bg);border:1px dashed var(--admin-border);border-radius:var(--r3);padding:14px;margin-bottom:16px;}
+.paste-zone-title{font-size:11.5px;font-weight:700;color:var(--admin);margin-bottom:6px;}
+.paste-textarea{width:100%;min-height:68px;padding:8px;border:1px solid var(--admin-border);border-radius:var(--r3);background:var(--bg2);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;resize:vertical;}
+.paste-textarea:focus{outline:none;border-color:var(--admin);}
+
+/* Toast */
+#toast-root{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+.toast{display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:var(--r3);background:var(--card-bg);border:1px solid var(--border);box-shadow:var(--shadowxl);font-size:13.5px;font-weight:600;color:var(--text);animation:slideUp .2s ease;min-width:220px;}
+.toast.success{border-left:4px solid var(--green);}
+.toast.error{border-left:4px solid var(--red);}
+.toast.info{border-left:4px solid var(--blue);}
+
+@keyframes blink{0%,80%,100%{opacity:0;}40%{opacity:1;}}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.04);}}
+@keyframes slideUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+@media(max-width:900px){
+  .home-banner{grid-template-columns:1fr;}
+  .home-banner-left{padding:36px 30px;}
+  .home-banner-right{grid-template-columns:1fr 1fr;border-left:none;border-top:1px solid var(--border);}
+  .stat-tile:nth-child(1),.stat-tile:nth-child(2){border-bottom:1px solid var(--border);}
+  .stat-tile:nth-child(2){border-right:none;}
+  .stat-tile:nth-child(3){border-right:1px solid var(--border);}
+  .dash-summary{grid-template-columns:1fr 1fr;gap:12px;}
+}
+@media(max-width:640px){
+  .navbar,.admin-bar,.refresh-bar{padding-left:20px;padding-right:20px;}
+  .home-wrap,.section,.detail-wrap{padding-left:20px;padding-right:20px;}
+  .company-row{grid-template-columns:44px 1fr auto;}
+  .co-counts{display:none;}
+  .d-stats{grid-template-columns:repeat(2,1fr);}
+  .d-cards,.jd-cards-grid{grid-template-columns:1fr;}
+  .dash-summary{grid-template-columns:1fr 1fr;}
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   HOME — COMPANY CARD GRID + HOVER TOOLTIP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.co-cards-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:16px;
+}
+.co-card{
+  background:var(--card-bg);border:1.5px solid var(--border);
+  border-radius:var(--r2);padding:20px 18px 16px;
+  cursor:pointer;transition:all .22s;
+  box-shadow:var(--shadow2);position:relative;
+  overflow:visible;
+}
+.co-card:hover{
+  border-color:var(--blue);
+  box-shadow:0 6px 32px rgba(109,14,106,0.18);
+  transform:translateY(-4px);
+  z-index:10;
+}
+.co-card .co-avatar{margin-bottom:12px;}
+.co-card-name{
+  font-weight:700;font-size:13.5px;color:var(--text);
+  margin-bottom:8px;line-height:1.3;
+}
+.co-card-stats{
+  display:flex;gap:0;margin-top:12px;
+  border-top:1px solid var(--border);padding-top:12px;
+}
+.co-card-stat{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  border-right:1px solid var(--border);
+}
+.co-card-stat:last-child{border-right:none;}
+.co-card-stat-num{font-size:19px;font-weight:800;color:var(--navy);line-height:1;letter-spacing:-0.02em;}
+.co-card-stat-lbl{font-size:9px;color:var(--text4);font-weight:700;letter-spacing:0.06em;margin-top:3px;}
+
+/* Tooltip — appears above card on hover */
+.co-tooltip{
+  position:absolute;
+  left:50%;bottom:calc(100% + 12px);
+  transform:translateX(-50%) translateY(8px);
+  background:#2A0A28;color:#fff;
+  border-radius:12px;padding:14px 16px;
+  min-width:200px;max-width:240px;
+  pointer-events:none;
+  opacity:0;transition:opacity .2s ease,transform .2s ease;
+  box-shadow:0 12px 40px rgba(0,0,0,0.30);
+  z-index:200;font-size:12px;line-height:1.5;
+  border:1px solid rgba(255,255,255,0.08);
+}
+.co-tooltip::after{
+  content:'';position:absolute;
+  top:100%;left:50%;transform:translateX(-50%);
+  border:7px solid transparent;
+  border-top-color:#1E293B;
+}
+.co-card:hover .co-tooltip{opacity:1;transform:translateX(-50%) translateY(0);}
+.co-tooltip-row{display:flex;gap:10px;margin-bottom:5px;}
+.co-tooltip-row:last-child{margin-bottom:0;}
+.co-tooltip-k{font-size:9.5px;color:rgba(255,255,255,0.45);font-weight:700;letter-spacing:0.08em;min-width:46px;padding-top:1px;flex-shrink:0;}
+.co-tooltip-v{color:rgba(255,255,255,0.90);font-weight:500;font-size:12px;}
+
+@media(max-width:640px){
+  .co-cards-grid{grid-template-columns:repeat(2,1fr);gap:12px;}
+  .co-tooltip{display:none;}
+}
+
+
+/* ── PLACEMENT LOGIN GATE ── */
+#placement-login{
+  position:fixed;inset:0;z-index:2000;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(150deg,#0F172A 0%,#1A1030 50%,#5C1259 100%);
+  padding:24px;
+}
+#placement-login.hidden{display:none;}
+.pl-card{
+  background:#fff;border-radius:20px;padding:48px 44px 40px;
+  width:100%;max-width:420px;text-align:center;
+  box-shadow:0 32px 80px rgba(0,0,0,0.28);position:relative;
+}
+.pl-logo{
+  width:60px;height:60px;border-radius:16px;margin:0 auto 18px;
+  background:#fff;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+  box-shadow:0 8px 24px rgba(109,14,106,0.40);
+}
+.pl-heading{font-size:24px;font-weight:800;color:#0F172A;letter-spacing:-0.03em;margin-bottom:6px;}
+.pl-sub{font-size:13px;color:#64748B;margin-bottom:28px;line-height:1.5;}
+.pl-label{display:block;font-size:11.5px;font-weight:700;color:#374151;margin-bottom:7px;text-align:left;letter-spacing:0.04em;}
+#placement-pin{
+  width:100%;padding:12px 16px;border:1.5px solid #E2E8F0;border-radius:10px;
+  font-family:inherit;font-size:22px;font-weight:700;text-align:center;
+  color:#0F172A;background:#F8FAFC;outline:none;
+  letter-spacing:0.25em;transition:all .15s;
+  -webkit-text-security:disc;
+}
+#placement-pin:focus{border-color:#570B54;background:#fff;box-shadow:0 0 0 3px rgba(109,14,106,0.12);}
+#pin-error{min-height:20px;font-size:12.5px;color:#EF4444;font-weight:600;margin:8px 0 0;text-align:left;}
+.pl-btn{
+  width:100%;margin-top:16px;padding:13px 20px;border:none;border-radius:10px;
+  background:linear-gradient(135deg,#570B54,#6D0E6A);color:#fff;
+  font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;
+  box-shadow:0 4px 16px rgba(109,14,106,0.32);transition:all .2s;
+}
+.pl-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(109,14,106,0.42);}
+.pl-back{
+  position:absolute;top:20px;left:24px;
+  font-size:12.5px;color:#64748B;font-weight:600;
+  text-decoration:none;transition:color .15s;
+}
+.pl-back:hover{color:#0F172A;}
+
+
+/* ─── PLACEMENT CELL MODE ─────────────────────────────── */
+.pc-bar{background:linear-gradient(135deg,#1A0519,#3A0838);color:#fff;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px;font-weight:700;letter-spacing:.02em;}
+.pc-bar-badge{background:#FCD34D;color:#78350F;font-size:11px;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:.04em;}
+.pc-bar-actions{display:flex;gap:8px;}
+.pc-bar-actions button{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:12px;font-weight:600;padding:5px 14px;border-radius:8px;cursor:pointer;font-family:inherit;}
+.pc-bar-actions button:hover{background:rgba(255,255,255,.22);}
+
+/* Unique placed panel */
+.pc-panel{background:var(--card);border:1.5px solid #A855F7;border-radius:16px;margin:24px 0 0;overflow:hidden;}
+.pc-panel-head{background:linear-gradient(135deg,#2D0A2C,#3A0838);padding:18px 22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.pc-panel-title{font-size:15px;font-weight:800;color:#fff;letter-spacing:-.01em;flex:1;}
+.pc-stat-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:4px;width:100%;}
+.pc-stat-chip{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:10px 18px;text-align:center;min-width:100px;}
+.pc-stat-chip .pc-num{font-size:26px;font-weight:800;color:#fff;line-height:1;}
+.pc-stat-chip .pc-lbl{font-size:10.5px;font-weight:700;color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:.05em;margin-top:3px;}
+.pc-stat-chip.green .pc-num{color:#86EFAC;}
+.pc-stat-chip.amber .pc-num{color:#FCD34D;}
+.pc-stat-chip.red   .pc-num{color:#FCA5A5;}
+
+/* Student join table */
+.pc-table-wrap{overflow-x:auto;}
+.pc-table{width:100%;border-collapse:collapse;font-size:13px;}
+.pc-table th{background:rgba(168,85,247,.12);padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);}
+.pc-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text1);vertical-align:middle;}
+.pc-table tr:last-child td{border-bottom:none;}
+.pc-table tr:hover td{background:rgba(168,85,247,.04);}
+.pc-name-cell{font-weight:600;font-size:13.5px;}
+.pc-company-list{font-size:11.5px;color:var(--text3);margin-top:2px;}
+.join-btn{padding:5px 14px;border-radius:20px;font-size:11.5px;font-weight:700;cursor:pointer;border:1.5px solid;font-family:inherit;transition:all .15s;white-space:nowrap;}
+.join-btn.joined   {background:#DCFCE7;border-color:#86EFAC;color:#166534;}
+.join-btn.not-joined{background:#FEF2F2;border-color:#FCA5A5;color:#991B1B;}
+.join-btn.pending  {background:var(--bg2);border-color:var(--border);color:var(--text3);}
+.join-btn:hover    {opacity:.8;transform:scale(1.03);}
+.join-cycle-hint   {font-size:10px;color:var(--text3);margin-top:3px;text-align:right;}
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+</head>
+<body>
+
+<!-- ── PLACEMENT CELL LOGIN GATE ── -->
+<div id="placement-login">
+  <div class="pl-card">
+    <div class="pl-logo"><img src="logo.jpg" alt="VG" style="width:100%;height:100%;object-fit:contain;display:block;border-radius:16px;"/></div>
+    <h1 class="pl-heading">Placement Cell Analytics</h1>
+    <p class="pl-sub">Enter the Placement Cell passkey to access<br>the Analytics Dashboard.</p>
+    <label class="pl-label" for="placement-pin">PASSKEY</label>
+    <input id="placement-pin" type="tel" maxlength="4" inputmode="numeric" placeholder="••••" autocomplete="off" autofocus/>
+    <p id="pin-error"></p>
+    <button class="pl-btn" onclick="checkPlacementPin()">Access Dashboard →</button>
+    <a href="index.html" class="pl-back">← Home</a>
+  </div>
+</div>
+
+
+<div id="toast-root"></div>
+
+<!-- LOADING SCREEN -->
+<div id="loading-screen">
+  <div class="loader-logo"><img src="logo.jpg" alt="VG" style="width:100%;height:100%;object-fit:contain;border-radius:18px;display:block;"/></div>
+  <div>
+    <div class="loader-text">Loading Placement Dashboard</div>
+    <div class="loader-sub" id="loader-sub">Starting up<span class="loader-dots"><span>.</span><span>.</span><span>.</span></span></div>
+  </div>
+</div>
+
+<!-- ERROR SCREEN -->
+<div id="error-screen">
+  <div class="error-icon">⚠️</div>
+  <div class="error-title">Could not load config</div>
+  <div class="error-msg" id="error-msg">Unable to read the Placement Dashboard Config sheet.</div>
+  <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:16px 20px;text-align:left;max-width:480px;font-size:12px;line-height:1.8;color:var(--text2);margin-top:4px;">
+    <strong>Checklist:</strong><br>
+    1. Config Sheet is shared as <strong>"Anyone with the link → Viewer"</strong><br>
+    2. Column B contains the <strong>raw Sheet ID</strong> (not a hyperlink) — e.g. <code style="font-family:monospace;background:var(--bg4);padding:1px 5px;border-radius:3px">1LpZNHaX…</code><br>
+    3. Tab names in your sheet must be exactly <strong>CONFIG_TAB</strong> and <strong>ADMIN_MODE</strong><br>
+    4. All company sheets are also shared publicly
+  </div>
+  <button class="btn btn-primary" style="margin-top:12px" onclick="init()">↺ Retry</button>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <nav id="navbar"></nav>
+  <div id="admin-bar"></div>
+  <div id="refresh-bar" class="refresh-bar"><span class="spin">↻</span> Refreshing student data from sheets…</div>
+  <main id="main"></main>
+</div>
+
+<div id="modal-overlay" class="modal-overlay">
+  <div class="modal" id="modal-box">
+    <div class="modal-head">
+      <span class="modal-title" id="modal-title">—</span>
+      <button class="modal-close" id="modal-close">×</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+
+<script>
+
+
+
+/* ════════════════════════════════════════════════════
+   CONFIG
+════════════════════════════════════════════════════ */
+const CONFIG_SHEET_ID = '__SHEET_ID__';
+const CONFIG_TAB      = 'CONFIG_TAB';   // Main config tab — tab renamed by user
+const ADMIN_DATA_TAB  = 'ADMIN_MODE';   // Admin overrides tab — tab renamed by user
+const ADMIN_PIN       = '__ADMIN_PIN__';
+const JOIN_PIN        = '__JOIN_PIN__';   // Placement Cell Mode
+const CACHE_TTL       = 60000;          // 60s per company
+
+/* ════════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════════ */
+let COMPANIES   = [];   // Built from config sheet
+let ADMIN_DATA  = {};   // Keyed by company name, from Admin Data tab
+let view        = 'home';
+let cId         = null;
+let adminMode   = false;
+let pcMode      = false;   // Placement Cell Mode (PIN 2007)
+let cellMode    = false;   // We are in placement-cell.html
+let filters     = { status: 'all' };
+
+/* ════════════════════════════════════════════════════
+   HELPERS
+════════════════════════════════════════════════════ */
+function xe(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function ini(n){ return (n||'?').split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase() || '?'; }
+const GRAD = [['#1B3055','#8A6C10'],['#1A5E3C','#1B3055'],['#8A6C10','#7A1A28'],['#1C5A72','#1A5E3C'],['#3C2060','#1B3055'],['#1A5E3C','#1C5A72'],['#7A1A28','#8A6C10'],['#1B3055','#3C2060']];
+function avgr(i){ const p=GRAD[i%GRAD.length]; return `linear-gradient(135deg,${p[0]},${p[1]})`; }
+function fmtDate(d){ if(!d)return'—'; try{return new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});}catch{return d;} }
+
+const STATUS_MAP = {
+  completed:        { l:'Completed',        cls:'s-completed' },
+  results_awaited:  { l:'Results Awaited',  cls:'s-results_awaited' },
+  registered_sent:  { l:'Reg. Sent',        cls:'s-registered_sent' },
+  upcoming:         { l:'Upcoming',         cls:'s-upcoming' }
+};
+function statusOf(c){
+  if(c.studentsSelected.length>0)  return 'completed';
+  if(c.studentsInterviewed.length>0) return 'results_awaited';
+  if(c.studentsRegistered.length>0)  return 'registered_sent';
+  return 'upcoming';
+}
+
+/* ════════════════════════════════════════════════════
+   TOAST
+════════════════════════════════════════════════════ */
+function toast(msg, type='info', icon){
+  const icons={info:'ℹ️',success:'✅',error:'❌'};
+  const r=document.getElementById('toast-root'),t=document.createElement('div');
+  t.className=`toast ${type}`;
+  t.innerHTML=`<span>${icon||icons[type]}</span><span>${msg}</span>`;
+  r.appendChild(t);
+  setTimeout(()=>{t.style.cssText='opacity:0;transform:translateY(8px);transition:all .3s';setTimeout(()=>t.remove(),300);},2800);
+}
+
+/* ════════════════════════════════════════════════════
+   MODAL
+════════════════════════════════════════════════════ */
+function openModal(title, bodyHtml, footerHtml=''){
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-body').innerHTML=bodyHtml;
+  document.getElementById('modal-footer').innerHTML=footerHtml;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal(){ document.getElementById('modal-overlay').classList.remove('open'); }
+document.getElementById('modal-close').onclick=closeModal;
+document.getElementById('modal-overlay').onclick=e=>{ if(e.target===document.getElementById('modal-overlay'))closeModal(); };
+document.addEventListener('keydown',e=>{ if(e.key==='Escape')closeModal(); });
+
+/* ════════════════════════════════════════════════════
+   FETCH helpers
+════════════════════════════════════════════════════ */
+
+// CSV fetch — used for all student data tabs
+// Wraps fetch with a timeout so a hanging request surfaces as an error
+// instead of spinning the loading screen forever.
+async function fetchWithTimeout(url, ms=8000){
+  const ctrl = new AbortController();
+  const tid  = setTimeout(() => ctrl.abort(), ms);
+  try {
+    const res = await fetch(url, { signal: ctrl.signal });
+    clearTimeout(tid);
+    return res;
+  } catch(e) {
+    clearTimeout(tid);
+    if(e.name === 'AbortError') throw new Error(`Request timed out after ${ms/1000}s — check your internet connection and that the sheet is public.`);
+    throw e;
+  }
+}
+
+async function fetchSheetCSV(sheetId, tabName){
+  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tabName)}`;
+  const res = await fetchWithTimeout(url);
+  if(!res.ok) throw new Error(`HTTP ${res.status}`);
+  const text = await res.text();
+  if(text.trimStart().startsWith('<'))
+    throw new Error(`Sheet not public or ID invalid (tab: "${tabName}")`);
+  return text;
+}
+
+// Fetch config sheet as gviz JSON (for =HYPERLINK() formula cells: cell.v = the URL)
+async function fetchConfigJSON(sheetId, tabName){
+  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tabName)}`;
+  const res = await fetchWithTimeout(url);
+  if(!res.ok) throw new Error(`HTTP ${res.status}`);
+  const text = await res.text();
+  if(text.trimStart().startsWith('<'))
+    throw new Error('Config sheet is not shared publicly. Share it as "Anyone with the link → Viewer".');
+  const jsonStr = text.replace(/^[^(]*\(/, '').replace(/\);\s*$/, '');
+  return JSON.parse(jsonStr);
+}
+
+// Fetch config sheet as HTML and extract hyperlink hrefs from column B.
+// This handles Google Sheets "Insert Link" cells (green + icon) which gviz JSON
+// does NOT expose the URL for — only the HTML export preserves the <a href>.
+async function fetchConfigHTMLLinks(sheetId){
+  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=html`;
+  const res = await fetchWithTimeout(url, 10000);
+  if(!res.ok) return {};
+  const html = await res.text();
+  if(html.trimStart().startsWith('{')) return {}; // redirect JSON, skip
+  // Parse the HTML table rows; extract row index → href from column B anchor tags
+  const links = {};
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  const rows = doc.querySelectorAll('table tr');
+  rows.forEach((tr, ri) => {
+    if(ri === 0) return; // skip header
+    const tds = tr.querySelectorAll('td');
+    if(tds.length < 2) return;
+    const a = tds[1].querySelector('a[href]');
+    if(a){
+      const href = a.getAttribute('href');
+      const sid = extractSheetId(href);
+      if(sid) links[ri] = sid; // ri = 1-based data row index
+    }
+  });
+  return links;
+}
+
+/* ════════════════════════════════════════════════════
+   PARSE CSV  (handles quoted fields + commas)
+════════════════════════════════════════════════════ */
+function parseCSV(csv){
+  const rows=[];
+  let cur='',inQ=false,row=[];
+  for(let i=0;i<csv.length;i++){
+    const ch=csv[i];
+    if(ch==='"'){if(inQ&&csv[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
+    else if(ch===','&&!inQ){row.push(cur.trim());cur='';}
+    else if((ch==='\n'||ch==='\r')&&!inQ){if(ch==='\r'&&csv[i+1]==='\n')i++;row.push(cur.trim());rows.push(row);row=[];cur='';}
+    else cur+=ch;
+  }
+  if(cur||row.length) {row.push(cur.trim());rows.push(row);}
+  return rows.filter(r=>r.some(c=>c));
+}
+
+/* ════════════════════════════════════════════════════
+   PARSE CONFIG SHEET from gviz JSON
+   Columns: A=Company  B=Sheet ID (hyperlink OK)
+            C=Reg Tab  D=Int Tab  E=Sel Tab
+════════════════════════════════════════════════════ */
+function extractSheetId(raw){
+  if(!raw) return '';
+  raw = String(raw).trim();
+  // Decode URI encoding
+  try { raw = decodeURIComponent(raw); } catch(e) {}
+  // Google redirect URL: https://www.google.com/url?q=https://docs.google.com/...
+  const redir = raw.match(/[?&]q=([^&]+)/);
+  if(redir) return extractSheetId(decodeURIComponent(redir[1]));
+  // Standard spreadsheet URL → extract /d/{ID}
+  const m = raw.match(/\/d\/([a-zA-Z0-9_-]{20,})/);
+  if(m) return m[1];
+  // Plain ID (44-char alphanumeric string)
+  if(/^[a-zA-Z0-9_-]{20,}$/.test(raw)) return raw;
+  return '';
+}
+
+// htmlLinks = { rowIndex(1-based): sheetId } from fetchConfigHTMLLinks fallback
+function parseConfigFromJSON(gvizJson, htmlLinks={}){
+  const table = gvizJson.table;
+  if(!table || !table.rows) return [];
+
+  const cols = (table.cols||[]).map(c=>(c.label||'').toLowerCase().trim());
+  const ci = (...ks) => { for(const k of ks){ const i=cols.findIndex(c=>c.includes(k)); if(i!==-1)return i; } return -1; };
+
+  const iComp = ci('company')                     !== -1 ? ci('company')                     : 0;
+  const iSheet= ci('sheet')                       !== -1 ? ci('sheet')                       : 1;
+  const iReg  = ci('reg')                         !== -1 ? ci('reg')                         : 2;
+  const iInt  = ci('int','interview','attended')  !== -1 ? ci('int','interview','attended')  : 3;
+  const iSel  = ci('sel','select')                !== -1 ? ci('sel','select')                : 4;
+
+  const companies = [];
+  table.rows.forEach((row, idx) => {
+    const cells = row.c || [];
+    const val = i => (cells[i] && cells[i].v != null) ? String(cells[i].v).trim() : '';
+    const fmt = i => (cells[i] && cells[i].f)         ? String(cells[i].f).trim() : '';
+
+    const name = val(iComp);
+    if(!name || name.toLowerCase()==='company') return;
+
+    // Sheet ID resolution priority:
+    // 1. gviz JSON cell.v  — works for =HYPERLINK() formula cells (v = the URL)
+    // 2. gviz JSON cell.f  — formatted value fallback
+    // 3. htmlLinks map     — works for Insert Link cells (green + icon) from HTML export
+    const rowNum = idx + 1; // 1-based to match HTML table rows
+    let sid = extractSheetId(val(iSheet))
+           || extractSheetId(fmt(iSheet))
+           || htmlLinks[rowNum]
+           || '';
+    if(!sid) return; // still no ID — company hidden until column B is set
+
+    const tabReg = val(iReg) || 'Registered Students';
+    let   tabInt = val(iInt) || null;
+    let   tabSel = val(iSel) || null;
+    // If Int/Sel tab names are the same as Reg (e.g. not yet filled in config),
+    // treat them as null so we don't silently return Registered data for all stages.
+    if(tabInt && tabInt.toLowerCase()===tabReg.toLowerCase()) tabInt=null;
+    if(tabSel && tabSel.toLowerCase()===tabReg.toLowerCase()) tabSel=null;
+    if(tabInt && tabSel && tabInt.toLowerCase()===tabSel.toLowerCase()) tabSel=null;
+
+    companies.push({
+      id: idx + 1, name, sheetId: sid,
+      tabReg, tabInt, tabSel,
+      website:'', interviewMode:'', registrationDate:'', driveDate:'',
+      poc:{name:'',designation:'',email:'',phone:''},
+      roles:[], jds:{}, notes:'', jdUrl:'',
+      studentsRegistered:[], studentsInterviewed:[], studentsSelected:[],
+      _loading:false, _lastFetched:0
+    });
+  });
+  return companies;
+}
+
+/* ════════════════════════════════════════════════════
+   PARSE ADMIN DATA TAB
+   Expected columns: Company | Website | Interview Mode |
+     Reg Date | Drive Date | POC Name | POC Designation |
+     POC Email | POC Phone | Roles | Notes
+════════════════════════════════════════════════════ */
+function parseAdminData(csv){
+  const rows = parseCSV(csv);
+  if(rows.length < 2) return {};
+  const hdr = rows[0].map(h=>h.toLowerCase().replace(/[^a-z0-9]/g,''));
+  const col = k => hdr.findIndex(h=>h.includes(k));
+  const iComp     = col('company');
+  const iWeb      = col('website');
+  const iMode     = col('interview');
+  const iRegDate  = col('reg');
+  const iDriveDate= col('drive');
+  const iPocName  = col('pocname') !== -1 ? col('pocname') : col('name');
+  const iPocDesig = col('desig');
+  const iPocEmail = col('email');
+  const iPocPhone = col('phone');
+  const iRoles    = col('role');
+  const iNotes    = col('note');
+  const _iJd=col('jd'); const _iLink=col('link');
+  const iJdUrl    = _iJd!==-1?_iJd:_iLink;
+
+  const data = {};
+  rows.slice(1).forEach(r => {
+    const name = (r[iComp]||'').trim();
+    if(!name) return;
+    const roles = (r[iRoles]||'').split(',').map(s=>s.trim()).filter(Boolean);
+    data[name.toLowerCase()] = {
+      website:         r[iWeb]||'',
+      interviewMode:   r[iMode]||'',
+      registrationDate:r[iRegDate]||'',
+      driveDate:       r[iDriveDate]||'',
+      poc: {
+        name:        r[iPocName]||'',
+        designation: r[iPocDesig]||'',
+        email:       r[iPocEmail]||'',
+        phone:       r[iPocPhone]||''
+      },
+      roles,
+      jds: Object.fromEntries(roles.map(rol=>[rol,{text:'',pdf:null}])),
+      notes: r[iNotes]||'',
+      jdUrl: iJdUrl!==-1?(r[iJdUrl]||'').trim():''
+    };
+  });
+  return data;
+}
+
+/* ════════════════════════════════════════════════════
+   PARSE STUDENT TAB  (flexible column detection)
+════════════════════════════════════════════════════ */
+function parseStudentTab(csv){
+  const rows = parseCSV(csv);
+  if(rows.length < 2) return [];
+  const hdr = rows[0].map(h=>(h||'').toLowerCase());
+  const detect = ks => hdr.findIndex(h=>ks.some(k=>h.includes(k)));
+  const iName   = detect(['name']);
+  const iEmail  = detect(['email','mail']);
+  const iPhone  = detect(['phone','mobile','contact','ph']);
+  const iClass  = detect(['class','section','branch','course','dept']);
+  const iStatus = detect(['status','join','joined']);
+  return rows.slice(1).map((r,i) => ({
+    id: `#${String(i+1).padStart(3,'0')}`,
+    name:       (iName   !== -1 ? r[iName]   : '') || '',
+    email:      (iEmail  !== -1 ? r[iEmail]  : '') || '',
+    phone:      (iPhone  !== -1 ? r[iPhone]  : '') || '',
+    class:      (iClass  !== -1 ? r[iClass]  : '') || '',
+    joinStatus: (iStatus !== -1 ? r[iStatus] : '') || 'Pending',
+  })).filter(s => s.name || s.email);
+}
+
+// Parse student data from gviz JSON table (used by loadStudents)
+function parseStudentFromJSON(json){
+  const table = json.table;
+  if(!table || !table.rows || !table.cols) return [];
+
+  const cols = table.cols.map(c => (c.label||'').toLowerCase());
+  const detect = ks => cols.findIndex(h => ks.some(k => h.includes(k)));
+
+  const iName   = detect(['name']);
+  const iEmail  = detect(['email','mail']);
+  const iPhone  = detect(['phone','mobile','contact','ph']);
+  const iClass  = detect(['class','section','branch','course','dept']);
+  const iStatus = detect(['status','join','joined']);
+
+  const val = (row, i) => {
+    if(i === -1 || !row.c || !row.c[i]) return '';
+    const c = row.c[i];
+    return String(c.v != null ? c.v : (c.f || '')).trim();
+  };
+
+  return table.rows.map((row, i) => ({
+    id:         `#${String(i+1).padStart(3,'0')}`,
+    name:       val(row, iName),
+    email:      val(row, iEmail),
+    phone:      val(row, iPhone),
+    class:      val(row, iClass),
+    joinStatus: val(row, iStatus) || 'Pending',
+  })).filter(s => s.name || s.email);
+}
+
+/* ════════════════════════════════════════════════════
+   LOAD LIVE STUDENTS for one company
+════════════════════════════════════════════════════ */
+async function loadStudents(company, force=false){
+  if(!force && company._lastFetched && Date.now()-company._lastFetched < CACHE_TTL) return;
+  if(company._loading) return;
+  company._loading = true;
+
+  const fetchTab = async (tabName) => {
+    if(!tabName) return [];
+    try {
+      // Use JSON endpoint so we get status:"error" when tab doesn't exist.
+      // The CSV endpoint silently returns the first sheet's data for missing tabs.
+      const url = `https://docs.google.com/spreadsheets/d/${company.sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tabName)}`;
+      const res = await fetchWithTimeout(url);
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      const text = await res.text();
+      if(text.trimStart().startsWith('<')) throw new Error('Sheet not public');
+      const json = JSON.parse(text.replace(/^[^(]*\(/, '').replace(/\);?\s*$/, ''));
+      // status:"error" means tab name not found — return empty, not fallback data
+      if(json.status === 'error') {
+        console.warn(`[${company.name}] tab "${tabName}" not found — returning 0`);
+        return [];
+      }
+      return parseStudentFromJSON(json);
+    } catch(e) {
+      console.warn(`[${company.name}] tab "${tabName}" failed:`, e.message);
+      return [];
+    }
+  };
+
+  // Deduplicate: if multiple tabs point to the same name, fetch once
+  const tabs = [
+    [company.tabReg, 'studentsRegistered'],
+    [company.tabInt, 'studentsInterviewed'],
+    [company.tabSel, 'studentsSelected']
+  ];
+  const fetched = {};
+  await Promise.all(tabs.map(async ([tab, key]) => {
+    if(!tab) { company[key]=[]; return; }
+    if(fetched[tab] !== undefined){ company[key]=fetched[tab]; return; }
+    const data = await fetchTab(tab);
+    fetched[tab] = data;
+    company[key] = data;
+  }));
+
+  company._loading = false;
+  company._lastFetched = Date.now();
+}
+
+/* ════════════════════════════════════════════════════
+   INIT — load config sheet, then companies
+════════════════════════════════════════════════════ */
+async function init(){
+  console.log('[Dashboard] init() started — CONFIG_SHEET_ID:', CONFIG_SHEET_ID);
+  document.getElementById('loading-screen').classList.remove('hide');
+  document.getElementById('error-screen').classList.remove('show');
+  document.getElementById('app').classList.remove('ready');
+
+  // Show a countdown so the user knows the page is working, not frozen
+  let _countdown = 8;
+  const _cdEl = document.createElement('div');
+  _cdEl.id = 'load-countdown';
+  _cdEl.style.cssText = 'font-size:11px;color:var(--text4);margin-top:8px;';
+  _cdEl.textContent = '';
+  document.querySelector('.loader-logo').parentNode.appendChild(_cdEl);
+  const _cdTimer = setInterval(() => {
+    _countdown--;
+    if(_countdown > 0) _cdEl.textContent = `Timeout in ${_countdown}s if unreachable`;
+    else clearInterval(_cdTimer);
+  }, 1000);
+  const _clearCountdown = () => { clearInterval(_cdTimer); _cdEl.remove(); };
+
+  const setLoadSub = msg => {
+    const el = document.getElementById('loader-sub');
+    if(el) el.innerHTML = msg;
+  };
+  setLoadSub('Connecting to Google Sheets<span class="loader-dots"><span>.</span><span>.</span><span>.</span></span>');
+
+  try {
+    // 1. Fetch config as JSON + HTML simultaneously for maximum hyperlink coverage
+    //    JSON gives us =HYPERLINK() formula URLs; HTML gives us Insert-Link URLs
+    const [configJSON, htmlLinks] = await Promise.all([
+      fetchConfigJSON(CONFIG_SHEET_ID, CONFIG_TAB),
+      fetchConfigHTMLLinks(CONFIG_SHEET_ID).catch(()=>({}))
+    ]);
+    setLoadSub('Parsing company list<span class="loader-dots"><span>.</span><span>.</span><span>.</span></span>');
+    COMPANIES = parseConfigFromJSON(configJSON, htmlLinks);
+
+    if(!COMPANIES.length){
+      throw new Error('No companies with valid Sheet IDs found. Make sure Column B in your config sheet contains the Google Sheet URL (as a hyperlink or plain URL), and the config sheet is shared as "Anyone with the link → Viewer".');
+    }
+
+    // 2. Fetch Admin Data tab (non-fatal)
+    setLoadSub('Loading admin data<span class="loader-dots"><span>.</span><span>.</span><span>.</span></span>');
+    try {
+      const adminCSV = await fetchSheetCSV(CONFIG_SHEET_ID, ADMIN_DATA_TAB);
+      ADMIN_DATA = parseAdminData(adminCSV);
+    } catch(e){
+      console.warn('Admin Data tab not found or empty:', e.message);
+      ADMIN_DATA = {};
+    }
+
+    // 3. Merge admin data into companies
+    mergeAdminData();
+
+    // 4. Show app
+    _clearCountdown();
+    document.getElementById('loading-screen').classList.add('hide');
+    document.getElementById('app').classList.add('ready');
+    // Auto-activate admin if arriving from placement cell login
+    if(sessionStorage.getItem('placementAdmin')==='1'){
+      adminMode=true; document.body.classList.add('admin-mode');
+    }
+    if(cellMode){ adminMode=true; document.body.classList.add('admin-mode'); }
+    go('home');
+    if(pcMode) setTimeout(scrollToPCPanel, 600);
+
+    // 5. Fetch all student data in background
+    loadAllStudents();
+
+  } catch(e){
+    _clearCountdown();
+    console.error('Init failed:', e);
+    document.getElementById('loading-screen').classList.add('hide');
+    document.getElementById('error-screen').classList.add('show');
+    const raw = e.message || 'Unknown error';
+    const isTimeout = raw.includes('timed out');
+    const isNetwork = raw.includes('Failed to fetch') || raw.includes('NetworkError') || raw.includes('fetch');
+    let friendly = raw;
+    if(isTimeout) friendly = 'Request timed out. Check your internet connection and verify the config sheet is shared as "Anyone with the link → Viewer".';
+    else if(isNetwork) friendly = 'Could not reach Google Sheets. Make sure you are connected to the internet and the config sheet is publicly shared.';
+    document.getElementById('error-msg').textContent = friendly;
+    console.error('[Init error]', e);
+  }
+}
+
+function mergeAdminData(){
+  COMPANIES.forEach(c => {
+    const ad = ADMIN_DATA[c.name.toLowerCase()];
+    if(!ad) return;
+    c.website         = ad.website;
+    c.interviewMode   = ad.interviewMode;
+    c.registrationDate= ad.registrationDate;
+    c.driveDate       = ad.driveDate;
+    c.poc             = ad.poc;
+    c.roles           = ad.roles;
+    c.jds             = ad.jds;
+    c.notes           = ad.notes;
+    c.jdUrl           = ad.jdUrl||'';
+  });
+}
+
+async function loadAllStudents(){
+  document.getElementById('refresh-bar').classList.add('show');
+  await Promise.all(COMPANIES.map(c => loadStudents(c)));
+  document.getElementById('refresh-bar').classList.remove('show');
+  if(view==='home') buildHome();
+  else if(view==='dashboard') buildDashboard();
+  else if(view==='detail') buildDetail(cId);
+}
+
+/* ════════════════════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════════════════════ */
+function go(v, id){
+  view=v; if(id!==undefined) cId=id;
+  renderNav();
+  renderAdminBar();
+  if(v==='home')           buildHome();
+  else if(v==='dashboard') buildDashboard();
+  else if(v==='detail')    buildDetail(id);
+}
+
+/* ════════════════════════════════════════════════════
+   NAVBAR
+════════════════════════════════════════════════════ */
+function renderNav(){
+  const nb = document.getElementById('navbar');
+  let right = '';
+  if(view==='dashboard') right=`<button class="btn-ghost btn" id="n-home">← Home</button>`;
+  if(view==='detail'){
+    const c=COMPANIES.find(x=>x.id===cId);
+    right=`<nav class="nav-crumb"><span class="crumb" id="n-h">Home</span><span class="crumb-sep">/</span><span class="crumb" id="n-d">Companies</span><span class="crumb-sep">/</span><span class="crumb-active">${c?xe(c.name):''}</span></nav>`;
+  }
+  const adminBtnStyle = adminMode
+    ? 'background:#6D0E6A;color:#fff;border:none;border-radius:8px;padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:.02em;'
+    : 'background:none;border:1.5px solid #D3B6D2;color:#570B54;border-radius:8px;padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:.02em;';
+  const adminBtnLabel = adminMode ? '🛡️ Admin On' : '🛡️ Admin';
+  nb.innerHTML=`<div class="navbar"><a class="nav-brand" id="n-brand"><div class="nav-logo"><img src="logo.jpg" alt="VG" style="width:100%;height:100%;object-fit:contain;border-radius:10px;display:block;"/></div><div class="nav-name"><span>Vidyavahini</span><span>First Grade Degree College</span></div></a><div class="nav-right"><a href="index.html" class="btn-nav-home-pd" title="Home">←</a><button id="n-admin" style="${adminBtnStyle}">${adminBtnLabel}</button><button class="btn-icon" id="n-theme">🌙</button>${right}</div></div>`;
+  const g=id=>document.getElementById(id);
+  g('n-brand').onclick=()=>{ window.location.href='index.html'; };
+  g('n-theme').onclick=toggleTheme;
+  updateThemeIcon();
+  if(g('n-admin')) g('n-admin').onclick=handleAdmin;
+  if(g('n-home'))  g('n-home').onclick=()=>go('home');
+  if(g('n-h'))     g('n-h').onclick=()=>go('home');
+  if(g('n-d'))     g('n-d').onclick=()=>go('dashboard');
+}
+
+function updateThemeIcon(){ const b=document.getElementById('n-theme'); if(b)b.textContent=document.documentElement.getAttribute('data-theme')==='light'?'🌙':'☀️'; }
+function toggleTheme(){ const d=document.documentElement; d.setAttribute('data-theme',d.getAttribute('data-theme')==='dark'?'light':'dark'); updateThemeIcon(); }
+
+/* ════════════════════════════════════════════════════
+   ADMIN BAR
+════════════════════════════════════════════════════ */
+function renderAdminBar(){
+  const r=document.getElementById('admin-bar');
+  if(!adminMode){ r.innerHTML=''; }
+  else {
+    r.innerHTML=`<div class="admin-bar"><span>🛡️ Admin Mode active</span><div class="admin-bar-actions"><button class="btn btn-admin-outline btn-sm" id="ab-diag">🔍 Diagnostics</button><button class="btn btn-admin-outline btn-sm" id="ab-refresh">↺ Reload Config</button><button class="btn btn-admin-outline btn-sm" id="ab-exit">Exit Admin</button></div></div>`;
+    document.getElementById('ab-diag').onclick=showDiagnostics;
+    document.getElementById('ab-refresh').onclick=()=>{ init(); toast('Reloading config…','info','↺'); };
+    document.getElementById('ab-exit').onclick=()=>{ adminMode=false; document.body.classList.remove('admin-mode'); sessionStorage.removeItem('placementAdmin'); go(view,cId); toast('Admin Mode off','info','🔒'); };
+  }
+  renderPCBar();
+}
+
+function renderPCBar(){
+  const r=document.getElementById('pc-bar');
+  if(!r)return;
+  if(!pcMode){ r.innerHTML=''; return; }
+  r.innerHTML=`<div class="pc-bar"><span>🔐 Placement Cell Mode &nbsp;·&nbsp; <a href="#" onclick="event.preventDefault();handleAdmin()" style="color:#FCD34D;text-decoration:underline;font-weight:800;">Campus Placement Dashboard</a></span><span class="pc-bar-badge">CONFIDENTIAL</span><div class="pc-bar-actions"><button onclick="scrollToPCPanel()">↓ Jump to Tracker</button><button onclick="exitPCMode()">Exit</button></div></div>`;
+}
+
+/* ════════════════════════════════════════════════════
+   ADMIN PIN
+════════════════════════════════════════════════════ */
+function handleAdmin(){
+  if(adminMode){ adminMode=false; document.body.classList.remove('admin-mode'); sessionStorage.removeItem('placementAdmin'); go(view,cId); toast('Admin Mode off','info','🔒'); return; }
+  let pin='';
+  const upd=(err=false)=>{
+    document.querySelectorAll('.pin-cell').forEach((el,i)=>{ el.value=pin[i]||''; if(i===pin.length)el.focus(); });
+    document.getElementById('pe').textContent=err?'Incorrect PIN. Try again.':'';
+  };
+  const chk=()=>{
+    if(pin===ADMIN_PIN){ closeModal(); adminMode=true; document.body.classList.add('admin-mode'); sessionStorage.setItem('placementAdmin','1'); go(view,cId); toast('Admin Mode enabled — you can now edit student data','success','🛡️'); }
+    else if(pin===JOIN_PIN){ closeModal(); pcMode=true; go(view,cId); toast('Placement Cell Mode enabled','success','🔐'); setTimeout(scrollToPCPanel,400); }
+    else{ upd(true); setTimeout(()=>{ pin=''; upd(false); },800); }
+  };
+  openModal('Access PIN',`<p style="font-size:13px;color:var(--text3);margin-bottom:4px;text-align:center;">Enter PIN to enable a mode</p><p style="font-size:11px;color:var(--text4);margin-bottom:16px;text-align:center;">Admin Mode (edit) &nbsp;·&nbsp; Placement Cell Mode (tracker)</p><div class="pin-row">${[0,1,2,3].map(i=>`<input class="pin-cell" id="pc${i}" maxlength="1" inputmode="numeric" pattern="[0-9]"/>`).join('')}</div><div class="pin-error" id="pe"></div>`);
+  setTimeout(()=>{ document.getElementById('pc0')?.focus(); },50);
+  const onKey=e=>{
+    if(e.key>='0'&&e.key<='9'&&pin.length<4){ pin+=e.key; upd(); if(pin.length===4)chk(); }
+    if(e.key==='Backspace'&&pin.length){ pin=pin.slice(0,-1); upd(); }
+  };
+  document.addEventListener('keydown',onKey);
+  const orig=closeModal;
+  document.getElementById('modal-close').onclick=()=>{ document.removeEventListener('keydown',onKey); closeModal(); };
+}
+
+/* ════════════════════════════════════════════════════
+   COMPANY LOGO — Clearbit logo API with initials fallback
+════════════════════════════════════════════════════ */
+const LOGO_HINTS = {
+  'tcs':'tcs.com','infosys':'infosys.com','wipro':'wipro.com','accenture':'accenture.com',
+  'cognizant':'cognizant.com','hcl':'hcltech.com','tech mahindra':'techmahindra.com',
+  'first source':'firstsource.com','firstsource':'firstsource.com','fyers':'fyers.in',
+  'rupeek':'rupeek.com','codeyoung':'codeyoung.com','interns elite':'internselite.com',
+  'genz':'genzeducatewing.com','cloud unicorn':'cloudunicorn.in','idea infinity':'ideainfinity.in',
+  'deloitte':'deloitte.com','kpmg':'kpmg.com','ey':'ey.com','pwc':'pwc.com',
+  'ibm':'ibm.com','oracle':'oracle.com','microsoft':'microsoft.com','amazon':'amazon.com',
+  'google':'google.com','zoho':'zoho.com','freshworks':'freshworks.com','byju':'byjus.com'
+};
+
+function getLogoDomain(c){
+  if(c.website){
+    try{
+      const u=c.website.startsWith('http')?c.website:'https://'+c.website;
+      return new URL(u).hostname.replace(/^www\./,'');
+    }catch(e){}
+  }
+  const n=c.name.toLowerCase();
+  for(const[k,v]of Object.entries(LOGO_HINTS)){if(n.includes(k))return v;}
+  return n.replace(/[^a-z0-9]/g,'')+'.com';
+}
+
+function companyLogoHtml(c,size,extraCss){
+  const sz=size||48; const domain=getLogoDomain(c);
+  const clearbit='https://logo.clearbit.com/'+domain+'?size='+sz*2;
+  const wfav='https://'+domain+'/favicon.ico';
+  const gfav='https://www.google.com/s2/favicons?domain='+domain+'&sz=128';
+  const grad=avgr(c.id-1);
+  const pad=sz>56?8:6; const fsz=Math.round(sz*0.30);
+  return '<div class="co-avatar" style="width:'+sz+'px;height:'+sz+'px;'+(extraCss||'')+'">'
+    +'<img class="co-logo-a" src="'+clearbit+'" '
+    +'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\';" '
+    +'style="width:100%;height:100%;object-fit:contain;padding:'+pad+'px;display:block;" />'
+    +'<img class="co-logo-b" src="'+wfav+'" '
+    +'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\';" '
+    +'style="width:100%;height:100%;object-fit:contain;padding:'+(pad+2)+'px;display:none;" />'
+    +'<img class="co-logo-c" src="'+gfav+'" '
+    +'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';" '
+    +'style="width:100%;height:100%;object-fit:contain;padding:'+(pad+2)+'px;display:none;" />'
+    +'<span class="co-ini" style="background:'+grad+';font-size:'+fsz+'px;">'+ini(c.name)+'</span>'
+    +'</div>';
+}
+
+/* ════════════════════════════════════════════════════
+   MODAL HELPERS — wide variant + JD pdf cleanup
+════════════════════════════════════════════════════ */
+function openModalWide(title,bodyHtml,footerHtml){
+  openModal(title,bodyHtml,footerHtml);
+  document.getElementById('modal-box').classList.add('modal-wide');
+}
+// Patch closeModal to remove wide class & clean JD state
+const _origClose=closeModal;
+closeModal=function(){
+  _origClose();
+  const b=document.getElementById('modal-box');
+  if(b)b.classList.remove('modal-wide');
+  window._jdPdf=null;
+};
+
+/* ════════════════════════════════════════════════════
+   STUDENT TABLE BUILDER
+════════════════════════════════════════════════════ */
+function buildStudentTableHtml(students){
+  if(!students||!students.length)return '<div class="no-data">No records found.</div>';
+  const hasBranch=students.some(s=>s.class);
+  const hasPhone=students.some(s=>s.phone);
+  const hasEmail=students.some(s=>s.email);
+  return '<table class="student-table">'
+    +'<thead><tr><th>#</th><th>Name</th>'+(hasEmail?'<th>Email</th>':'')+(hasBranch?'<th>Class</th>':'')+(hasPhone?'<th>Phone</th>':'')+'</tr></thead>'
+    +'<tbody>'+students.map(s=>'<tr><td>'+xe(s.id)+'</td><td>'+xe(s.name||'—')+'</td>'
+      +(hasEmail?'<td>'+xe(s.email||'—')+'</td>':'')
+      +(hasBranch?'<td>'+xe(s.class||'—')+'</td>':'')
+      +(hasPhone?'<td>'+xe(s.phone||'—')+'</td>':'')
+    +'</tr>').join('')+'</tbody></table>';
+}
+
+function showStudentModal(title,students){
+  openModalWide(title,buildStudentTableHtml(students),'');
+}
+
+/* ════════════════════════════════════════════════════
+   HOME STAT TILE MODALS
+════════════════════════════════════════════════════ */
+function showStatModal(type){
+  if(type==='companies'){
+    const rows=COMPANIES.map(c=>{
+      const st=STATUS_MAP[statusOf(c)]||STATUS_MAP.upcoming;
+      return '<div class="popup-row" onclick="closeModal();go(\'detail\','+c.id+')">'
+        +companyLogoHtml(c,40)
+        +'<div style="flex:1;min-width:0">'
+          +'<div class="popup-row-name">'+xe(c.name)+'</div>'
+          +'<div class="popup-row-sub"><span class="s-pill '+st.cls+'">'+st.l+'</span></div>'
+        +'</div>'
+        +'<div style="text-align:right;flex-shrink:0">'
+          +'<div style="font-size:20px;font-weight:800;color:var(--green);letter-spacing:-0.02em">'+c.studentsSelected.length+'</div>'
+          +'<div style="font-size:10px;color:var(--text4);font-weight:600">PLACED</div>'
+        +'</div></div>';
+    }).join('');
+    openModalWide('All Companies — '+COMPANIES.length+' total',
+      '<div class="popup-list">'+rows+'</div>','');
+    return;
+  }
+
+  if(type==='drives'){
+    const done=COMPANIES.filter(c=>c.studentsSelected.length>0||c.studentsInterviewed.length>0);
+    if(!done.length){openModal('Drives Done','<div class="no-data">No drives conducted yet.</div>','');return;}
+    const rows=done.map(c=>'<div class="popup-row" onclick="closeModal();go(\'detail\','+c.id+')">'
+      +companyLogoHtml(c,40)
+      +'<div style="flex:1;min-width:0">'
+        +'<div class="popup-row-name">'+xe(c.name)+'</div>'
+        +'<div class="popup-row-sub">'+c.studentsInterviewed.length+' interviewed · '+c.studentsSelected.length+' selected</div>'
+      +'</div>'
+      +'<span class="s-pill s-completed">Done</span>'
+    +'</div>').join('');
+    openModalWide('Drives Completed — '+done.length,
+      '<div class="popup-list">'+rows+'</div>','');
+    return;
+  }
+
+  if(type==='registrations'){
+    const opts=COMPANIES.map(c=>'<option value="'+c.id+'">'+xe(c.name)+' ('+c.studentsRegistered.length+')</option>').join('');
+    openModalWide('Registrations by Company',
+      '<select class="popup-company-select" id="_rsel" onchange="showPickedStudents(\'studentsRegistered\',this.value,\'_rlist\')">'
+        +'<option value="">— Select a company —</option>'+opts
+      +'</select>'
+      +'<div id="_rlist"></div>','');
+    return;
+  }
+
+  if(type==='placed'){
+    const placed=COMPANIES.filter(c=>c.studentsSelected.length>0);
+    const opts=placed.map(c=>'<option value="'+c.id+'">'+xe(c.name)+' ('+c.studentsSelected.length+')</option>').join('');
+    openModalWide('Placed Students by Company',
+      '<select class="popup-company-select" id="_psel" onchange="showPickedStudents(\'studentsSelected\',this.value,\'_plist\')">'
+        +'<option value="">— Select a company —</option>'+opts
+      +'</select>'
+      +'<div id="_plist"></div>','');
+    return;
+  }
+}
+
+function showPickedStudents(key,cIdStr,listElemId){
+  const el=document.getElementById(listElemId);
+  if(!el)return;
+  if(!cIdStr){el.innerHTML='';return;}
+  const c=COMPANIES.find(x=>x.id===parseInt(cIdStr));
+  if(!c){el.innerHTML='';return;}
+  el.innerHTML=buildStudentTableHtml(c[key]);
+}
+
+/* ════════════════════════════════════════════════════
+   HOME VIEW
+════════════════════════════════════════════════════ */
+function buildHome(){
+  const total=COMPANIES.length;
+  const regs=COMPANIES.reduce((s,c)=>s+c.studentsRegistered.length,0);
+  const ints=COMPANIES.reduce((s,c)=>s+c.studentsInterviewed.length,0);
+  const sel=COMPANIES.reduce((s,c)=>s+c.studentsSelected.length,0);
+  const done=COMPANIES.filter(c=>c.studentsSelected.length>0||c.studentsInterviewed.length>0).length;
+  const recent=[...COMPANIES].sort((a,b)=>b.studentsRegistered.length-a.studentsRegistered.length).slice(0,5);
+
+  document.getElementById('main').innerHTML=`
+  <div class="home-wrap">
+    <div class="home-banner">
+      <div class="home-banner-left">
+        <div class="home-eyebrow">PLACEMENT SEASON 2024–25</div>
+        <h1 class="home-title">Placement Cell <em>Analytics</em><br>Dashboard</h1>
+        <p class="home-sub">Confidential analytics view — conversion funnel, joining status and placement statistics.</p>
+        <button class="btn-primary-inv" onclick="go('dashboard')">View All Companies →</button>
+      </div>
+      <div class="home-banner-right">
+        <div class="stat-tile" onclick="showStatModal('companies')">
+          <button class="tile-pdf-btn" onclick="event.stopPropagation();exportPDF('companies')" title="Download PDF">⬇ PDF</button>
+          <div class="stat-tile-icon">🏢</div>
+          <div class="stat-tile-num">${total}</div>
+          <div class="stat-tile-lbl">Companies</div>
+          <div class="stat-tile-hint">Click to view ↗</div>
+        </div>
+        <div class="stat-tile" onclick="showStatModal('registrations')">
+          <button class="tile-pdf-btn" onclick="event.stopPropagation();exportPDF('registrations')" title="Download PDF">⬇ PDF</button>
+          <div class="stat-tile-icon">📋</div>
+          <div class="stat-tile-num">${regs}</div>
+          <div class="stat-tile-lbl">Registrations</div>
+          <div class="stat-tile-hint">Click to view ↗</div>
+        </div>
+        <div class="stat-tile" onclick="showStatModal('drives')">
+          <button class="tile-pdf-btn" onclick="event.stopPropagation();exportPDF('drives')" title="Download PDF">⬇ PDF</button>
+          <div class="stat-tile-icon">✅</div>
+          <div class="stat-tile-num">${done}</div>
+          <div class="stat-tile-lbl">Drives Done</div>
+          <div class="stat-tile-hint">Click to view ↗</div>
+        </div>
+        <div class="stat-tile" onclick="showStatModal('placed')">
+          <button class="tile-pdf-btn" onclick="event.stopPropagation();exportPDF('placed')" title="Download PDF">⬇ PDF</button>
+          <div class="stat-tile-icon">🎉</div>
+          <div class="stat-tile-num">${sel}</div>
+          <div class="stat-tile-lbl">Placed</div>
+          <div class="stat-tile-hint">Click to view ↗</div>
+        </div>
+      </div>
+    </div>
+    <div class="section" style="padding-left:0;padding-right:0;padding-top:0">
+      <div class="section-head">
+        <span class="section-title">All Companies</span>
+        <button class="btn btn-outline btn-sm" onclick="go('dashboard')">See Dashboard &rarr;</button>
+      </div>
+      <div class="section-divider"></div>
+      <div class="co-cards-grid">${COMPANIES.map(c=>coCardHtml(c)).join('')}</div>
+    </div>
+  </div>`;
+  document.querySelectorAll('.co-card[data-id]').forEach(el=>{
+    el.onclick=()=>go('detail',parseInt(el.dataset.id));
+  });
+  if(pcMode) renderPCPanel();
+}
+
+function coCardHtml(c){
+  const st=STATUS_MAP[statusOf(c)]||STATUS_MAP.upcoming;
+  const r=c.studentsRegistered.length,sel=c.studentsSelected.length,intvw=c.studentsInterviewed.length;
+  const tipRows=[
+    ['STATUS',st.l],
+    c.driveDate?['DRIVE',fmtDate(c.driveDate)]:null,
+    c.interviewMode?['MODE',xe(c.interviewMode)]:null,
+    c.roles&&c.roles.length?['ROLES',xe(c.roles.slice(0,2).join(', ')+(c.roles.length>2?' +more':''))]:null,
+    c.poc&&c.poc.name?['POC',xe(c.poc.name)]:null,
+    sel>0?['PLACED',sel+' students']:null,
+  ].filter(Boolean).map(([k,v])=>
+    '<div class="co-tooltip-row"><span class="co-tooltip-k">'+k+'</span><span class="co-tooltip-v">'+v+'</span></div>'
+  ).join('');
+  return '<div class="co-card" data-id="'+c.id+'">'
+    +'<div class="co-tooltip">'+(tipRows||'<div class="co-tooltip-row"><span class="co-tooltip-v">No details yet</span></div>')+'</div>'
+    +companyLogoHtml(c,44)
+    +'<div class="co-card-name">'+xe(c.name)+'</div>'
+    +'<span class="s-pill '+st.cls+'">'+st.l+'</span>'
+    +'<div class="co-card-stats">'
+    +'<div class="co-card-stat"><div class="co-card-stat-num">'+r+'</div><div class="co-card-stat-lbl">REG</div></div>'
+    +'<div class="co-card-stat"><div class="co-card-stat-num">'+intvw+'</div><div class="co-card-stat-lbl">INT</div></div>'
+    +'<div class="co-card-stat"><div class="co-card-stat-num">'+sel+'</div><div class="co-card-stat-lbl">SEL</div></div>'
+    +'</div></div>';
+}
+
+/* ════════════════════════════════════════════════════
+   DASHBOARD VIEW
+════════════════════════════════════════════════════ */
+function buildDashboard(){
+  const statusFilters=['all','upcoming','registered_sent','results_awaited','completed'];
+  let list=COMPANIES;
+  if(filters.status!=='all')list=list.filter(c=>statusOf(c)===filters.status);
+  const total=COMPANIES.length;
+  const regs=COMPANIES.reduce((s,c)=>s+c.studentsRegistered.length,0);
+  const ints=COMPANIES.reduce((s,c)=>s+c.studentsInterviewed.length,0);
+  const sel=COMPANIES.reduce((s,c)=>s+c.studentsSelected.length,0);
+
+  document.getElementById('main').innerHTML=`
+  <div class="section" style="padding-top:28px;">
+    <div class="dash-summary">
+      <div class="dash-sum-tile"><div class="dash-sum-num">${total}</div><div class="dash-sum-lbl">Companies</div></div>
+      <div class="dash-sum-tile"><div class="dash-sum-num">${regs}</div><div class="dash-sum-lbl">Registered</div></div>
+      <div class="dash-sum-tile"><div class="dash-sum-num">${ints}</div><div class="dash-sum-lbl">Interviewed</div></div>
+      <div class="dash-sum-tile"><div class="dash-sum-num">${sel}</div><div class="dash-sum-lbl">Selected</div></div>
+    </div>
+    <div class="section-head">
+      <span class="section-title">All Companies</span>
+      <div class="filters">
+        ${statusFilters.map(s=>`<button class="filter-chip${filters.status===s?' active':''}" onclick="setFilter('${s}')">${s==='all'?'All':STATUS_MAP[s]?.l||s}</button>`).join('')}
+      </div>
+    </div>
+    <div class="section-divider"></div>
+    ${list.length
+      ?`<div class="company-list">${list.map(c=>companyRowHtml(c)).join('')}</div>`
+      :`<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">No companies match this filter</div></div>`
+    }
+  </div>`;
+  bindCompanyRows();
+}
+function setFilter(s){filters.status=s;buildDashboard();}
+
+function companyRowHtml(c){
+  const st=STATUS_MAP[statusOf(c)]||STATUS_MAP.upcoming;
+  const r=c.studentsRegistered.length,i=c.studentsInterviewed.length,s=c.studentsSelected.length;
+  const base=Math.max(r,1);
+  return `<div class="company-row" data-id="${c.id}">
+    ${companyLogoHtml(c,48)}
+    <div class="co-info">
+      <div class="co-name">${xe(c.name)}</div>
+      <div class="co-funnel">
+        <div class="co-funnel-r" style="width:100%"></div>
+        <div class="co-funnel-i" style="width:${Math.round(i/base*100)}%"></div>
+        <div class="co-funnel-s" style="width:${Math.round(s/base*100)}%"></div>
+      </div>
+    </div>
+    <div class="co-counts">
+      <div class="co-count"><div class="co-count-num">${r}</div><div class="co-count-lbl">Reg</div></div>
+      <div class="co-count"><div class="co-count-num">${i}</div><div class="co-count-lbl">Int</div></div>
+      <div class="co-count"><div class="co-count-num">${s}</div><div class="co-count-lbl">Sel</div></div>
+    </div>
+    <span class="s-pill ${st.cls}">${st.l}</span>
+  </div>`;
+}
+function bindCompanyRows(){
+  document.querySelectorAll('.company-row').forEach(el=>{
+    el.onclick=()=>go('detail',parseInt(el.dataset.id));
+  });
+}
+
+/* ════════════════════════════════════════════════════
+   DETAIL VIEW
+════════════════════════════════════════════════════ */
+async function buildDetail(id){
+  const c=COMPANIES.find(x=>x.id===id);
+  if(!c){go('dashboard');return;}
+  const st=STATUS_MAP[statusOf(c)]||STATUS_MAP.upcoming;
+  const rate=c.studentsInterviewed.length?Math.round(c.studentsSelected.length/c.studentsInterviewed.length*100):0;
+
+  const pocHtml=['name','designation','email','phone'].map(k=>
+    `<div class="d-field"><div class="d-field-k">${k.charAt(0).toUpperCase()+k.slice(1)}</div>`+
+    `<div class="d-field-v${!c.poc[k]?' empty':''}">${xe(c.poc[k])||'—'}</div></div>`
+  ).join('');
+  const driveHtml=[['registrationDate','Reg Date'],['driveDate','Drive Date'],['interviewMode','Mode'],['notes','Notes']].map(([k,l])=>
+    `<div class="d-field"><div class="d-field-k">${l}</div>`+
+    `<div class="d-field-v${!c[k]?' empty':''}">${k==='registrationDate'||k==='driveDate'?fmtDate(c[k]):xe(c[k])||'—'}</div></div>`
+  ).join('');
+  const rolesHtml=c.roles.length?c.roles.map(r=>`<span class="role-chip">${xe(r)}</span>`).join('')
+    :'<span class="d-field-v empty">—</span>';
+  const AE=(fn,label)=>adminMode?`<button class="edit-chip" onclick="${fn}">${label||'✏️ Edit'}</button>`:'';
+
+  document.getElementById('main').innerHTML=`
+  <div class="detail-wrap">
+    <div class="d-hero">
+      ${companyLogoHtml(c,68,'border-radius:14px;')}
+      <div style="flex:1;min-width:0">
+        <div class="d-name">${xe(c.name)}</div>
+        <div class="d-badges">
+          <span class="s-pill-inv">${st.l}</span>
+          ${c.interviewMode?`<span class="mode-pill">${xe(c.interviewMode)}</span>`:''}
+          ${c.website?`<a class="d-link" href="${xe(c.website)}" target="_blank" rel="noopener">🔗 Website ↗</a>`:''}
+          <span class="live-badge" id="live-btn">🔄 Live · refresh</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-stats">
+      <div class="d-stat" id="dsr">
+        <button class="tile-pdf-btn" onclick="event.stopPropagation();downloadPlacedPDF('dsr-full')" title="Download PDF">⬇ PDF</button>
+        <div class="d-stat-num">${c.studentsRegistered.length}</div>
+        <div class="d-stat-lbl">Registered${adminMode?' <small style="opacity:.5">✏</small>':''}</div>
+      </div>
+      <div class="d-stat" id="dsi">
+        <button class="tile-pdf-btn" onclick="event.stopPropagation();downloadPlacedPDF('dsi-full')" title="Download PDF">⬇ PDF</button>
+        <div class="d-stat-num">${c.studentsInterviewed.length}</div>
+        <div class="d-stat-lbl">Interviewed${adminMode?' <small style="opacity:.5">✏</small>':''}</div>
+      </div>
+      <div class="d-stat" id="dss">
+        <button class="tile-pdf-btn" onclick="event.stopPropagation();downloadPlacedPDF('dss-full')" title="Download PDF">⬇ PDF</button>
+        <div class="d-stat-num">${c.studentsSelected.length}</div>
+        <div class="d-stat-lbl">Selected${adminMode?' <small style="opacity:.5">✏</small>':''}</div>
+      </div>
+      ${c.studentsInterviewed.length>0?`<div class="d-stat" style="cursor:default">
+        <div class="d-stat-num" style="color:var(--${rate>=70?'green':rate>=40?'amber':'red'})">${rate}%</div>
+        <div class="d-stat-lbl">Selection Rate</div>
+      </div>`:''}
+    </div>
+
+    <div class="d-cards">
+      <div class="d-card">${AE(`openEditPOC(${c.id})`)}
+        <div class="d-card-lbl">👤 POINT OF CONTACT</div>${pocHtml}</div>
+      <div class="d-card">${AE(`openEditDrive(${c.id})`)}
+        <div class="d-card-lbl">📅 DRIVE DETAILS</div>${driveHtml}</div>
+      <div class="d-card">${AE(`openEditRoles(${c.id})`)}
+        <div class="d-card-lbl">💼 ROLES OFFERED</div>
+        <div class="roles-wrap">${rolesHtml}</div></div>
+    </div>
+
+    ${buildJDSection(c)}
+    ${buildStudentSection('Registered Students',c.studentsRegistered,'dsr-full',c.id)}
+    ${buildStudentSection('Interviewed / Attended',c.studentsInterviewed,'dsi-full',c.id)}
+    ${buildStudentSection('Selected Students',c.studentsSelected,'dss-full',c.id)}
+    <div id="analytics-section"></div>
+  </div>`;
+
+  document.getElementById('live-btn').onclick=async()=>{
+    const btn=document.getElementById('live-btn');
+    if(!btn)return;
+    btn.textContent='⏳ Refreshing…';
+    await loadStudents(c,true);
+    go('detail',id);
+  };
+
+  // Stat box clicks → modal (view) or edit (admin)
+  document.getElementById('dsr').onclick=()=>{
+    if(adminMode)openEditStudents(c.id,'studentsRegistered');
+    else showStudentModal('Registered Students — '+xe(c.name),c.studentsRegistered);
+  };
+  document.getElementById('dsi').onclick=()=>{
+    if(adminMode)openEditStudents(c.id,'studentsInterviewed');
+    else showStudentModal('Interviewed / Attended — '+xe(c.name),c.studentsInterviewed);
+  };
+  document.getElementById('dss').onclick=()=>{
+    if(adminMode)openEditStudents(c.id,'studentsSelected');
+    else showStudentModal('Selected Students — '+xe(c.name),c.studentsSelected);
+  };
+
+  // JD card clicks
+  document.querySelectorAll('.jd-card[data-role]').forEach(el=>{
+    el.onclick=()=>handleJDCardClick(c,el.dataset.role);
+  });
+}
+
+/* ════════════════════════════════════════════════════
+   JD SECTION — build HTML
+════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════
+   GOOGLE DRIVE URL → DIRECT DOWNLOAD CONVERSION
+════════════════════════════════════════════════════ */
+function gdriveDirect(url){
+  if(!url) return '';
+  // /file/d/ID/view
+  const m=url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if(m) return 'https://drive.google.com/uc?export=download&id='+m[1];
+  // open?id=ID
+  const m2=url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if(m2) return 'https://drive.google.com/uc?export=download&id='+m2[1];
+  return url;
+}
+function triggerUrlDownload(url,filename){
+  const dl=gdriveDirect(url);
+  const a=document.createElement('a');
+  a.href=dl; a.download=filename||'JD.pdf'; a.target='_blank';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+/* ════════════════════════════════════════════════════
+   JD SECTION — all companies, driven by jdUrl + roles
+════════════════════════════════════════════════════ */
+function buildJDSection(c){
+  const AE=(fn,label)=>adminMode?'<button class="edit-chip" onclick="'+fn+'">'+(label||'\u270f\ufe0f')+'</button>':'';
+  const hasRoles=!!(c.roles&&c.roles.length);
+  const hasUrl=!!(c.jdUrl);
+
+  if(!hasRoles&&!hasUrl){
+    if(!adminMode) return '';
+    return '<div class="jd-section"><div class="jd-section-head"><span class="jd-section-title">\ud83d\udccb Job Descriptions</span></div>'
+      +'<div class="jd-empty">Add roles in the Roles card or a JD link in Config Sheet column K.</div></div>';
+  }
+
+  let cards='';
+  if(hasRoles){
+    cards=c.roles.map(function(role){
+      const jd=(c.jds&&c.jds[role])||{};
+      const canDl=hasUrl||!!(jd.pdfBase64);
+      return '<div class="jd-card" data-role="'+xe(role)+'">'
+        +'<div class="jd-card-accent"></div>'
+        +'<div class="jd-card-role">'+xe(role)+'</div>'
+        +(jd.designation?'<div class="jd-card-field"><span class="jd-card-key">TITLE</span><span class="jd-card-val">'+xe(jd.designation)+'</span></div>':'')
+        +(jd.location?'<div class="jd-card-field"><span class="jd-card-key">LOCATION</span><span class="jd-card-val">'+xe(jd.location)+'</span></div>':'')
+        +(jd.salary?'<div class="jd-card-field"><span class="jd-card-key">SALARY</span><span class="jd-card-val">'+xe(jd.salary)+'</span></div>':'')
+        +(canDl
+          ?'<div class="jd-card-pdf">\ud83d\udcc4 <span>'+(adminMode?'Click to edit / replace':'Click to download JD \u2193')+'</span></div>'
+          :'<div class="jd-card-no-pdf">'+(adminMode?'No PDF — click to add':'No JD attached')+'</div>')
+        +'</div>';
+    }).join('');
+  } else {
+    // jdUrl exists but no named roles — generic download card
+    cards='<div class="jd-card" data-role="">'
+      +'<div class="jd-card-accent"></div>'
+      +'<div class="jd-card-role">Job Description</div>'
+      +'<div class="jd-card-field"><span class="jd-card-key">COMPANY</span><span class="jd-card-val">'+xe(c.name)+'</span></div>'
+      +'<div class="jd-card-pdf">\ud83d\udcc4 <span>Click to download JD \u2193</span></div>'
+      +'</div>';
+  }
+
+  const addBtn=adminMode&&hasRoles?'<button class="btn btn-outline btn-sm" onclick="openAddJD('+c.id+')">+ Add JD</button>':'';
+  return '<div class="jd-section">'
+    +'<div class="jd-section-head"><span class="jd-section-title">\ud83d\udccb Job Descriptions</span>'+addBtn+'</div>'
+    +'<div class="jd-cards-grid">'+cards+'</div>'
+    +'</div>';
+}
+/* ════════════════════════════════════════════════════
+   JD CARD CLICK — admin: edit  |  view: download PDF
+════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════
+   JD CARD CLICK — admin: edit | view: download via URL or base64
+════════════════════════════════════════════════════ */
+function handleJDCardClick(c,role){
+  if(adminMode){
+    // Only open edit if named role exists
+    if(role) openEditJD(c.id,role);
+    else toast('Add roles first to edit JD details','info','💼');
+    return;
+  }
+  // View mode — download priority: jdUrl from sheet > pdfBase64 in memory
+  if(c.jdUrl){
+    const fname=(role||c.name).replace(/\s+/g,'_')+'_JD.pdf';
+    triggerUrlDownload(c.jdUrl,fname);
+    toast('Downloading JD'+(role?' for '+role:''),'success','📥');
+    return;
+  }
+  const jd=(c.jds&&c.jds[role])||{};
+  if(jd.pdfBase64){
+    try{
+      const raw=jd.pdfBase64;
+      const b64=raw.includes(',')?raw.split(',')[1]:raw;
+      const byteStr=atob(b64);
+      const arr=new Uint8Array(byteStr.length);
+      for(let i=0;i<byteStr.length;i++) arr[i]=byteStr.charCodeAt(i);
+      const blob=new Blob([arr],{type:'application/pdf'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url; a.download=(role||c.name).replace(/\s+/g,'_')+'_JD.pdf';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(()=>URL.revokeObjectURL(url),3000);
+      toast('Downloading JD'+(role?' for '+role:''),'success','📥');
+    }catch(e){toast('Download failed: '+e.message,'error');}
+    return;
+  }
+  toast('No JD available'+(role?' for '+role:''),'info','📄');
+}
+/* ════════════════════════════════════════════════════
+   JD ADMIN EDIT MODAL
+════════════════════════════════════════════════════ */
+function openEditJD(id,role){
+  const c=COMPANIES.find(x=>x.id===id);
+  if(!c.jds)c.jds={};
+  if(!c.jds[role])c.jds[role]={designation:'',location:'',salary:'',text:'',pdfBase64:null};
+  const jd=c.jds[role];
+  window._jdPdf=null;
+  openModal('Edit JD — '+role,`
+    <div class="form-row"><label class="form-label">Job Title / Designation</label>
+      <input class="form-input" id="jd-desig" value="${xe(jd.designation||'')}"/></div>
+    <div class="form-row"><label class="form-label">Work Location</label>
+      <input class="form-input" id="jd-loc" value="${xe(jd.location||'')}"/></div>
+    <div class="form-row"><label class="form-label">Stipend / Salary (CTC)</label>
+      <input class="form-input" id="jd-sal" value="${xe(jd.salary||'')}"/></div>
+    <div class="form-row">
+      <label class="form-label">JD PDF</label>
+      <div class="file-upload-zone" onclick="document.getElementById('jd-pdf-inp').click()">
+        <div class="file-upload-label">${jd.pdfBase64?'✅ PDF uploaded':'📎 <b>Click to upload PDF</b> (max 8 MB)'}</div>
+        <div style="font-size:11px;color:var(--text4);margin-top:4px">PDF stays in session only</div>
+      </div>
+      <input type="file" id="jd-pdf-inp" accept=".pdf" style="display:none"
+        onchange="handlePdfUpload(event,'jd-pdf-inp','jd-pdf-status')"/>
+      <div id="jd-pdf-status" style="font-size:12px;color:var(--green);margin-top:6px;font-weight:600"></div>
+    </div>
+    <div class="form-row"><label class="form-label">Notes / Description</label>
+      <textarea class="form-textarea" id="jd-text">${xe(jd.text||'')}</textarea></div>`,
+    `<button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button>`+
+    `<button class="btn btn-admin btn-sm" onclick="saveJD(${id},'${role.replace(/'/g,"\\'")}')">Save JD</button>`
+  );
+}
+
+function openAddJD(id){
+  const c=COMPANIES.find(x=>x.id===id);
+  if(!c.roles||!c.roles.length){toast('Add roles first via the Roles card','info','💼');return;}
+  window._jdPdf=null;
+  const sel=c.roles.map(r=>`<option value="${xe(r)}">${xe(r)}</option>`).join('');
+  openModal('Add Job Description',`
+    <div class="form-row"><label class="form-label">Role</label>
+      <select class="form-select" id="jd-role-sel"><option value="">— Select —</option>${sel}</select></div>
+    <div class="form-row"><label class="form-label">Job Title / Designation</label>
+      <input class="form-input" id="jd-desig" value=""/></div>
+    <div class="form-row"><label class="form-label">Work Location</label>
+      <input class="form-input" id="jd-loc" value=""/></div>
+    <div class="form-row"><label class="form-label">Stipend / Salary (CTC)</label>
+      <input class="form-input" id="jd-sal" value=""/></div>
+    <div class="form-row">
+      <label class="form-label">JD PDF</label>
+      <div class="file-upload-zone" onclick="document.getElementById('jd-pdf-inp').click()">
+        <div class="file-upload-label">📎 <b>Click to upload PDF</b> (max 8 MB)</div>
+      </div>
+      <input type="file" id="jd-pdf-inp" accept=".pdf" style="display:none"
+        onchange="handlePdfUpload(event,'jd-pdf-inp','jd-pdf-status')"/>
+      <div id="jd-pdf-status" style="font-size:12px;color:var(--green);margin-top:6px;font-weight:600"></div>
+    </div>
+    <div class="form-row"><label class="form-label">Notes / Description</label>
+      <textarea class="form-textarea" id="jd-text"></textarea></div>`,
+    `<button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button>`+
+    `<button class="btn btn-admin btn-sm" onclick="saveNewJD(${id})">Add JD</button>`
+  );
+}
+
+function handlePdfUpload(event,inputId,statusId){
+  const file=event.target.files[0];
+  if(!file)return;
+  if(file.size>8*1024*1024){toast('PDF too large — max 8 MB','error');return;}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    window._jdPdf=e.target.result; // stores as data URL
+    const el=document.getElementById(statusId);
+    if(el)el.textContent='✅ '+file.name+' loaded';
+    toast('PDF ready','success','📄');
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveJD(id,role){
+  const c=COMPANIES.find(x=>x.id===id);
+  if(!c.jds)c.jds={};
+  if(!c.jds[role])c.jds[role]={};
+  c.jds[role].designation=(document.getElementById('jd-desig')||{value:''}).value.trim();
+  c.jds[role].location=(document.getElementById('jd-loc')||{value:''}).value.trim();
+  c.jds[role].salary=(document.getElementById('jd-sal')||{value:''}).value.trim();
+  c.jds[role].text=(document.getElementById('jd-text')||{value:''}).value.trim();
+  if(window._jdPdf)c.jds[role].pdfBase64=window._jdPdf;
+  closeModal(); go('detail',id); toast('JD saved for '+role,'success','📋');
+}
+
+function saveNewJD(id){
+  const role=(document.getElementById('jd-role-sel')||{value:''}).value;
+  if(!role){toast('Select a role first','error');return;}
+  const c=COMPANIES.find(x=>x.id===id);
+  if(!c.jds)c.jds={};
+  c.jds[role]={
+    designation:(document.getElementById('jd-desig')||{value:''}).value.trim(),
+    location:(document.getElementById('jd-loc')||{value:''}).value.trim(),
+    salary:(document.getElementById('jd-sal')||{value:''}).value.trim(),
+    text:(document.getElementById('jd-text')||{value:''}).value.trim(),
+    pdfBase64:window._jdPdf||null
+  };
+  closeModal(); go('detail',id); toast('JD added for '+role,'success','📋');
+}
+
+/* ════════════════════════════════════════════════════
+   STUDENT SECTION (inline tables in detail view)
+════════════════════════════════════════════════════ */
+function joinStatusColor(st){
+  if(!st||st==='Pending') return 'color:#92400E;background:#FEF3C7;border-color:#FCD34D';
+  if(st==='Joined')       return 'color:#166534;background:#DCFCE7;border-color:#86EFAC';
+  if(st==='Not Joined')   return 'color:#991B1B;background:#FEF2F2;border-color:#FCA5A5';
+  return 'color:#64748B;background:var(--bg2);border-color:var(--border)';
+}
+
+function buildStudentSection(title,students,anchorId,companyId){
+  if(!students.length)return`<div id="${anchorId}" class="student-section"><div class="student-section-head"><span class="student-section-title">${title}</span><span class="student-count">0</span></div><div class="no-data">📭 No records yet</div></div>`;
+  const hasBranch=students.some(s=>s.class);
+  const hasPhone=students.some(s=>s.phone);
+  const hasEmail=students.some(s=>s.email);
+  const isSelected = anchorId === 'dss-full';
+  const pdfBtn = isSelected && students.length
+    ? `<button class="btn-pdf-download" onclick="downloadPlacedPDF('${anchorId}')">⬇ PDF</button>`
+    : '';
+  const analyticBtn = isSelected && students.length
+    ? `<button class="btn-pdf-download" style="background:linear-gradient(135deg,#570B54,#3A0838);color:#fff;border:none;" onclick="openCompanyAnalytics(${companyId})">📊 Analytics</button>`
+    : '';
+
+  const statusCell = (s, i) => {
+    if(!isSelected) return '';
+    const st = s.joinStatus || 'Pending';
+    const stl = joinStatusColor(st);
+    if(adminMode){
+      return `<td>
+        <select class="join-select" style="${stl};border:1.5px solid;border-radius:20px;padding:3px 10px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;appearance:none;-webkit-appearance:none;background-image:url('data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' viewBox=\'0 0 12 12\'><path d=\'M6 8L2 4h8z\' fill=\'%23666\'></path></svg>');background-repeat:no-repeat;background-position:right 8px center;padding-right:24px;"
+          onchange="updateJoinStatus(${companyId},${i},'${(s.email||s.name||'').replace(/'/g,"\\'")}'  ,this.value,this)">
+          <option value="Pending" ${st==='Pending'?'selected':''}>⏳ Pending</option>
+          <option value="Joined" ${st==='Joined'?'selected':''}>✅ Joined</option>
+          <option value="Not Joined" ${st==='Not Joined'?'selected':''}>❌ Not Joined</option>
+        </select>
+      </td>`;
+    }
+    return `<td><span style="${stl};border:1.5px solid;border-radius:20px;padding:3px 10px;font-size:11.5px;font-weight:700;white-space:nowrap;">${st==='Pending'?'⏳':st==='Joined'?'✅':'❌'} ${xe(st)}</span></td>`;
+  };
+
+  return`<div id="${anchorId}" class="student-section">
+    <div class="student-section-head">
+      <div class="student-section-head-left"><span class="student-section-title">${title}</span><span class="student-count">${students.length}</span></div>
+      <div style="display:flex;gap:8px;">${analyticBtn}${pdfBtn}</div>
+    </div>
+    <table class="student-table">
+      <thead><tr><th>#</th><th>Name</th>${hasEmail?'<th>Email</th>':''}${hasBranch?'<th>Class</th>':''}${hasPhone?'<th>Phone</th>':''}${isSelected?'<th>Status</th>':''}</tr></thead>
+      <tbody>${students.map((s,i)=>`<tr>
+        <td>${xe(s.id)}</td><td>${xe(s.name||'—')}</td>
+        ${hasEmail?`<td>${xe(s.email||'—')}</td>`:''}
+        ${hasBranch?`<td>${xe(s.class||'—')}</td>`:''}
+        ${hasPhone?`<td>${xe(s.phone||'—')}</td>`:''}
+        ${statusCell(s,i)}
+      </tr>`).join('')}</tbody>
+    </table>
+  </div>`;
+}
+
+/* ── Shared PDF builder ── */
+async function _buildReportPDF(title, subtitle, allSections){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+  const DATE_STR = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+
+  // ── Load logo as base64 ──
+  let logoB64 = null;
+  try {
+    const resp = await fetch('logo.jpg');
+    const blob = await resp.blob();
+    logoB64 = await new Promise(res => {
+      const r = new FileReader();
+      r.onload = () => res(r.result);
+      r.readAsDataURL(blob);
+    });
+  } catch(e){ logoB64 = null; }
+
+  // ── Draw full page header: logo left, college name + title centred ──
+  function drawHeader(){
+    doc.setFillColor(109,14,106);
+    doc.rect(0, 0, 210, 30, 'F');
+    if(logoB64) doc.addImage(logoB64, 'JPEG', 10, 4, 22, 22);
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(13); doc.setFont('helvetica','bold');
+    doc.text('Vidyavahini First Grade Degree College', 38, 13);
+    doc.setFontSize(9); doc.setFont('helvetica','normal');
+    doc.text('Placement Cell  —  ' + title, 38, 21);
+  }
+
+  // ── Company info block below header, returns table startY ──
+  function drawCompanyBlock(companyName, roles, isContinued){
+    doc.setTextColor(50,50,50);
+    doc.setFontSize(11); doc.setFont('helvetica','bold');
+    doc.text(companyName + (isContinued ? '   (contd.)' : ''), 14, 40);
+    doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(80,80,80);
+    doc.text('Role(s): ' + (roles||'—'), 14, 47);
+    doc.setTextColor(160,160,160);
+    doc.text('Generated: ' + DATE_STR, 14, 53);
+    doc.setDrawColor(220,200,220); doc.setLineWidth(0.25);
+    doc.line(14, 57, 196, 57);
+    return 61;
+  }
+
+  // ── Footer ──
+  function drawFooter(){
+    const pg = doc.internal.getCurrentPageInfo().pageNumber;
+    doc.setDrawColor(200,180,200); doc.setLineWidth(0.25);
+    doc.line(14, 285, 196, 285);
+    doc.setFontSize(8); doc.setTextColor(180,180,180); doc.setFont('helvetica','normal');
+    doc.text('Vidyavahini First Grade Degree College — Placement Cell', 14, 290);
+    doc.text('Page ' + pg, 196, 290, {align:'right'});
+  }
+
+  // ── One page per company; first company on page 1 (no blank cover) ──
+  allSections.forEach((sec, si) => {
+    if(si > 0) doc.addPage();
+    drawHeader();
+    const startY = drawCompanyBlock(sec.companyName, sec.roles, false);
+
+    if(!sec.rows.length){
+      doc.setFontSize(9); doc.setTextColor(150,150,150); doc.setFont('helvetica','normal');
+      doc.text('No records for this company.', 14, startY + 6);
+      drawFooter();
+      return;
+    }
+
+    const _name = sec.companyName;
+    const _roles = sec.roles;
+    let _isFirst = true;
+
+    doc.autoTable({
+      startY,
+      head: [['Sl. No.', 'Full Name', 'Email ID']],
+      body: sec.rows,
+      theme: 'grid',
+      styles:{
+        fontSize:9.5, cellPadding:{top:3,bottom:3,left:5,right:5},
+        lineColor:[210,185,210], lineWidth:0.3, textColor:[30,30,30], font:'helvetica',
+      },
+      headStyles:{
+        fillColor:[109,14,106], textColor:[255,255,255], fontStyle:'bold', fontSize:9.5, halign:'left',
+      },
+      columnStyles:{
+        0:{cellWidth:16,halign:'center'}, 1:{cellWidth:65}, 2:{cellWidth:'auto'},
+      },
+      alternateRowStyles:{fillColor:[247,240,247]},
+      margin:{left:14, right:14, bottom:18, top:61},
+      didDrawPage:()=>{
+        if(_isFirst){ _isFirst=false; drawFooter(); return; }
+        drawHeader();
+        drawCompanyBlock(_name, _roles, true);
+        drawFooter();
+      },
+    });
+
+    const finalY = doc.lastAutoTable.finalY + 6;
+    if(finalY < 282){
+      doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(109,14,106);
+      doc.text('Total: ' + sec.rows.length + ' student' + (sec.rows.length!==1?'s':''), 14, finalY);
+    }
+  });
+
+  return doc;
+}
+
+async function downloadPlacedPDF(anchorId){
+  const co = COMPANIES.find(x=>x.id===cId);
+  if(!co){ toast('No company selected','info'); return; }
+
+  const map = { 'dsr-full': ['studentsRegistered','Registered Students'],
+                'dsi-full': ['studentsInterviewed','Interviewed / Attended'],
+                'dss-full': ['studentsSelected','Selected / Placed'] };
+  const [key, label] = map[anchorId] || ['studentsSelected','Selected'];
+  const students = co[key] || [];
+
+  if(!students.length){ toast('No students in this list','info'); return; }
+
+  const rows = students.map((s,i)=>[i+1, s.name||'—', s.email||'—']);
+  const roles = co.roles && co.roles.length ? co.roles.join(', ') : '—';
+  const doc = await _buildReportPDF(label, label + ' — ' + co.name,
+    [{ companyName: co.name, roles, rows }]);
+
+  const fname = co.name.replace(/\s+/g,'_') + '_' + key.replace('students','') + '.pdf';
+  doc.save(fname);
+  toast('PDF downloaded','success','📄');
+}
+
+async function exportPDF(type){
+  const { jsPDF } = window.jspdf;
+
+  if(type === 'companies'){
+    // Summary: one row per company with counts
+    const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+    doc.setFillColor(109,14,106); doc.rect(0,0,210,22,'F');
+    doc.setTextColor(255,255,255); doc.setFontSize(13); doc.setFont('helvetica','bold');
+    doc.text('Vidyavahini First Grade Degree College', 14, 10);
+    doc.setFontSize(9); doc.setFont('helvetica','normal');
+    doc.text('Placement Cell — All Companies Summary', 14, 17);
+    doc.setTextColor(150,150,150); doc.setFontSize(9);
+    doc.text('Generated: ' + new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}), 14, 31);
+
+    const rows = COMPANIES.map((c,i)=>[
+      i+1, c.name,
+      (c.roles&&c.roles.length ? c.roles.join(', ') : '—'),
+      c.studentsRegistered.length,
+      c.studentsInterviewed.length,
+      c.studentsSelected.length,
+    ]);
+    doc.autoTable({
+      startY:36,
+      head:[['#','Company','Roles','Registered','Interviewed','Selected']],
+      body:rows, theme:'grid',
+      styles:{fontSize:9,cellPadding:{top:3,bottom:3,left:4,right:4},lineColor:[200,180,200],lineWidth:0.3,textColor:[30,30,30]},
+      headStyles:{fillColor:[109,14,106],textColor:[255,255,255],fontStyle:'bold',fontSize:9},
+      columnStyles:{0:{cellWidth:12,halign:'center'},1:{cellWidth:48},2:{cellWidth:'auto'},3:{cellWidth:24,halign:'center'},4:{cellWidth:26,halign:'center'},5:{cellWidth:22,halign:'center'}},
+      alternateRowStyles:{fillColor:[247,240,247]},
+      margin:{left:14,right:14},
+      didDrawPage:()=>{ doc.setFontSize(8);doc.setTextColor(160,160,160);doc.text('Vidyavahini Placement Cell',14,289);doc.text('Page '+doc.internal.getCurrentPageInfo().pageNumber,196,289,{align:'right'}); }
+    });
+    doc.save('All_Companies_Summary.pdf');
+    toast('PDF downloaded','success','📄'); return;
+  }
+
+  if(type === 'registrations'){
+    const sections = COMPANIES.filter(c=>c.studentsRegistered.length>0).map(c=>({
+      companyName: c.name,
+      roles: c.roles&&c.roles.length ? c.roles.join(', ') : '—',
+      rows: c.studentsRegistered.map((s,i)=>[i+1,s.name||'—',s.email||'—']),
+    }));
+    if(!sections.length){ toast('No registrations yet','info'); return; }
+    const doc = await _buildReportPDF('Registrations Report','All Registrations by Company', sections);
+    doc.save('Registrations_Report.pdf');
+    toast('PDF downloaded','success','📄'); return;
+  }
+
+  if(type === 'drives'){
+    const sections = COMPANIES
+      .filter(c=>c.studentsSelected.length>0||c.studentsInterviewed.length>0)
+      .map(c=>({
+        companyName: c.name,
+        roles: c.roles&&c.roles.length ? c.roles.join(', ') : '—',
+        rows: c.studentsSelected.map((s,i)=>[i+1,s.name||'—',s.email||'—']),
+      }));
+    if(!sections.length){ toast('No drives completed yet','info'); return; }
+    const doc = await _buildReportPDF('Drives Done Report','Completed Drives — Selected Students', sections);
+    doc.save('Drives_Done_Report.pdf');
+    toast('PDF downloaded','success','📄'); return;
+  }
+
+  if(type === 'placed'){
+    const sections = COMPANIES.filter(c=>c.studentsSelected.length>0).map(c=>({
+      companyName: c.name,
+      roles: c.roles&&c.roles.length ? c.roles.join(', ') : '—',
+      rows: c.studentsSelected.map((s,i)=>[i+1,s.name||'—',s.email||'—']),
+    }));
+    if(!sections.length){ toast('No placed students yet','info'); return; }
+    const doc = await _buildReportPDF('Placement Report','All Placed Students by Company', sections);
+    doc.save('Placement_Report.pdf');
+    toast('PDF downloaded','success','📄'); return;
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   ADMIN EDIT MODALS
+   Note: These allow overriding values in memory.
+   To persist, the user edits the Admin Data tab in the Config Sheet.
+   A note in each modal reminds them of this.
+════════════════════════════════════════════════════ */
+const SAVE_NOTE = `<p style="font-size:11px;color:var(--text3);margin-top:12px;padding:8px 10px;background:var(--amber-bg);border-radius:6px;border:1px solid var(--admin-border);">💡 To persist these changes, also update the <strong>Admin Data</strong> tab in your Config Sheet.</p>`;
+
+function openEditPOC(id){
+  const c=COMPANIES.find(x=>x.id===id);
+  openModal('Edit Point of Contact',`
+    ${['name','designation','email','phone'].map(k=>`<div class="form-row"><label class="form-label">${k.charAt(0).toUpperCase()+k.slice(1)}</label><input class="form-input" id="poc-${k}" value="${xe(c.poc[k]||'')}"/></div>`).join('')}
+    ${SAVE_NOTE}`,
+    `<button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-admin btn-sm" onclick="savePOC(${id})">Save</button>`);
+}
+function savePOC(id){
+  const c=COMPANIES.find(x=>x.id===id);
+  ['name','designation','email','phone'].forEach(k=>c.poc[k]=document.getElementById(`poc-${k}`).value.trim());
+  closeModal(); go('detail',id); toast('POC updated (update Config Sheet to persist)','success');
+}
+
+function openEditDrive(id){
+  const c=COMPANIES.find(x=>x.id===id);
+  openModal('Edit Drive Details',`
+    <div class="form-row"><label class="form-label">Website URL</label><input class="form-input" id="drv-web" value="${xe(c.website||'')}"/></div>
+    <div class="form-row"><label class="form-label">Interview Mode</label>
+      <select class="form-select" id="drv-mode"><option value="">—</option>${['Virtual','In-Person','Hybrid'].map(m=>`<option${c.interviewMode===m?' selected':''}>${m}</option>`).join('')}</select></div>
+    <div class="form-row"><label class="form-label">Registration Date</label><input class="form-input" type="date" id="drv-rdate" value="${c.registrationDate||''}"/></div>
+    <div class="form-row"><label class="form-label">Drive Date</label><input class="form-input" type="date" id="drv-ddate" value="${c.driveDate||''}"/></div>
+    <div class="form-row"><label class="form-label">Notes</label><textarea class="form-textarea" id="drv-notes">${xe(c.notes||'')}</textarea></div>
+    ${SAVE_NOTE}`,
+    `<button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-admin btn-sm" onclick="saveDrive(${id})">Save</button>`);
+}
+function saveDrive(id){
+  const c=COMPANIES.find(x=>x.id===id);
+  c.website=document.getElementById('drv-web').value.trim();
+  c.interviewMode=document.getElementById('drv-mode').value;
+  c.registrationDate=document.getElementById('drv-rdate').value;
+  c.driveDate=document.getElementById('drv-ddate').value;
+  c.notes=document.getElementById('drv-notes').value.trim();
+  closeModal(); go('detail',id); toast('Drive details updated (update Config Sheet to persist)','success');
+}
+
+function openEditRoles(id){
+  const c=COMPANIES.find(x=>x.id===id);
+  openModal('Edit Roles',`
+    <div class="form-row"><label class="form-label">Roles (comma-separated)</label>
+    <input class="form-input" id="roles-inp" value="${xe(c.roles.join(', '))}"/>
+    <div class="form-hint">e.g. Software Engineer, Data Analyst, HR Executive</div></div>
+    ${SAVE_NOTE}`,
+    `<button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-admin btn-sm" onclick="saveRoles(${id})">Save</button>`);
+}
+function saveRoles(id){
+  const c=COMPANIES.find(x=>x.id===id);
+  c.roles=document.getElementById('roles-inp').value.split(',').map(s=>s.trim()).filter(Boolean);
+  closeModal(); go('detail',id); toast('Roles updated (update Config Sheet to persist)','success');
+}
+
+/* ════════════════════════════════════════════════════
+   ADMIN EDIT STUDENTS (manual override)
+════════════════════════════════════════════════════ */
+function openEditStudents(id, key){
+  const c=COMPANIES.find(x=>x.id===id);
+  const titles={studentsRegistered:'Registered',studentsInterviewed:'Interviewed',studentsSelected:'Selected'};
+  let rows=[...c[key]];
+
+  const render=()=>{
+    const allChecked = rows.length > 0 && rows.every(r=>r._checked);
+    document.getElementById('st-sel-all').checked = allChecked;
+    document.getElementById('st-sel-all').indeterminate = !allChecked && rows.some(r=>r._checked);
+    const nChecked = rows.filter(r=>r._checked).length;
+    const delBtn = document.getElementById('st-del-sel');
+    if(delBtn){ delBtn.textContent = nChecked ? `Delete Selected (${nChecked})` : 'Delete Selected'; delBtn.disabled = !nChecked; }
+    document.getElementById('st-tbody').innerHTML=rows.map((s,i)=>`
+      <tr style="${s._checked?'background:var(--red-bg)':''}">
+        <td style="padding:4px 6px;width:32px"><input type="checkbox" ${s._checked?'checked':''} onchange="stRows[${i}]._checked=this.checked;stRender()" style="cursor:pointer"/></td>
+        <td style="color:var(--text4);font-size:11px;padding:4px 6px">${String(i+1).padStart(3,'0')}</td>
+        <td><input class="form-input" style="padding:4px 8px;font-size:12px" value="${xe(s.name||'')}" onchange="stRows[${i}].name=this.value"/></td>
+        <td><input class="form-input" style="padding:4px 8px;font-size:12px" value="${xe(s.email||'')}" onchange="stRows[${i}].email=this.value"/></td>
+        <td><button onclick="stRows.splice(${i},1);stRender()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;padding:0 6px;line-height:1" title="Remove row">×</button></td>
+      </tr>`).join('');
+  };
+  window.stRows = rows;
+  window.stRender = render;
+
+  openModal(`Edit ${titles[key]} Students`,`
+    <div class="paste-zone">
+      <div class="paste-zone-title">📋 Paste from Google Sheets</div>
+      <textarea class="paste-textarea" id="paste-in" placeholder="Copy cells from Google Sheets and paste here (Name + Email columns)…"></textarea>
+      <button class="btn btn-admin-outline btn-xs" style="margin-top:6px" onclick="applyPaste()">⚡ Parse & Add Rows</button>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;gap:8px;">
+      <div style="font-size:11px;color:var(--text3)" id="st-count-lbl"></div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-outline btn-xs" onclick="stRows.push({id:'',name:'',email:''});stRender()">+ Add Row</button>
+        <button class="btn btn-outline btn-xs" id="st-del-sel" disabled onclick="window.stRows=stRows.filter(r=>!r._checked);stRender()">Delete Selected</button>
+        <button class="btn btn-outline btn-xs" id="st-clear-all" onclick="if(confirm('Clear all '+stRows.length+' entries?')){window.stRows=[];stRender();}">Clear All</button>
+      </div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <thead><tr>
+        <th style="padding:4px 6px;width:32px"><input type="checkbox" id="st-sel-all" onchange="stRows.forEach(r=>r._checked=this.checked);stRender()" style="cursor:pointer"/></th>
+        <th style="text-align:left;padding:4px 6px;font-size:10px;color:var(--text3)">#</th>
+        <th style="text-align:left;padding:4px 8px;font-size:10px;color:var(--text3)">Name</th>
+        <th style="text-align:left;padding:4px 8px;font-size:10px;color:var(--text3)">Email</th>
+        <th></th>
+      </tr></thead>
+      <tbody id="st-tbody"></tbody>
+    </table>
+    ${SAVE_NOTE}`,
+    `<button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-admin btn-sm" onclick="saveStudents(${id},'${key}')">Save ${titles[key]}</button>`);
+
+  render();
+  const lbl=document.getElementById('st-count-lbl');
+  if(lbl) setInterval(()=>{ const n=stRows.length; if(lbl)lbl.textContent=`${n} entr${n===1?'y':'ies'}`; },200);
+
+  window.applyPaste=()=>{
+    const raw=document.getElementById('paste-in').value;
+    const lines=raw.trim().split('\n');
+    let added=0,dups=0;
+    lines.forEach(line=>{
+      const cols=line.split('\t');
+      let name='',email='';
+      cols.forEach(col=>{ col=col.trim(); if(col.includes('@'))email=col; else if(col&&!col.match(/^\d{2}[-/]\d{2}/))name=col; });
+      if(!name&&!email) return;
+      const isDup=stRows.some(r=>(email&&r.email.toLowerCase()===email.toLowerCase())||(name&&!email&&r.name.toLowerCase()===name.toLowerCase()));
+      if(isDup){dups++;return;}
+      stRows.push({id:'',name,email}); added++;
+    });
+    document.getElementById('paste-in').value='';
+    render();
+    toast(`Added ${added} row${added!==1?'s':''}${dups?` · ${dups} duplicate${dups>1?'s':''} skipped`:''}`,added?'success':'info');
+  };
+}
+
+function saveStudents(id, key){
+  const c=COMPANIES.find(x=>x.id===id);
+  c[key]=window.stRows.filter(s=>s.name||s.email).map((s,i)=>({...s,id:`#${String(i+1).padStart(3,'0')}`}));
+  closeModal(); go('detail',id); toast(`${key.replace('students','')} list updated`,'success');
+}
+
+/* ════════════════════════════════════════════════════
+   DIAGNOSTICS — shows fetch results for each company
+════════════════════════════════════════════════════ */
+
+async function showDiagnostics(){
+  openModal('Sheet Fetch Diagnostics',
+    '<p style="font-size:12px;color:var(--text3);margin-bottom:14px">' +
+    'Testing each company sheet. <strong style="color:var(--amber)">If a row shows "Failed to fetch"</strong>: ' +
+    'click "Open Sheet" — if Google asks you to sign in, the sheet is not public. ' +
+    'Set sharing to <em>Anyone with the link &rarr; Viewer</em>.' +
+    '</p><div id="diag-body"><div style="text-align:center;padding:24px;color:var(--text3)">Running tests\u2026</div></div>'
+  );
+
+  var diagFetch = function(sheetId, tab) {
+    var url = 'https://docs.google.com/spreadsheets/d/' + sheetId + '/gviz/tq?tqx=out:json&sheet=' + encodeURIComponent(tab);
+    return fetchWithTimeout(url, 10000).then(function(res) {
+      if(!res.ok) return { ok:false, err:'HTTP ' + res.status };
+      return res.text();
+    }).then(function(text) {
+      if(typeof text !== 'string') return text; // already error obj
+      if(text.trimStart().startsWith('<')) return { ok:false, err:'Sheet not public (received login page)' };
+      var j = JSON.parse(text.replace(/^[^(]*\(/, '').replace(/\);?\s*$/, ''));
+      if(j.status === 'error') return { ok:false, err:'Tab not found in this sheet' };
+      var rows = parseStudentFromJSON(j);
+      return { ok:true, rows: rows.length };
+    }).catch(function(e) {
+      var msg = e.message || String(e);
+      if(msg.includes('timed out')) return { ok:false, err:'Timed out — sheet may not be public' };
+      if(msg.includes('Failed to fetch') || msg.includes('NetworkError'))
+        return { ok:false, err:'Cannot reach sheet — verify it is shared as "Anyone with link"' };
+      return { ok:false, err: msg };
+    });
+  };
+
+  Promise.all(COMPANIES.map(function(c) {
+    var tests = [
+      { tab: c.tabReg, key: 'Registered' },
+      { tab: c.tabInt, key: 'Interviewed' },
+      { tab: c.tabSel, key: 'Selected' }
+    ];
+    return Promise.all(tests.map(function(t) {
+      if(!t.tab) return Promise.resolve(
+        '<div style="color:var(--text4);font-size:12px">&mdash; ' + t.key + ': not configured</div>'
+      );
+      return diagFetch(c.sheetId, t.tab).then(function(r) {
+        if(r.ok)
+          return '<div style="color:var(--green);font-size:12.5px">&#10003; ' + t.key + ' (' + xe(t.tab) + '): ' + r.rows + ' rows</div>';
+        return '<div style="color:var(--red);font-size:12.5px">&#10007; ' + t.key + ' (' + xe(t.tab) + '): ' + r.err + '</div>';
+      });
+    })).then(function(results) {
+      return '<div style="margin-bottom:12px;padding:13px 15px;border:1px solid var(--border2);border-radius:8px;background:var(--bg3)">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
+          '<span style="font-weight:700;font-size:13.5px">' + xe(c.name) + '</span>' +
+          '<a href="https://docs.google.com/spreadsheets/d/' + c.sheetId + '/edit" target="_blank" rel="noopener"' +
+          ' style="font-size:11px;color:var(--navy);text-decoration:none;padding:2px 9px;border:1px solid var(--navy-border);border-radius:4px;font-weight:600">' +
+          'Open Sheet &#8599;</a>' +
+        '</div>' +
+        '<div style="font-family:\'JetBrains Mono\',monospace;font-size:9.5px;color:var(--text4);margin-bottom:8px;word-break:break-all">ID: ' + c.sheetId + '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:5px">' + results.join('') + '</div>' +
+      '</div>';
+    });
+  })).then(function(rows) {
+    var body = document.getElementById('diag-body');
+    if(body) body.innerHTML = rows.join('');
+  });
+}
+
+/* ════════════════════════════════════════════════════
+   PLACEMENT CELL LOGIN GATE
+════════════════════════════════════════════════════ */
+function checkPlacementPin(){
+  var pin = (document.getElementById('placement-pin').value || '').trim();
+  var errEl = document.getElementById('pin-error');
+  errEl.textContent = '';
+  if(pin.length < 4){ errEl.textContent = 'Please enter the 4-digit passkey.'; return; }
+  if(pin === JOIN_PIN){
+    document.getElementById('placement-login').classList.add('hidden');
+    cellMode = true;
+    adminMode = true;
+    document.body.classList.add('admin-mode');
+    init();
+  } else {
+    errEl.textContent = 'Incorrect Passkey. Please try again.';
+    document.getElementById('placement-pin').value = '';
+    document.getElementById('placement-pin').focus();
+  }
+}
+
+document.getElementById('placement-pin').addEventListener('keydown', function(e){
+  if(e.key === 'Enter') checkPlacementPin();
+});
+
+/* Auto-focus passkey field on page load */
+window.addEventListener('DOMContentLoaded', function(){
+  setTimeout(function(){ document.getElementById('placement-pin')?.focus(); }, 100);
+});
+
+
+
+
+</script>
+  <script>
+    if('serviceWorker' in navigator){
+      window.addEventListener('load',()=>{
+        navigator.serviceWorker.register('sw.js')
+          .then(r=>console.log('[PWA] SW registered'))
+          .catch(e=>console.warn('[PWA] SW failed:',e));
+      });
+    }
+  
+
+/* ════════════════════════════════════════════════════
+   PLACEMENT CELL MODE  (PIN 2007)
+════════════════════════════════════════════════════ */
+
+// joinStatus: { emailOrName -> 'joined' | 'not_joined' | 'pending' }
+function loadJoinStatus(){
+  try{ return JSON.parse(sessionStorage.getItem('joinStatus')||'{}'); }catch{ return {}; }
+}
+function saveJoinStatus(js){ sessionStorage.setItem('joinStatus',JSON.stringify(js)); }
+
+function exitPCMode(){
+  pcMode=false;
+  renderAdminBar();
+  renderNav();
+  const p=document.getElementById('pc-panel');
+  if(p)p.remove();
+  toast('Placement Cell Mode off','info','🔒');
+}
+
+function scrollToPCPanel(){
+  const p=document.getElementById('pc-panel');
+  if(p) p.scrollIntoView({behavior:'smooth',block:'start'});
+  else if(view==='home') renderPCPanel();
+}
+
+/* Build unique placed student list across all companies */
+function getUniquePlaced(){
+  const seen=new Map(); // key=lower(email||name) → {name,email,companies:[],joinStatus}
+  COMPANIES.forEach(co=>{
+    (co.studentsSelected||[]).forEach(s=>{
+      const key=(s.email||s.name||'').toLowerCase().trim();
+      if(!key)return;
+      if(!seen.has(key)) seen.set(key,{name:s.name||'',email:s.email||'',companies:[],joinStatus:s.joinStatus||'Pending'});
+      else {
+        // prefer non-Pending status
+        const existing=seen.get(key);
+        if(existing.joinStatus==='Pending' && s.joinStatus && s.joinStatus!=='Pending') existing.joinStatus=s.joinStatus;
+      }
+      seen.get(key).companies.push(co.name);
+    });
+  });
+  return [...seen.values()];
+}
+
+function joinKey(student){ return (student.email||student.name||'').toLowerCase().trim(); }
+
+function renderPCPanel(){
+  if(!pcMode)return;
+  const homeWrap=document.querySelector('.home-wrap');
+  if(!homeWrap)return;
+  let panel=document.getElementById('pc-panel');
+  if(!panel){ panel=document.createElement('div'); panel.id='pc-panel'; panel.className='pc-panel'; homeWrap.appendChild(panel); }
+
+  const uniq=getUniquePlaced();
+  const total=uniq.length;
+  const joined=uniq.filter(s=>s.joinStatus==='Joined').length;
+  const notJoined=uniq.filter(s=>s.joinStatus==='Not Joined').length;
+  const pending=total-joined-notJoined;
+  const rawTotal=COMPANIES.reduce((s,co)=>s+co.studentsSelected.length,0);
+
+  const rows=uniq.map((s,i)=>{
+    const st=s.joinStatus||'Pending';
+    const stl=joinStatusColor(st);
+    return `<tr>
+      <td style="color:var(--text3);font-size:12px;width:36px">${i+1}</td>
+      <td><div class="pc-name-cell">${xe(s.name||'—')}</div><div class="pc-company-list">${xe(s.email||'—')}</div></td>
+      <td><div class="pc-company-list" style="font-size:12px;">${s.companies.map(co=>'• '+xe(co)).join('<br>')}</div></td>
+      <td style="text-align:right">
+        <span style="${stl};border:1.5px solid;border-radius:20px;padding:4px 12px;font-size:11.5px;font-weight:700;white-space:nowrap;">
+          ${st==='Pending'?'⏳':st==='Joined'?'✅':'❌'} ${xe(st)}
+        </span>
+        <div class="join-cycle-hint" style="color:var(--text3);font-size:10px;margin-top:3px;">Edit via company detail → admin</div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  panel.innerHTML=`
+    <div class="pc-panel-head">
+      <div style="width:100%;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <div class="pc-panel-title">🔐 Placement Cell — Joining Tracker</div>
+        <span style="font-size:11px;color:rgba(255,255,255,.5);">Raw total (incl. duplicates): ${rawTotal} · Unique students placed: ${total}</span>
+      </div>
+      <div class="pc-stat-row">
+        <div class="pc-stat-chip"><div class="pc-num">${total}</div><div class="pc-lbl">Unique Placed</div></div>
+        <div class="pc-stat-chip green"><div class="pc-num">${joined}</div><div class="pc-lbl">Joined</div></div>
+        <div class="pc-stat-chip red"><div class="pc-num">${notJoined}</div><div class="pc-lbl">Not Joined</div></div>
+        <div class="pc-stat-chip amber"><div class="pc-num">${pending}</div><div class="pc-lbl">Pending</div></div>
+        <div class="pc-stat-chip" style="min-width:120px;"><div class="pc-num" style="color:#C4B5FD">${rawTotal}</div><div class="pc-lbl">Total Selections</div></div>
+        <div class="pc-stat-chip" style="min-width:120px;"><div class="pc-num" style="font-size:18px;color:#C4B5FD">${rawTotal>0?total+' / '+rawTotal:'—'}</div><div class="pc-lbl">Unique / Raw</div></div>
+      </div>
+    </div>
+    ${uniq.length===0
+      ?'<div style="padding:32px;text-align:center;color:var(--text3);font-size:13px;">No students selected yet across any company.</div>'
+      :`<div class="pc-table-wrap"><table class="pc-table">
+          <thead><tr><th>#</th><th>Student</th><th>Selected By</th><th style="text-align:right">Joining Status</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>
+        <div style="padding:12px 20px;font-size:11.5px;color:rgba(255,255,255,.45);background:rgba(0,0,0,.15);border-top:1px solid rgba(255,255,255,.08);">
+          💡 Status is read live from company sheets. To update: go to a company detail page → enable Admin Mode (1234) → change the Status dropdown against each student.
+        </div>`
+    }`;
+}
+
+
+
+
+/* ════════════════════════════════════════════════════
+   JOIN STATUS UPDATE  (writes to company sheet via Apps Script)
+════════════════════════════════════════════════════ */
+async function updateJoinStatus(companyId, studentIdx, emailOrName, newStatus, selectEl){
+  const co = COMPANIES.find(x=>x.id===companyId);
+  if(!co) return;
+
+  // Optimistic UI update in memory
+  if(co.studentsSelected[studentIdx]) co.studentsSelected[studentIdx].joinStatus = newStatus;
+  // Re-colour the select element immediately
+  if(selectEl){ selectEl.style.cssText = joinStatusColor(newStatus)+';border:1.5px solid;border-radius:20px;padding:3px 10px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;appearance:none;-webkit-appearance:none;background-image:url(\'data:image/svg+xml,<svg xmlns=\\\'http://www.w3.org/2000/svg\\\' width=\\\'12\\\' height=\\\'12\\\' viewBox=\\\'0 0 12 12\\\'><path d=\\\'M6 8L2 4h8z\\\' fill=\\\'%23666\\\'></path></svg>\');background-repeat:no-repeat;background-position:right 8px center;padding-right:24px;'; }
+
+  // Write to Apps Script
+  try {
+    const payload = {
+      action: 'updateJoinStatus',
+      sheetId: co.sheetId,
+      tabName: co.tabSel,
+      emailOrName: emailOrName,
+      status: newStatus
+    };
+    const res = await fetch(_WEBAPP, { method:'POST', body: JSON.stringify(payload) });
+    const data = await res.json();
+    if(!data.ok) throw new Error(data.error||'Unknown error');
+    toast(`Status updated: ${newStatus}`,'success','✅');
+  } catch(e) {
+    toast('Saved locally — sheet write failed: '+e.message,'info','⚠️');
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   COMPANY ANALYTICS  (funnel chart + branded PDF)
+════════════════════════════════════════════════════ */
+function openCompanyAnalytics(companyId){
+  const co = COMPANIES.find(x=>x.id===companyId);
+  if(!co) return;
+
+  const reg = co.studentsRegistered.length;
+  const att = co.studentsInterviewed.length;
+  const sel = co.studentsSelected.length;
+  const joined = co.studentsSelected.filter(s=>s.joinStatus==='Joined').length;
+  const notJoined = co.studentsSelected.filter(s=>s.joinStatus==='Not Joined').length;
+  const pending = sel - joined - notJoined;
+
+  const pct = (n,d) => d>0 ? Math.round(n/d*100) : 0;
+  const r2a = pct(att,reg), a2s = pct(sel,att), s2j = pct(joined,sel), r2s = pct(sel,reg);
+
+  openModal(`📊 Analytics — ${xe(co.name)}`,`
+    <div style="font-size:12px;color:var(--text3);margin-bottom:14px;">Conversion funnel from registration to joining. Edit join status via the Selected Students table.</div>
+    <canvas id="analytics-canvas" width="520" height="300" style="width:100%;border-radius:10px;background:var(--bg2);"></canvas>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;">
+      <div style="background:var(--bg2);border-radius:10px;padding:12px;">
+        <div style="font-size:10.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Conversion Ratios</div>
+        ${[
+          ['Reg → Attended', r2a+'%'],
+          ['Attended → Selected', a2s+'%'],
+          ['Selected → Joined', s2j+'%'],
+          ['Overall (Reg → Selected)', r2s+'%']
+        ].map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12.5px;"><span style="color:var(--text2)">${k}</span><span style="font-weight:700;color:var(--text1)">${v}</span></div>`).join('')}
+      </div>
+      <div style="background:var(--bg2);border-radius:10px;padding:12px;">
+        <div style="font-size:10.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Joining Breakdown</div>
+        ${[
+          ['Joined', joined, '#22C55E'],
+          ['Not Joined', notJoined, '#EF4444'],
+          ['Pending', pending, '#F59E0B'],
+        ].map(([k,v,col])=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12.5px;"><span style="color:var(--text2)">${k}</span><span style="font-weight:700;color:${col}">${v}</span></div>`).join('')}
+        <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12.5px;"><span style="font-weight:700;color:var(--text1)">Total Selected</span><span style="font-weight:800;color:var(--text1)">${sel}</span></div>
+      </div>
+    </div>`,
+    `<button class="btn btn-outline btn-sm" onclick="closeModal()">Close</button>
+     <button class="btn btn-admin btn-sm" onclick="downloadAnalyticsPDF(${companyId})">⬇ Download Report</button>`
+  );
+
+  // Draw canvas chart after modal renders
+  requestAnimationFrame(()=>{
+    const canvas = document.getElementById('analytics-canvas');
+    if(!canvas) return;
+    drawFunnelChart(canvas, co.name, reg, att, sel, joined, notJoined, pending);
+  });
+}
+
+function drawFunnelChart(canvas, companyName, reg, att, sel, joined, notJoined, pending){
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const bg    = isDark ? '#1E1B2E' : '#F8FAFC';
+  const text1 = isDark ? '#F1F5F9' : '#0F172A';
+  const text3 = isDark ? '#94A3B8' : '#64748B';
+  const border= isDark ? '#334155' : '#E2E8F0';
+
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = bg;
+  ctx.fillRect(0,0,W,H);
+
+  // Logo watermark
+  const logoImg = new Image();
+  logoImg.onload = () => {
+    ctx.save();
+    ctx.globalAlpha = 0.06;
+    const lw = 140, lh = 140;
+    ctx.drawImage(logoImg, W/2-lw/2, H/2-lh/2, lw, lh);
+    ctx.restore();
+    _drawFunnelBars(ctx, W, H, reg, att, sel, joined, notJoined, pending, text1, text3, border, isDark);
+  };
+  logoImg.onerror = () => _drawFunnelBars(ctx, W, H, reg, att, sel, joined, notJoined, pending, text1, text3, border, isDark);
+  logoImg.src = 'logo.jpg';
+}
+
+function _drawFunnelBars(ctx, W, H, reg, att, sel, joined, notJoined, pending, text1, text3, border, isDark){
+  const stages = [
+    { label:'Registered', n:reg,    color:'#6D0E6A' },
+    { label:'Attended',   n:att,    color:'#1D4ED8' },
+    { label:'Selected',   n:sel,    color:'#059669' },
+    { label:'Joined',     n:joined, color:'#16A34A' },
+  ];
+  const maxN = Math.max(...stages.map(s=>s.n), 1);
+  const padL=14, padR=14, padT=36, padB=52;
+  const chartW = W - padL - padR;
+  const chartH = H - padT - padB;
+  const barW = Math.floor(chartW / stages.length);
+  const gap = Math.floor(barW * 0.22);
+  const bw = barW - gap;
+
+  // Title
+  ctx.fillStyle = text1;
+  ctx.font = `bold 13px 'Inter','Helvetica',sans-serif`;
+  ctx.textAlign = 'left';
+  ctx.fillText('Placement Funnel — ' + companyName, padL, 22);
+
+  stages.forEach((s, i) => {
+    const barH = maxN > 0 ? Math.round(s.n / maxN * chartH) : 0;
+    const x = padL + i * barW + gap/2;
+    const y = padT + chartH - barH;
+
+    // Gradient bar
+    const grad = ctx.createLinearGradient(x, y, x, y + barH);
+    grad.addColorStop(0, s.color);
+    grad.addColorStop(1, s.color + '99');
+    ctx.fillStyle = grad;
+    const radius = 6;
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + bw - radius, y);
+    ctx.quadraticCurveTo(x + bw, y, x + bw, y + radius);
+    ctx.lineTo(x + bw, y + barH);
+    ctx.lineTo(x, y + barH);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+    ctx.fill();
+
+    // Value on top of bar
+    ctx.fillStyle = text1;
+    ctx.font = `bold 15px 'Inter','Helvetica',sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText(s.n, x + bw/2, y - 8);
+
+    // Percentage inside bar (if tall enough)
+    if(barH > 30 && i > 0 && stages[i-1].n > 0){
+      const pct = Math.round(s.n / stages[i-1].n * 100);
+      ctx.fillStyle = '#fff';
+      ctx.font = `bold 11px 'Inter','Helvetica',sans-serif`;
+      ctx.fillText(pct+'%', x + bw/2, y + 18);
+    }
+
+    // X axis label
+    ctx.fillStyle = text3;
+    ctx.font = `11px 'Inter','Helvetica',sans-serif`;
+    ctx.fillText(s.label, x + bw/2, H - padB + 16);
+
+    // Arrow between bars
+    if(i < stages.length - 1){
+      ctx.fillStyle = text3;
+      ctx.font = `14px sans-serif`;
+      ctx.fillText('→', x + bw + gap/2 - 6, padT + chartH/2 + 5);
+    }
+  });
+
+  // Joining breakdown mini bars at bottom
+  if(sel > 0){
+    const bx = padL + 3 * barW + gap/2;
+    const bStartY = padT + chartH - (maxN>0?Math.round(joined/maxN*chartH):0);
+    const notJH = maxN>0?Math.round(notJoined/maxN*chartH):0;
+    const pendH = maxN>0?Math.round(pending/maxN*chartH):0;
+
+    // Overlay stacked colors on joined bar region
+    const selBarH = maxN>0?Math.round(sel/maxN*chartH):0;
+    const totalH = selBarH;
+    const jH = totalH>0?Math.round(joined/sel*totalH):0;
+    const nH = totalH>0?Math.round(notJoined/sel*totalH):0;
+    const pH = totalH - jH - nH;
+
+    const barX = padL + 3 * barW + gap/2;
+    const barBaseY = padT + chartH;
+
+    [[jH,'#22C55E'],[nH,'#EF4444'],[pH,'#F59E0B']].reduce((yAcc,[h,col])=>{
+      if(h<=0)return yAcc;
+      ctx.fillStyle = col + 'CC';
+      ctx.fillRect(barX, barBaseY - yAcc - h, bw, h);
+      return yAcc + h;
+    }, 0);
+  }
+
+  // Baseline
+  ctx.strokeStyle = border;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(padL, padT + chartH);
+  ctx.lineTo(W - padR, padT + chartH);
+  ctx.stroke();
+}
+
+/* ─ Branded PDF download ─ */
+async function downloadAnalyticsPDF(companyId){
+  const co = COMPANIES.find(x=>x.id===companyId);
+  if(!co) return;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' });
+  // A4 landscape: 297 × 210
+  const W=297, H=210;
+  const DATE_STR = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+
+  const reg = co.studentsRegistered.length;
+  const att = co.studentsInterviewed.length;
+  const sel = co.studentsSelected.length;
+  const joined    = co.studentsSelected.filter(s=>s.joinStatus==='Joined').length;
+  const notJoined = co.studentsSelected.filter(s=>s.joinStatus==='Not Joined').length;
+  const pending   = sel - joined - notJoined;
+  const pct=(n,d)=>d>0?Math.round(n/d*100):0;
+
+  // Load logo
+  let logoB64=null;
+  try {
+    const resp = await fetch('logo.jpg');
+    const blob = await resp.blob();
+    logoB64 = await new Promise(res=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.readAsDataURL(blob); });
+  } catch(e){ logoB64=null; }
+
+  // ── Page 1: Header + Funnel chart ──
+  // Header bar
+  doc.setFillColor(87,11,84);
+  doc.rect(0,0,W,28,'F');
+  if(logoB64) doc.addImage(logoB64,'JPEG',8,3,22,22);
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(14); doc.setFont('helvetica','bold');
+  doc.text('Vidyavahini First Grade Degree College — Placement Analytics',38,12);
+  doc.setFontSize(10); doc.setFont('helvetica','normal');
+  doc.text(xe(co.name) + '  ·  Generated: ' + DATE_STR,38,21);
+
+  // Watermark logo (light)
+  if(logoB64){
+    doc.saveGraphicsState();
+    doc.setGState(new doc.GState({opacity:0.05}));
+    doc.addImage(logoB64,'JPEG',W/2-35,H/2-35,70,70);
+    doc.restoreGraphicsState();
+  }
+
+  // ── Draw funnel as canvas → image ──
+  const offscreen = document.createElement('canvas');
+  offscreen.width = 900; offscreen.height = 480;
+  _drawFunnelBars(offscreen.getContext('2d'), offscreen.width, offscreen.height, reg, att, sel, joined, notJoined, pending, '#1A0519', '#64748B', '#E2E8F0', false);
+  const chartImg = offscreen.toDataURL('image/png');
+  doc.addImage(chartImg,'PNG',14,32,180,96);
+
+  // ── Conversion table (right of chart) ──
+  doc.setFillColor(245,240,245);
+  doc.roundedRect(200,32,90,96,4,4,'F');
+  doc.setTextColor(87,11,84); doc.setFontSize(9); doc.setFont('helvetica','bold');
+  doc.text('CONVERSION RATIOS',202,41);
+  const ratios=[
+    ['Reg → Attended', pct(att,reg)+'%'],
+    ['Attended → Selected', pct(sel,att)+'%'],
+    ['Selected → Joined', pct(joined,sel)+'%'],
+    ['Overall (Reg → Sel)', pct(sel,reg)+'%'],
+  ];
+  doc.setFont('helvetica','normal'); doc.setTextColor(50,50,50); doc.setFontSize(8.5);
+  ratios.forEach(([k,v],i)=>{
+    const y=50+i*11;
+    doc.text(k,202,y);
+    doc.setFont('helvetica','bold'); doc.setTextColor(87,11,84);
+    doc.text(v,282,y,'right');
+    doc.setFont('helvetica','normal'); doc.setTextColor(50,50,50);
+    if(i<ratios.length-1){ doc.setDrawColor(220,200,220); doc.line(200,y+4,290,y+4); }
+  });
+
+  // ── Joining breakdown ──
+  doc.setFillColor(245,240,245);
+  doc.roundedRect(200,134,90,44,4,4,'F');
+  doc.setTextColor(87,11,84); doc.setFontSize(9); doc.setFont('helvetica','bold');
+  doc.text('JOINING STATUS',202,143);
+  const jRows=[['Joined',joined,'#22C55E'],['Not Joined',notJoined,'#EF4444'],['Pending',pending,'#F59E0B']];
+  jRows.forEach(([k,v,col],i)=>{
+    const y=152+i*9;
+    doc.setFont('helvetica','normal'); doc.setTextColor(50,50,50); doc.setFontSize(8.5);
+    doc.text(k,202,y);
+    const rgb=parseInt(col.slice(1),16);
+    doc.setTextColor((rgb>>16)&255,(rgb>>8)&255,rgb&255);
+    doc.setFont('helvetica','bold');
+    doc.text(String(v),282,y,'right');
+  });
+
+  // ── Page 2: Presentation bullet points ──
+  doc.addPage();
+  doc.setFillColor(87,11,84);
+  doc.rect(0,0,W,28,'F');
+  if(logoB64) doc.addImage(logoB64,'JPEG',8,3,22,22);
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(14); doc.setFont('helvetica','bold');
+  doc.text('Placement Summary — ' + xe(co.name),38,12);
+  doc.setFontSize(10); doc.setFont('helvetica','normal');
+  doc.text('Vidyavahini First Grade Degree College  ·  ' + DATE_STR,38,21);
+
+  if(logoB64){
+    doc.saveGraphicsState();
+    doc.setGState(new doc.GState({opacity:0.05}));
+    doc.addImage(logoB64,'JPEG',W/2-35,H/2-35,70,70);
+    doc.restoreGraphicsState();
+  }
+
+  let py = 40;
+  const bullet=(text,indent=0,bold=false,col=[50,50,50],size=11)=>{
+    doc.setFont('helvetica',bold?'bold':'normal');
+    doc.setTextColor(...col);
+    doc.setFontSize(size);
+    const prefix = indent===0?'▸ ':'    • ';
+    doc.text(prefix+text, 14+indent*4, py);
+    py += size*0.5+3;
+  };
+  const section=(title)=>{
+    py+=4;
+    doc.setFillColor(87,11,84);
+    doc.roundedRect(12,py-6,W-24,11,3,3,'F');
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(11);
+    doc.text(title,14,py+1);
+    py+=12;
+    doc.setTextColor(50,50,50);
+  };
+
+  section('Drive Overview');
+  bullet(xe(co.name)+' Campus Placement Drive',0,true,[87,11,84],13);
+  if(co.driveDate) bullet('Drive Date: '+fmtDate(co.driveDate));
+  if(co.interviewMode) bullet('Mode: '+xe(co.interviewMode));
+  if(co.roles&&co.roles.length) bullet('Roles Offered: '+xe(co.roles.join(', ')));
+
+  section('Funnel Performance');
+  bullet(`${reg} students registered for this placement drive`);
+  bullet(`${att} students attended the interview (${pct(att,reg)}% of registrations)`);
+  bullet(`${sel} students selected / placed (${pct(sel,att)}% interview conversion)`);
+  bullet(`Overall registration-to-placement rate: ${pct(sel,reg)}%`);
+
+  section('Joining Status');
+  bullet(`${joined} of ${sel} selected students have confirmed joining (${pct(joined,sel)}%)`,0,false,[22,101,52]);
+  bullet(`${notJoined} student${notJoined!==1?'s':''} declined or did not join (${pct(notJoined,sel)}%)`,0,false,[153,27,27]);
+  bullet(`${pending} student${pending!==1?'s':''} status yet to be confirmed`,0,false,[146,64,14]);
+
+  section('Key Insights');
+  if(reg>0&&att<reg) bullet(`Drop-off at registration stage: ${reg-att} students did not attend`);
+  if(att>0&&sel<att) bullet(`${att-sel} interviewed students were not selected`);
+  if(pct(sel,reg)>=50) bullet('Strong overall conversion — above 50% registration-to-placement',0,false,[22,101,52]);
+  else if(pct(sel,reg)>=25) bullet('Moderate conversion — scope to improve pre-placement preparation');
+  else if(sel>0) bullet('Lower conversion — consider targeted aptitude / interview training');
+  if(pct(joined,sel)>=80) bullet('Excellent joining rate — high student commitment',0,false,[22,101,52]);
+  else if(pct(joined,sel)>=50) bullet('Good joining rate — follow up with pending students');
+  else if(sel>0) bullet('Low joining rate — investigate reasons for non-joining');
+  if(sel===0) bullet('No selections recorded yet for this drive');
+
+  doc.save(`VVFGC_${xe(co.name).replace(/[^a-zA-Z0-9]/g,'_')}_Analytics_${DATE_STR.replace(/ /g,'-')}.pdf`);
+  toast('Analytics PDF downloaded','success','⬇');
+}
+
+</script>
+</body>
+</html>
