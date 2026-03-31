@@ -433,6 +433,8 @@ body.admin-mode .d-stat{background:var(--admin-bg);}
 .d-field-k{font-size:10px;color:var(--text4);font-weight:700;letter-spacing:0.05em;}
 .d-field-v{font-size:13.5px;color:var(--text2);font-weight:500;line-height:1.4;}
 .d-field-v.empty{color:var(--text4);font-style:italic;}
+.poc-masked{font-size:13.5px;color:var(--text4);cursor:pointer;letter-spacing:2px;user-select:none;border-bottom:1px dashed var(--border);padding-bottom:1px;}
+.poc-masked:hover{color:var(--purple);border-color:var(--purple);}
 .edit-chip{font-size:10px;background:var(--admin-bg);color:var(--admin);border:1px solid var(--admin-border);border-radius:var(--r5);padding:2px 9px;cursor:pointer;margin-left:auto;font-weight:700;transition:all .15s;}
 .edit-chip:hover{background:var(--admin);color:#fff;}
 .roles-wrap{display:flex;flex-wrap:wrap;gap:7px;}
@@ -1794,10 +1796,16 @@ async function buildDetail(id){
   const st=STATUS_MAP[statusOf(c)]||STATUS_MAP.upcoming;
   const rate=c.studentsInterviewed.length?Math.round(c.studentsSelected.length/c.studentsInterviewed.length*100):0;
 
-  const pocHtml=['name','designation','email','phone'].map(k=>
-    `<div class="d-field"><div class="d-field-k">${k.charAt(0).toUpperCase()+k.slice(1)}</div>`+
-    `<div class="d-field-v${!c.poc[k]?' empty':''}">${xe(c.poc[k])||'—'}</div></div>`
-  ).join('');
+  const pocHtml=['name','designation','email','phone'].map(k=>{
+    const val = c.poc[k]||'';
+    const isSensitive = k==='email'||k==='phone';
+    const display = isSensitive && !adminMode && !pcMode
+      ? `<span class="poc-masked" onclick="revealPOC(event,'${k}',${c.id})" title="Click to reveal">••••••••</span>`
+      : `<span class="d-field-v${!val?' empty':''}">${xe(val)||'—'}</span>`;
+    return `<div class="d-field"><div class="d-field-k">${k.charAt(0).toUpperCase()+k.slice(1)}</div>${display}</div>`;
+  }).join('');
+
+
   const driveHtml=[['registrationDate','Reg Date'],['driveDate','Drive Date'],['interviewMode','Mode'],['notes','Notes']].map(([k,l])=>
     `<div class="d-field"><div class="d-field-k">${l}</div>`+
     `<div class="d-field-v${!c[k]?' empty':''}">${k==='registrationDate'||k==='driveDate'?fmtDate(c[k]):xe(c[k])||'—'}</div></div>`
@@ -2505,6 +2513,45 @@ function savePOC(id){
   ['name','designation','email','phone'].forEach(k=>c.poc[k]=document.getElementById(`poc-${k}`).value.trim());
   closeModal(); go('detail',id); toast('POC updated (update Config Sheet to persist)','success');
 }
+
+/* Reveal masked POC field — requires Placement Cell PIN */
+function revealPOC(evt, field, companyId){
+  evt.stopPropagation();
+  const c = COMPANIES.find(x=>x.id===companyId);
+  if(!c) return;
+
+  /* Build a mini PIN modal */
+  openModal('🔐 Enter Placement Cell PIN',
+    `<div style="text-align:center;padding:8px 0 4px;">
+       <div style="font-size:13px;color:var(--text3);margin-bottom:16px;">Enter your PIN to reveal contact details.</div>
+       <input id="poc-pin-input" type="password" maxlength="8" class="form-input"
+         style="text-align:center;font-size:20px;letter-spacing:6px;max-width:160px;"
+         placeholder="••••"
+         onkeydown="if(event.key==='Enter') _checkPocPin(${companyId})"/>
+       <div id="poc-pin-err" style="color:var(--red);font-size:12px;margin-top:8px;min-height:16px;"></div>
+     </div>`,
+    `<button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button>
+     <button class="btn btn-admin btn-sm" onclick="_checkPocPin(${companyId})">Reveal</button>`
+  );
+  setTimeout(()=>{ const el=document.getElementById('poc-pin-input'); if(el) el.focus(); }, 120);
+}
+
+function _checkPocPin(companyId){
+  const pin = (document.getElementById('poc-pin-input')||{}).value||'';
+  if(pin !== JOIN_PIN && pin !== ADMIN_PIN){
+    const el=document.getElementById('poc-pin-err');
+    if(el) el.textContent='Incorrect PIN. Try again.';
+    return;
+  }
+  closeModal();
+  /* Temporarily enable pcMode for this session so all details show */
+  if(!pcMode && !adminMode){
+    pcMode=true;
+    toast('Contact details unlocked for this session','success','🔓');
+  }
+  go(view, companyId);
+}
+
 
 function openEditDrive(id){
   const c=COMPANIES.find(x=>x.id===id);
