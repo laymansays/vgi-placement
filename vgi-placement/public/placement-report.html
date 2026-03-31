@@ -458,42 +458,53 @@ async function loadLogo(){
   }catch(e){ return null; }
 }
 
-/* Loads the full-width VVFGC banner logo */
+/* Loads the VG logo for the header box */
 async function loadBannerLogo(){
-  try{
-    const r=await fetch('logo_VVFGC.png'); if(!r.ok) return null;
-    const bl=await r.blob();
-    const b64=await new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.readAsDataURL(bl);});
-    return await new Promise(res=>{const i=new Image();i.onload=()=>res(i);i.onerror=()=>res(null);i.src=b64;});
-  }catch(e){ return null; }
+  return loadLogo(); // same logo.jpg used in navbar
 }
 
 /* ═══════════════════════════════════════════════════════
-   DRAW: SHARED HEADER — uses VVFGC banner logo full-width
+   DRAW: SHARED HEADER — matches Image 2 style
+   Purple gradient bg · VG logo box · College name right
 ═══════════════════════════════════════════════════════ */
-const BANNER_H = 110; // canvas-px height of banner header area
+const BANNER_H = 90; // canvas-px height of header area
 
 function drawHeader(X, txt, rr, PW, bannerImg, title, subtitle, rightTop, rightSub){
-  /* Draw white background rect for header area */
-  X.fillStyle='#ffffff';
+  /* Purple gradient background */
+  const g = X.createLinearGradient(0, 0, PW, 0);
+  g.addColorStop(0, '#570B54');
+  g.addColorStop(1, '#7B1F78');
+  X.fillStyle = g;
   X.fillRect(0, 0, PW, BANNER_H);
 
+  /* White border box for logo */
+  const lbx=18, lby=14, lbs=BANNER_H-28;
+  X.strokeStyle='#ffffff'; X.lineWidth=2;
+  X.strokeRect(lbx, lby, lbs, lbs);
+  X.fillStyle='rgba(255,255,255,0.08)';
+  X.fillRect(lbx+1, lby+1, lbs-2, lbs-2);
+
+  /* Logo inside box */
   if(bannerImg){
-    /* Scale banner to full width, preserve aspect ratio, center vertically */
-    const aspect = bannerImg.naturalWidth / bannerImg.naturalHeight;
-    const dw = PW;
-    const dh = Math.round(PW / aspect);
-    const dy = Math.max(0, Math.round((BANNER_H - dh) / 2));
-    X.drawImage(bannerImg, 0, dy, dw, Math.min(dh, BANNER_H));
+    X.save(); X.beginPath();
+    X.rect(lbx+3, lby+3, lbs-6, lbs-6);
+    X.clip();
+    X.drawImage(bannerImg, lbx+3, lby+3, lbs-6, lbs-6);
+    X.restore();
   }
 
-  /* Thin navy separator line below banner */
-  X.fillStyle='#001F5F';
-  X.fillRect(0, BANNER_H, PW, 2);
+  /* Institution name + subtitle */
+  const textX = lbx + lbs + 18;
+  txt('Vidyavahini First Grade Degree College', textX, BANNER_H*0.42, '#ffffff', 16, '800');
+  txt('Placement Cell  —  Placement Report',    textX, BANNER_H*0.72, 'rgba(255,255,255,0.70)', 11, '500');
 
-  /* Report title and subtitle below the banner */
-  txt(title,   PW/2, BANNER_H+22, '#1e293b', 12, '700',   'center');
-  txt(subtitle,PW/2, BANNER_H+38, '#64748b', 10, 'normal', 'center');
+  /* Thin separator below header */
+  X.fillStyle='rgba(255,255,255,0.18)';
+  X.fillRect(0, BANNER_H, PW, 1.5);
+
+  /* Report title / subtitle / right text below the banner */
+  txt(title,    PW/2, BANNER_H+22, '#1e293b', 12, '700',   'center');
+  txt(subtitle, PW/2, BANNER_H+38, '#64748b', 10, 'normal', 'center');
   if(rightTop) txt(rightTop, PW-18, BANNER_H+22, '#1e293b', 10, '700',   'right');
   if(rightSub) txt(rightSub, PW-18, BANNER_H+38, '#64748b',  9, 'normal','right');
 }
@@ -651,15 +662,38 @@ function drawStackedBar(X, txt, rr, cPad, jbY, PW, jnd, njnd, pend, sel){
 
 /* ═══════════════════════════════════════════════════════
    OVERALL: UNIQUE PLACED HELPER
+   Handles name variants: "A A", "A.A", "A.A.", "AA" → same person
 ═══════════════════════════════════════════════════════ */
+function normName(raw){
+  if(!raw) return '';
+  let s = raw.toLowerCase();
+  // Remove dots: "A.A." → "A A"
+  s = s.replace(/\./g, ' ');
+  // Split consonant-only runs ≤4 chars (initials jammed together): "aa" → "a a"
+  s = s.replace(/\b([b-df-hj-np-tv-z]{1,4})\b/g, tok => tok.split('').join(' '));
+  // Collapse spaces
+  s = s.replace(/\s+/g, ' ').trim();
+  return s;
+}
+
 function getUniquePlaced(){
   const seen=new Map();
   COMPANIES.forEach(co=>{
     (co.studentsSelected||[]).forEach(s=>{
-      const key=(s.email||s.name||'').toLowerCase().trim();
+      /* Priority key: email (most reliable) → normalised name fallback */
+      const emailKey = (s.email||'').toLowerCase().trim();
+      const nameKey  = normName(s.name);
+      const key = emailKey || nameKey;
       if(!key) return;
-      if(!seen.has(key)) seen.set(key,{name:s.name||'',email:s.email||'',companies:[],joinStatus:s.joinStatus||'Pending'});
-      else{ const e=seen.get(key); if(e.joinStatus==='Pending'&&s.joinStatus&&s.joinStatus!=='Pending') e.joinStatus=s.joinStatus; }
+
+      if(!seen.has(key)){
+        seen.set(key,{name:s.name||'',email:s.email||'',companies:[],joinStatus:s.joinStatus||'Pending'});
+      } else {
+        const e=seen.get(key);
+        /* Upgrade join status: Joined > Not Joined > Pending */
+        const rank = v => v==='Joined'?2:v==='Not Joined'?1:0;
+        if(rank(s.joinStatus) > rank(e.joinStatus)) e.joinStatus=s.joinStatus;
+      }
       seen.get(key).companies.push(co.name);
     });
   });
