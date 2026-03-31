@@ -15,3 +15,47 @@ services:
         sync: false
       - key: DASHBOARD_PIN
         sync: false
+```
+
+4. Click **Commit changes**
+
+---
+
+## Step 2 — Fix the Render service settings
+
+The service already exists on Render so you don't need to create a new one. Just fix the settings:
+
+1. Go to **render.com** → click **vgi-placement** service
+2. Click **Settings** in the left sidebar
+3. Find **Build Command** → change it to exactly: `npm install`
+4. Find **Start Command** → change it to exactly: `node server.js`
+5. Click **Save Changes**
+
+---
+
+## Step 3 — Check Environment Variables
+
+1. Click **Environment** in the left sidebar
+2. Confirm all 5 variables are there:
+
+| Key | Value |
+|---|---|
+| `SHEET_ID` | `1Mb9jrzZMSta5NYs28i3STS2tYNqhMtabj3wktvHiYmw` |
+| `WEBAPP_URL` | `https://script.google.com/macros/s/AKfycbzeh9Op-cDApwuN1XenvtMJGKZUyPbwCX1tj6M3Bel4DkEDLFWhzrme0bD9ktsaEgxe/exec` |
+| `ADMIN_PIN` | your new PIN |
+| `JOIN_PIN` | your new PIN |
+| `DASHBOARD_PIN` | your new PIN |
+
+If any are missing, add them now and click **Save Changes**.
+
+---
+
+## Step 4 — Redeploy
+
+1. Click **Manual Deploy** (top right) → **Deploy latest commit**
+2. Click **deploy logs** to watch it live — it should show:
+```
+==> Running build command: npm install
+==> Build succeeded
+==> Starting service: node server.js
+✅  VGI Placement System running on port 10000
