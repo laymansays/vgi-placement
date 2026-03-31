@@ -7,6 +7,7 @@
 <link rel="icon" type="image/jpeg" href="logo.jpg"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
@@ -181,7 +182,8 @@ select#co-select option{background:#1A1030;color:#fff;}
         <option value="overall">📊 Overall — All Companies</option>
       </select>
     </div>
-    <button class="btn-dl" id="btn-dl" onclick="downloadCurrentPDF()">⬇ Download PDF</button>
+    <button class="btn-dl" id="btn-dl" onclick="downloadCurrentPDF()">⬇ PDF</button>
+    <button class="btn-dl" id="btn-xl" onclick="downloadCurrentExcel()" style="background:#217346;border-color:#217346;">⬇ Excel</button>
     <a href="placement-dashboard.html" class="btn-back">← Dashboard</a>
   </div>
 
@@ -456,43 +458,44 @@ async function loadLogo(){
   }catch(e){ return null; }
 }
 
+/* Loads the full-width VVFGC banner logo */
+async function loadBannerLogo(){
+  try{
+    const r=await fetch('logo_VVFGC.png'); if(!r.ok) return null;
+    const bl=await r.blob();
+    const b64=await new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.readAsDataURL(bl);});
+    return await new Promise(res=>{const i=new Image();i.onload=()=>res(i);i.onerror=()=>res(null);i.src=b64;});
+  }catch(e){ return null; }
+}
+
 /* ═══════════════════════════════════════════════════════
-   DRAW: SHARED HEADER
+   DRAW: SHARED HEADER — uses VVFGC banner logo full-width
 ═══════════════════════════════════════════════════════ */
-function drawHeader(X, txt, rr, PW, logoImg, title, subtitle, rightTop, rightSub){
-  /* White background with navy border — matches circular style */
-  const nvy='#001F5F';
-  /* Outer border */
-  X.strokeStyle=nvy; X.lineWidth=2.5;
-  X.strokeRect(1,1,PW-2,78);
-  /* Header box fill */
-  X.fillStyle='#ffffff'; X.fillRect(2,2,PW-4,76);
-  /* Inner header border */
-  X.strokeStyle=nvy; X.lineWidth=1.5;
-  X.strokeRect(2,2,PW-4,76);
+const BANNER_H = 110; // canvas-px height of banner header area
 
-  /* Logo box border */
-  X.strokeStyle=nvy; X.lineWidth=1;
-  X.strokeRect(10,8,64,64);
+function drawHeader(X, txt, rr, PW, bannerImg, title, subtitle, rightTop, rightSub){
+  /* Draw white background rect for header area */
+  X.fillStyle='#ffffff';
+  X.fillRect(0, 0, PW, BANNER_H);
 
-  /* Logo image */
-  if(logoImg){
-    X.save(); X.beginPath();
-    X.rect(11,9,62,62); X.clip();
-    X.drawImage(logoImg,11,9,62,62);
-    X.restore();
+  if(bannerImg){
+    /* Scale banner to full width, preserve aspect ratio, center vertically */
+    const aspect = bannerImg.naturalWidth / bannerImg.naturalHeight;
+    const dw = PW;
+    const dh = Math.round(PW / aspect);
+    const dy = Math.max(0, Math.round((BANNER_H - dh) / 2));
+    X.drawImage(bannerImg, 0, dy, dw, Math.min(dh, BANNER_H));
   }
 
-  /* Institution name + CDC centered in text area right of logo */
-  const textLeft=82, textRight=PW-10, textCX=(textLeft+textRight)/2;
-  txt('Vidyavahini Group of Institutions, Tumakuru', textCX, 34, nvy, 15, '700', 'center');
-  txt('Career Development Center', textCX, 56, nvy, 13, '700', 'center');
+  /* Thin navy separator line below banner */
+  X.fillStyle='#001F5F';
+  X.fillRect(0, BANNER_H, PW, 2);
 
-  /* Report title — smaller, below the box */
-  txt(title,   PW/2, 100, '#1e293b', 12, '700',    'center');
-  txt(subtitle,PW/2, 116, '#64748b', 10, 'normal',  'center');
-  if(rightTop) txt(rightTop, PW-18, 100, '#1e293b', 10, '700',   'right');
-  if(rightSub) txt(rightSub, PW-18, 116, '#64748b',  9, 'normal','right');
+  /* Report title and subtitle below the banner */
+  txt(title,   PW/2, BANNER_H+22, '#1e293b', 12, '700',   'center');
+  txt(subtitle,PW/2, BANNER_H+38, '#64748b', 10, 'normal', 'center');
+  if(rightTop) txt(rightTop, PW-18, BANNER_H+22, '#1e293b', 10, '700',   'right');
+  if(rightSub) txt(rightSub, PW-18, BANNER_H+38, '#64748b',  9, 'normal','right');
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -689,7 +692,7 @@ async function renderOverall(){
   cv1.width=PW; cv1.height=PH;
   const {X:X1,txt:t1,rr:r1}=setupCtx(cv1);
 
-  const logoImg=await loadLogo();
+  const [logoImg, bannerImg] = await Promise.all([loadLogo(), loadBannerLogo()]);
 
   // White bg
   X1.fillStyle='#ffffff'; X1.fillRect(0,0,PW,PH);
@@ -697,8 +700,8 @@ async function renderOverall(){
   // Watermark
   if(logoImg){X1.save();X1.globalAlpha=0.04;X1.drawImage(logoImg,PW/2-110,PH/2-110,220,220);X1.restore();}
 
-  // Header
-  drawHeader(X1,t1,r1,PW,logoImg,'Placement Analytics Report — Overall','All Companies · '+DATE,
+  // Header — banner image full-width
+  drawHeader(X1,t1,r1,PW,bannerImg,'Placement Analytics Report — Overall','All Companies · '+DATE,
     drivesDone+' Drives · '+COMPANIES.length+' Companies','');
 
   // 5 KPI tiles
@@ -709,10 +712,10 @@ async function renderOverall(){
     {n:totalSel,lbl:'Total Selections',col:'#059669',icon:'✅'},
     {n:uniquePlaced,lbl:'Unique Placed',col:'#0891B2',icon:'🎓'},
   ];
-  drawKPITiles(X1,t1,r1,PW,kpis,135);
+  drawKPITiles(X1,t1,r1,PW,kpis,160);
 
   // Funnel
-  const chartX=20,chartY=250,chartW=PW*0.52-20,chartH=192;
+  const chartX=20,chartY=272,chartW=PW*0.52-20,chartH=192;
   drawFunnel(X1,t1,r1,chartX,chartY,chartW,chartH,[
     {n:totalReg,c:'#7C3AED',l:'Registered'},
     {n:totalAtt,c:'#2563EB',l:'Attended'},
@@ -804,19 +807,9 @@ async function renderOverall(){
   X3.fillStyle='#ffffff'; X3.fillRect(0,0,PW,PH);
   if(logoImg){X3.save();X3.globalAlpha=0.04;X3.drawImage(logoImg,PW/2-110,PH/2-110,220,220);X3.restore();}
 
-  // Page 3 header — same bordered style as circular
-  const nvy3='#001F5F';
-  X3.strokeStyle=nvy3; X3.lineWidth=2.5; X3.strokeRect(1,1,PW-2,78);
-  X3.fillStyle='#ffffff'; X3.fillRect(2,2,PW-4,76);
-  X3.strokeStyle=nvy3; X3.lineWidth=1.5; X3.strokeRect(2,2,PW-4,76);
-  X3.strokeStyle=nvy3; X3.lineWidth=1; X3.strokeRect(10,8,64,64);
-  if(logoImg){X3.save();X3.beginPath();X3.rect(11,9,62,62);X3.clip();X3.drawImage(logoImg,11,9,62,62);X3.restore();}
-  const tx3=(82+PW-10)/2;
-  t3('Vidyavahini Group of Institutions, Tumakuru',tx3,34,nvy3,15,'800','center');
-  t3('Career Development Center',tx3,56,nvy3,13,'700','center');
-  // Sub-header below box
-  t3('Overall Placement Summary · All Companies · '+drivesDone+' Drives Done',PW/2,100,'#1e293b',11,'700','center');
-  t3(DATE,PW/2,116,'#64748b',10,'normal','center');
+  // Header — banner image
+  drawHeader(X3,t3,r3,PW,bannerImg,
+    'Overall Placement Summary · All Companies · '+drivesDone+' Drives Done', DATE, '', '');
 
   // 5 big stat tiles in a row
   const bigTiles=[
@@ -826,17 +819,16 @@ async function renderOverall(){
     {n:totalSel,lbl:'Selected',col:'#059669'},
     {n:uniquePlaced,lbl:'Unique Placed',col:'#0891B2'},
   ];
-  const btPad=12,btW=(PW-btPad*(bigTiles.length+1))/bigTiles.length,btH=72,btY=130;
+  const btPad=12,btW=(PW-btPad*(bigTiles.length+1))/bigTiles.length,btH=72,btY=160;
   bigTiles.forEach((bt,i)=>{
     const bx=btPad+i*(btW+btPad);
-    const hc=parseInt(bt.col.slice(1),16);
     X3.fillStyle=bt.col;if(X3.roundRect)X3.roundRect(bx,btY,btW,btH,8);else X3.rect(bx,btY,btW,btH);X3.fill();
     t3(String(bt.n),bx+btW/2,btY+40,'#fff',22,'900','center');
     t3(bt.lbl,bx+btW/2,btY+58,'rgba(255,255,255,.75)',9,'600','center');
   });
 
   // Arc conversion cards
-  drawArcCards(X3,t3,r3,118,PW,[
+  drawArcCards(X3,t3,r3,248,PW,[
     {l1:'Reg',l2:'Att',n:totalAtt,d:totalReg},
     {l1:'Att',l2:'Sel',n:totalSel,d:totalAtt},
     {l1:'Sel',l2:'Jnd',n:totalJnd,d:totalSel},
@@ -845,7 +837,7 @@ async function renderOverall(){
   ]);
 
   // Stacked joining bar
-  drawStackedBar(X3,t3,r3,16,PH*0.56,PW,totalJnd,totalNjnd,totalPend,totalSel);
+  drawStackedBar(X3,t3,r3,16,PH*0.70,PW,totalJnd,totalNjnd,totalPend,totalSel);
 
   // Unique vs raw note
   t3('Unique Placed: '+uniquePlaced+' students (de-duplicated across companies)   |   Raw selections: '+totalSel,16,PH-12,'#94a3b8',9,'400');
@@ -893,7 +885,7 @@ async function renderCompany(co){
   const pend=sel-jnd-njnd;
 
   const SC=2.8,PW=297*SC,PH=210*SC;
-  const logoImg=await loadLogo();
+  const [logoImg, bannerImg] = await Promise.all([loadLogo(), loadBannerLogo()]);
 
   /* ── CANVAS 1: header, KPIs, funnel, metrics, donut, hero ── */
   const cv1=document.createElement('canvas'); cv1.width=PW; cv1.height=PH;
@@ -901,7 +893,7 @@ async function renderCompany(co){
   X1.fillStyle='#ffffff'; X1.fillRect(0,0,PW,PH);
   if(logoImg){X1.save();X1.globalAlpha=0.04;X1.drawImage(logoImg,PW/2-110,PH/2-110,220,220);X1.restore();}
 
-  drawHeader(X1,t1,r1,PW,logoImg,'Placement Analytics Report',co.name+' · '+DATE,
+  drawHeader(X1,t1,r1,PW,bannerImg,'Placement Analytics Report',co.name+' · '+DATE,
     (co.driveDate?'📅 '+fmtDate(co.driveDate):''),
     (co.interviewMode?'🖥 '+co.interviewMode:''));
 
@@ -910,9 +902,9 @@ async function renderCompany(co){
     {n:att,lbl:'Attended',col:'#2563EB',icon:'🎯'},
     {n:sel,lbl:'Selected',col:'#059669',icon:'✅'},
     {n:jnd,lbl:'Joined',col:'#16A34A',icon:'🎉'},
-  ],135);
+  ],160);
 
-  const chartX=20,chartY=255,chartW=PW*0.55-30,chartH=192;
+  const chartX=20,chartY=272,chartW=PW*0.55-30,chartH=192;
   drawFunnel(X1,t1,r1,chartX,chartY,chartW,chartH,[
     {n:reg,c:'#7C3AED',l:'Registered'},
     {n:att,c:'#2563EB',l:'Attended'},
@@ -920,7 +912,7 @@ async function renderCompany(co){
     {n:jnd,c:'#16A34A',l:'Joined'},
   ]);
 
-  const mX=PW*0.55,mY=215,mW=PW-mX-20,mH=chartH;
+  const mX=PW*0.55,mY=255,mW=PW-mX-20,mH=chartH;
   drawMetrics(X1,t1,r1,mX,mY,mW,mH,[
     {l:'Reg → Attended',n:att,d:reg},
     {l:'Att → Selected',n:sel,d:att},
@@ -939,23 +931,12 @@ async function renderCompany(co){
   X2.fillStyle='#ffffff'; X2.fillRect(0,0,PW,PH);
   if(logoImg){X2.save();X2.globalAlpha=0.04;X2.drawImage(logoImg,PW/2-110,PH/2-110,220,220);X2.restore();}
 
-  // Page 2 header — same bordered style as circular
-  const nvy2='#001F5F';
-  X2.strokeStyle=nvy2; X2.lineWidth=2.5; X2.strokeRect(1,1,PW-2,78);
-  X2.fillStyle='#ffffff'; X2.fillRect(2,2,PW-4,76);
-  X2.strokeStyle=nvy2; X2.lineWidth=1.5; X2.strokeRect(2,2,PW-4,76);
-  X2.strokeStyle=nvy2; X2.lineWidth=1; X2.strokeRect(10,8,64,64);
-  if(logoImg){X2.save();X2.beginPath();X2.rect(11,9,62,62);X2.clip();X2.drawImage(logoImg,11,9,62,62);X2.restore();}
-  const tx2=(82+PW-10)/2;
-  t2('Vidyavahini Group of Institutions, Tumakuru',tx2,34,nvy2,15,'800','center');
-  t2('Career Development Center',tx2,56,nvy2,13,'700','center');
-  // Company name sub-header below box
-  t2(xe(co.name),PW/2,100,'#1e293b',13,'800','center');
-  t2('Placement Summary  ·  '+DATE,PW/2,116,'#64748b',10,'normal','center');
+  // Page 2 header — banner image
+  drawHeader(X2,t2,r2,PW,bannerImg,xe(co.name)+' — Placement Summary','Generated: '+DATE,'','');
 
   // Big stat tiles
   const tiles=[{n:reg,lbl:'Registered',col:'#7C3AED'},{n:att,lbl:'Attended',col:'#2563EB'},{n:sel,lbl:'Selected',col:'#059669'},{n:jnd,lbl:'Joined',col:'#16A34A'}];
-  const tPad=16,tW=(PW-tPad*(tiles.length+1))/tiles.length,tH=72,tY=76;
+  const tPad=16,tW=(PW-tPad*(tiles.length+1))/tiles.length,tH=72,tY=160;
   tiles.forEach((t,i)=>{
     const bx=tPad+i*(tW+tPad);
     X2.fillStyle=t.col;if(X2.roundRect)X2.roundRect(bx,tY,tW,tH,8);else X2.rect(bx,tY,tW,tH);X2.fill();
@@ -964,7 +945,7 @@ async function renderCompany(co){
   });
 
   // Arc cards
-  drawArcCards(X2,t2,r2,64,PW,[
+  drawArcCards(X2,t2,r2,248,PW,[
     {l1:'Reg',l2:'Att',n:att,d:reg},
     {l1:'Att',l2:'Sel',n:sel,d:att},
     {l1:'Sel',l2:'Jnd',n:jnd,d:sel},
@@ -1028,12 +1009,10 @@ async function downloadCurrentPDF(){
     const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
     window._currentCanvases.forEach((cv,i)=>{
       if(i>0) doc.addPage();
-      // Scale canvas to A4 landscape (297×210mm)
       const aspectH=cv.height/cv.width*297;
       if(aspectH<=210){
         doc.addImage(cv.toDataURL('image/png'),'PNG',0,(210-aspectH)/2,297,aspectH);
       } else {
-        // taller canvas — split into pages of 297×210
         const pxPerPage=Math.round(cv.width/297*210);
         const pages=Math.ceil(cv.height/pxPerPage);
         for(let pg=0;pg<pages;pg++){
@@ -1047,7 +1026,85 @@ async function downloadCurrentPDF(){
     });
     doc.save((window._currentPDFName||'VVFGC_Report')+'_'+DATE.replace(/ /g,'-')+'.pdf');
   }catch(e){ alert('PDF generation failed: '+e.message); }
-  btn.disabled=false; btn.textContent='⬇ Download PDF';
+  btn.disabled=false; btn.textContent='⬇ PDF';
+}
+
+/* ═══════════════════════════════════════════════════════
+   EXCEL EXPORT
+═══════════════════════════════════════════════════════ */
+function downloadCurrentExcel(){
+  const btn=document.getElementById('btn-xl');
+  if(!COMPANIES||!COMPANIES.length){ alert('No data loaded yet.'); return; }
+  if(typeof XLSX==='undefined'){ alert('Excel library not loaded yet. Please wait a moment.'); return; }
+  btn.disabled=true; btn.textContent='⏳ Generating…';
+  try{
+    const DATE=new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+    const wb=XLSX.utils.book_new();
+
+    /* ── Sheet 1: Company Summary ── */
+    const summaryRows=[
+      ['Company','Registered','Attended','Selected','Joined','Not Joined','Pending','Reg→Jnd %','Drive Date','Interview Mode']
+    ];
+    COMPANIES.forEach(co=>{
+      const reg=co.studentsRegistered.length;
+      const att=co.studentsInterviewed.length;
+      const sel=co.studentsSelected.length;
+      const jnd=co.studentsSelected.filter(s=>s.joinStatus==='Joined').length;
+      const njnd=co.studentsSelected.filter(s=>s.joinStatus==='Not Joined').length;
+      const pend=sel-jnd-njnd;
+      const pct=reg>0?Math.round(jnd/reg*100)+'%':'N/A';
+      summaryRows.push([
+        co.name, reg, att, sel, jnd, njnd, pend, pct,
+        co.driveDate||'', co.interviewMode||''
+      ]);
+    });
+    // Totals row
+    const tot=r=>[...COMPANIES.reduce((s,c)=>{s.push(c);return s;},[])].reduce((s,c)=>s+c.studentsRegistered.length,0);
+    const tReg=COMPANIES.reduce((s,c)=>s+c.studentsRegistered.length,0);
+    const tAtt=COMPANIES.reduce((s,c)=>s+c.studentsInterviewed.length,0);
+    const tSel=COMPANIES.reduce((s,c)=>s+c.studentsSelected.length,0);
+    const tJnd=COMPANIES.flatMap(c=>c.studentsSelected).filter(s=>s.joinStatus==='Joined').length;
+    const tNjnd=COMPANIES.flatMap(c=>c.studentsSelected).filter(s=>s.joinStatus==='Not Joined').length;
+    summaryRows.push(['TOTAL',tReg,tAtt,tSel,tJnd,tNjnd,tSel-tJnd-tNjnd,tReg>0?Math.round(tJnd/tReg*100)+'%':'N/A','','']);
+    const ws1=XLSX.utils.aoa_to_sheet(summaryRows);
+    // Column widths
+    ws1['!cols']=[{wch:30},{wch:12},{wch:12},{wch:12},{wch:10},{wch:12},{wch:10},{wch:12},{wch:14},{wch:18}];
+    XLSX.utils.book_append_sheet(wb,ws1,'Summary');
+
+    /* ── Sheet 2: All Selected Students ── */
+    const selRows=[['Company','Name','Email','Phone','Role','Join Status']];
+    COMPANIES.forEach(co=>{
+      (co.studentsSelected||[]).forEach(s=>{
+        selRows.push([co.name, s.name||'', s.email||'', s.phone||'', s.role||'', s.joinStatus||'Pending']);
+      });
+    });
+    const ws2=XLSX.utils.aoa_to_sheet(selRows);
+    ws2['!cols']=[{wch:28},{wch:26},{wch:32},{wch:14},{wch:22},{wch:14}];
+    XLSX.utils.book_append_sheet(wb,ws2,'Selected Students');
+
+    /* ── Sheet 3: All Registered Students ── */
+    const regRows=[['Company','Name','Email','Phone']];
+    COMPANIES.forEach(co=>{
+      (co.studentsRegistered||[]).forEach(s=>{
+        regRows.push([co.name, s.name||'', s.email||'', s.phone||'']);
+      });
+    });
+    const ws3=XLSX.utils.aoa_to_sheet(regRows);
+    ws3['!cols']=[{wch:28},{wch:26},{wch:32},{wch:14}];
+    XLSX.utils.book_append_sheet(wb,ws3,'Registered Students');
+
+    /* ── Sheet 4: Unique Placed (de-duplicated) ── */
+    const uniq=getUniquePlaced();
+    const uniqRows=[['Name','Email','Companies','Join Status']];
+    uniq.forEach(s=>uniqRows.push([s.name,s.email,(s.companies||[]).join(', '),s.joinStatus]));
+    const ws4=XLSX.utils.aoa_to_sheet(uniqRows);
+    ws4['!cols']=[{wch:26},{wch:32},{wch:40},{wch:14}];
+    XLSX.utils.book_append_sheet(wb,ws4,'Unique Placed');
+
+    const fname=(window._currentPDFName||'VVFGC_Report')+'_'+DATE.replace(/ /g,'-')+'.xlsx';
+    XLSX.writeFile(wb,fname);
+  }catch(e){ alert('Excel generation failed: '+e.message); }
+  btn.disabled=false; btn.textContent='⬇ Excel';
 }
 
 /* ── BOOT ── */
