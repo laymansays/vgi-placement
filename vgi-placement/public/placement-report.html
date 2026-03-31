@@ -460,14 +460,39 @@ async function loadLogo(){
    DRAW: SHARED HEADER
 ═══════════════════════════════════════════════════════ */
 function drawHeader(X, txt, rr, PW, logoImg, title, subtitle, rightTop, rightSub){
-  const g=X.createLinearGradient(0,0,PW,0);
-  g.addColorStop(0,'#3b0764'); g.addColorStop(1,'#6D0E6A');
-  X.fillStyle=g; X.fillRect(0,0,PW,80);
-  if(logoImg){ X.save(); X.beginPath(); if(X.roundRect)X.roundRect(16,10,60,60,10); else X.rect(16,10,60,60); X.clip(); X.drawImage(logoImg,16,10,60,60); X.restore(); }
-  txt('Vidyavahini First Grade Degree College',90,32,'#fff',15,'700');
-  txt(title,90,54,'rgba(255,255,255,.65)',11);
-  txt(rightTop,PW-18,32,'#FCD34D',13,'700','right');
-  if(rightSub) txt(rightSub,PW-18,54,'rgba(255,255,255,.55)',10,'normal','right');
+  /* White background with navy border — matches circular style */
+  const nvy='#001F5F';
+  /* Outer border */
+  X.strokeStyle=nvy; X.lineWidth=2.5;
+  X.strokeRect(1,1,PW-2,78);
+  /* Header box fill */
+  X.fillStyle='#ffffff'; X.fillRect(2,2,PW-4,76);
+  /* Inner header border */
+  X.strokeStyle=nvy; X.lineWidth=1.5;
+  X.strokeRect(2,2,PW-4,76);
+
+  /* Logo box border */
+  X.strokeStyle=nvy; X.lineWidth=1;
+  X.strokeRect(10,8,64,64);
+
+  /* Logo image */
+  if(logoImg){
+    X.save(); X.beginPath();
+    X.rect(11,9,62,62); X.clip();
+    X.drawImage(logoImg,11,9,62,62);
+    X.restore();
+  }
+
+  /* Institution name + CDC centered in text area right of logo */
+  const textLeft=82, textRight=PW-10, textCX=(textLeft+textRight)/2;
+  txt('Vidyavahini Group of Institutions, Tumakuru', textCX, 34, nvy, 15, '700', 'center');
+  txt('Career Development Center', textCX, 56, nvy, 13, '700', 'center');
+
+  /* Report title — smaller, below the box */
+  txt(title,   PW/2, 100, '#1e293b', 12, '700',    'center');
+  txt(subtitle,PW/2, 116, '#64748b', 10, 'normal',  'center');
+  if(rightTop) txt(rightTop, PW-18, 100, '#1e293b', 10, '700',   'right');
+  if(rightSub) txt(rightSub, PW-18, 116, '#64748b',  9, 'normal','right');
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -684,10 +709,10 @@ async function renderOverall(){
     {n:totalSel,lbl:'Total Selections',col:'#059669',icon:'✅'},
     {n:uniquePlaced,lbl:'Unique Placed',col:'#0891B2',icon:'🎓'},
   ];
-  drawKPITiles(X1,t1,r1,PW,kpis,95);
+  drawKPITiles(X1,t1,r1,PW,kpis,135);
 
   // Funnel
-  const chartX=20,chartY=210,chartW=PW*0.52-20,chartH=192;
+  const chartX=20,chartY=250,chartW=PW*0.52-20,chartH=192;
   drawFunnel(X1,t1,r1,chartX,chartY,chartW,chartH,[
     {n:totalReg,c:'#7C3AED',l:'Registered'},
     {n:totalAtt,c:'#2563EB',l:'Attended'},
@@ -779,14 +804,19 @@ async function renderOverall(){
   X3.fillStyle='#ffffff'; X3.fillRect(0,0,PW,PH);
   if(logoImg){X3.save();X3.globalAlpha=0.04;X3.drawImage(logoImg,PW/2-110,PH/2-110,220,220);X3.restore();}
 
-  // Page 2 dark header
-  const g3=X3.createLinearGradient(0,0,PW,0);
-  g3.addColorStop(0,'#1e1b2e');g3.addColorStop(1,'#3b0764');
-  X3.fillStyle=g3;X3.fillRect(0,0,PW,64);
-  if(logoImg){X3.save();X3.beginPath();if(X3.roundRect)X3.roundRect(16,8,48,48,8);else X3.rect(16,8,48,48);X3.clip();X3.drawImage(logoImg,16,8,48,48);X3.restore();}
-  t3('Overall Placement Summary',72,28,'#fff',15,'800');
-  t3('Vidyavahini First Grade Degree College  ·  '+DATE,72,48,'rgba(255,255,255,.5)',10);
-  t3('All Companies · '+drivesDone+' Drives Done',PW-18,28,'rgba(255,255,255,.45)',9,'600','right');
+  // Page 3 header — same bordered style as circular
+  const nvy3='#001F5F';
+  X3.strokeStyle=nvy3; X3.lineWidth=2.5; X3.strokeRect(1,1,PW-2,78);
+  X3.fillStyle='#ffffff'; X3.fillRect(2,2,PW-4,76);
+  X3.strokeStyle=nvy3; X3.lineWidth=1.5; X3.strokeRect(2,2,PW-4,76);
+  X3.strokeStyle=nvy3; X3.lineWidth=1; X3.strokeRect(10,8,64,64);
+  if(logoImg){X3.save();X3.beginPath();X3.rect(11,9,62,62);X3.clip();X3.drawImage(logoImg,11,9,62,62);X3.restore();}
+  const tx3=(82+PW-10)/2;
+  t3('Vidyavahini Group of Institutions, Tumakuru',tx3,34,nvy3,15,'800','center');
+  t3('Career Development Center',tx3,56,nvy3,13,'700','center');
+  // Sub-header below box
+  t3('Overall Placement Summary · All Companies · '+drivesDone+' Drives Done',PW/2,100,'#1e293b',11,'700','center');
+  t3(DATE,PW/2,116,'#64748b',10,'normal','center');
 
   // 5 big stat tiles in a row
   const bigTiles=[
@@ -796,7 +826,7 @@ async function renderOverall(){
     {n:totalSel,lbl:'Selected',col:'#059669'},
     {n:uniquePlaced,lbl:'Unique Placed',col:'#0891B2'},
   ];
-  const btPad=12,btW=(PW-btPad*(bigTiles.length+1))/bigTiles.length,btH=72,btY=76;
+  const btPad=12,btW=(PW-btPad*(bigTiles.length+1))/bigTiles.length,btH=72,btY=130;
   bigTiles.forEach((bt,i)=>{
     const bx=btPad+i*(btW+btPad);
     const hc=parseInt(bt.col.slice(1),16);
@@ -806,7 +836,7 @@ async function renderOverall(){
   });
 
   // Arc conversion cards
-  drawArcCards(X3,t3,r3,64,PW,[
+  drawArcCards(X3,t3,r3,118,PW,[
     {l1:'Reg',l2:'Att',n:totalAtt,d:totalReg},
     {l1:'Att',l2:'Sel',n:totalSel,d:totalAtt},
     {l1:'Sel',l2:'Jnd',n:totalJnd,d:totalSel},
@@ -880,9 +910,9 @@ async function renderCompany(co){
     {n:att,lbl:'Attended',col:'#2563EB',icon:'🎯'},
     {n:sel,lbl:'Selected',col:'#059669',icon:'✅'},
     {n:jnd,lbl:'Joined',col:'#16A34A',icon:'🎉'},
-  ],95);
+  ],135);
 
-  const chartX=20,chartY=215,chartW=PW*0.55-30,chartH=192;
+  const chartX=20,chartY=255,chartW=PW*0.55-30,chartH=192;
   drawFunnel(X1,t1,r1,chartX,chartY,chartW,chartH,[
     {n:reg,c:'#7C3AED',l:'Registered'},
     {n:att,c:'#2563EB',l:'Attended'},
@@ -909,14 +939,19 @@ async function renderCompany(co){
   X2.fillStyle='#ffffff'; X2.fillRect(0,0,PW,PH);
   if(logoImg){X2.save();X2.globalAlpha=0.04;X2.drawImage(logoImg,PW/2-110,PH/2-110,220,220);X2.restore();}
 
-  // Page 2 dark header
-  const g2=X2.createLinearGradient(0,0,PW,0);
-  g2.addColorStop(0,'#1e1b2e');g2.addColorStop(1,'#3b0764');
-  X2.fillStyle=g2;X2.fillRect(0,0,PW,64);
-  if(logoImg){X2.save();X2.beginPath();if(X2.roundRect)X2.roundRect(16,8,48,48,8);else X2.rect(16,8,48,48);X2.clip();X2.drawImage(logoImg,16,8,48,48);X2.restore();}
-  t2(xe(co.name),72,28,'#fff',15,'800');
-  t2('Placement Summary  ·  '+DATE,72,48,'rgba(255,255,255,.5)',10);
-  t2('VIDYAVAHINI FIRST GRADE DEGREE COLLEGE',PW-18,28,'rgba(255,255,255,.3)',9,'600','right');
+  // Page 2 header — same bordered style as circular
+  const nvy2='#001F5F';
+  X2.strokeStyle=nvy2; X2.lineWidth=2.5; X2.strokeRect(1,1,PW-2,78);
+  X2.fillStyle='#ffffff'; X2.fillRect(2,2,PW-4,76);
+  X2.strokeStyle=nvy2; X2.lineWidth=1.5; X2.strokeRect(2,2,PW-4,76);
+  X2.strokeStyle=nvy2; X2.lineWidth=1; X2.strokeRect(10,8,64,64);
+  if(logoImg){X2.save();X2.beginPath();X2.rect(11,9,62,62);X2.clip();X2.drawImage(logoImg,11,9,62,62);X2.restore();}
+  const tx2=(82+PW-10)/2;
+  t2('Vidyavahini Group of Institutions, Tumakuru',tx2,34,nvy2,15,'800','center');
+  t2('Career Development Center',tx2,56,nvy2,13,'700','center');
+  // Company name sub-header below box
+  t2(xe(co.name),PW/2,100,'#1e293b',13,'800','center');
+  t2('Placement Summary  ·  '+DATE,PW/2,116,'#64748b',10,'normal','center');
 
   // Big stat tiles
   const tiles=[{n:reg,lbl:'Registered',col:'#7C3AED'},{n:att,lbl:'Attended',col:'#2563EB'},{n:sel,lbl:'Selected',col:'#059669'},{n:jnd,lbl:'Joined',col:'#16A34A'}];
