@@ -22,16 +22,17 @@ body{
   position:fixed;top:0;left:0;right:0;z-index:100;
   background:rgba(15,10,28,0.88);backdrop-filter:blur(14px);
   border-bottom:1px solid rgba(211,182,210,0.12);
-  padding:0 24px;height:60px;
-  display:flex;align-items:center;gap:16px;
+  padding:0 12px;height:60px;
+  display:flex;align-items:center;gap:8px;
+  overflow:visible;flex-wrap:nowrap;
 }
 .topbar-logo{
   width:36px;height:36px;border-radius:10px;overflow:hidden;flex-shrink:0;
   background:#fff;box-shadow:0 4px 16px rgba(109,14,106,0.40);
 }
 .topbar-logo img{width:100%;height:100%;object-fit:contain;display:block;}
-.topbar-title{font-size:15px;font-weight:800;letter-spacing:-0.02em;flex:1;}
-.topbar-title span{color:rgba(255,255,255,0.45);font-weight:500;margin-left:6px;font-size:13px;}
+.topbar-title{font-size:14px;font-weight:800;letter-spacing:-0.02em;flex:0 1 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;}
+.topbar-title span{color:rgba(255,255,255,0.45);font-weight:500;margin-left:6px;font-size:12px;}
 
 /* dropdown */
 .dropdown-wrap{display:flex;align-items:center;gap:10px;}
@@ -43,7 +44,7 @@ select#co-select{
   -webkit-appearance:none;appearance:none;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 8L2 4h8z' fill='%23aaa'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 12px center;
-  min-width:220px;transition:border-color .15s;
+  min-width:160px;transition:border-color .15s;
 }
 select#co-select:focus{border-color:rgba(211,182,210,0.55);}
 select#co-select option{background:#1A1030;color:#fff;}
@@ -199,10 +200,12 @@ select#co-select option{background:#1A1030;color:#fff;}
 const CONFIG_SHEET_ID = '__SHEET_ID__';
 const CONFIG_TAB      = 'CONFIG_TAB';
 const ADMIN_DATA_TAB  = 'ADMIN_MODE';
+const STUDENT_DB_TAB  = 'STUDENT DB';
 const CACHE_TTL       = 60000;
 
 let COMPANIES  = [];
 let ADMIN_DATA = {};
+let STUDENT_DB = {};
 let currentView = 'overall'; // 'overall' | company id (number)
 
 /* ═══════════════════════════════════════════════════════
@@ -379,6 +382,10 @@ async function init(){
     catch(e){ ADMIN_DATA={}; }
     mergeAdminData();
 
+    // Load student phone DB
+    try{ const dbCsv=await fetchCSV(CONFIG_SHEET_ID,STUDENT_DB_TAB); STUDENT_DB=parseStudentDB(dbCsv); }
+    catch(e){ STUDENT_DB={}; }
+
     // Build dropdown
     const sel=document.getElementById('co-select');
     COMPANIES.forEach(c=>{
@@ -399,6 +406,7 @@ async function init(){
       await loadStudentsForCompany(co);
       if(currentView==='overall') renderOverall();
     }));
+    enrichAllStudentPhones();
     if(currentView==='overall') renderOverall();
 
   }catch(e){
@@ -458,49 +466,37 @@ async function loadLogo(){
   }catch(e){ return null; }
 }
 
-/* Loads the VG logo for the header box */
+/* Loads the full-width VVFGC banner logo */
 async function loadBannerLogo(){
-  return loadLogo(); // same logo.jpg used in navbar
+  try{
+    const r=await fetch('logo_VVFGC.png'); if(!r.ok) return null;
+    const bl=await r.blob();
+    const b64=await new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.readAsDataURL(bl);});
+    return await new Promise(res=>{const i=new Image();i.onload=()=>res(i);i.onerror=()=>res(null);i.src=b64;});
+  }catch(e){ return null; }
 }
 
 /* ═══════════════════════════════════════════════════════
-   DRAW: SHARED HEADER — matches Image 2 style
-   Purple gradient bg · VG logo box · College name right
+   DRAW: SHARED HEADER — full-width logo_VVFGC.png banner
 ═══════════════════════════════════════════════════════ */
-const BANNER_H = 90; // canvas-px height of header area
+const BANNER_H = 100; // canvas-px height of header area
 
 function drawHeader(X, txt, rr, PW, bannerImg, title, subtitle, rightTop, rightSub){
-  /* Purple gradient background */
-  const g = X.createLinearGradient(0, 0, PW, 0);
-  g.addColorStop(0, '#570B54');
-  g.addColorStop(1, '#7B1F78');
-  X.fillStyle = g;
+  /* White background for banner area */
+  X.fillStyle='#ffffff';
   X.fillRect(0, 0, PW, BANNER_H);
 
-  /* White border box for logo */
-  const lbx=18, lby=14, lbs=BANNER_H-28;
-  X.strokeStyle='#ffffff'; X.lineWidth=2;
-  X.strokeRect(lbx, lby, lbs, lbs);
-  X.fillStyle='rgba(255,255,255,0.08)';
-  X.fillRect(lbx+1, lby+1, lbs-2, lbs-2);
-
-  /* Logo inside box */
   if(bannerImg){
-    X.save(); X.beginPath();
-    X.rect(lbx+3, lby+3, lbs-6, lbs-6);
-    X.clip();
-    X.drawImage(bannerImg, lbx+3, lby+3, lbs-6, lbs-6);
-    X.restore();
+    /* Scale to fill full width, preserve aspect ratio, clip to BANNER_H */
+    const aspect = bannerImg.naturalWidth / bannerImg.naturalHeight;
+    const dh = Math.round(PW / aspect);
+    const dy = Math.max(0, Math.round((BANNER_H - dh) / 2));
+    X.drawImage(bannerImg, 0, dy, PW, Math.min(dh, BANNER_H));
   }
 
-  /* Institution name + subtitle */
-  const textX = lbx + lbs + 18;
-  txt('Vidyavahini First Grade Degree College', textX, BANNER_H*0.42, '#ffffff', 16, '800');
-  txt('Placement Cell  —  Placement Report',    textX, BANNER_H*0.72, 'rgba(255,255,255,0.70)', 11, '500');
-
-  /* Thin separator below header */
-  X.fillStyle='rgba(255,255,255,0.18)';
-  X.fillRect(0, BANNER_H, PW, 1.5);
+  /* Thin purple separator line below banner */
+  X.fillStyle='#570B54';
+  X.fillRect(0, BANNER_H, PW, 2.5);
 
   /* Report title / subtitle / right text below the banner */
   txt(title,    PW/2, BANNER_H+22, '#1e293b', 12, '700',   'center');
@@ -661,19 +657,104 @@ function drawStackedBar(X, txt, rr, cPad, jbY, PW, jnd, njnd, pend, sel){
 }
 
 /* ═══════════════════════════════════════════════════════
+   STUDENT DB — phone lookup (mirrors placement-dashboard)
+═══════════════════════════════════════════════════════ */
+function parseStudentDB(csv){
+  const rows=parseCSV(csv);
+  if(rows.length<2) return {};
+  const hdr=rows[0].map(h=>(h||'').toLowerCase());
+  const col=(...ks)=>{for(const k of ks){const i=hdr.findIndex(h=>h.includes(k));if(i!==-1)return i;}return -1;};
+  const iName=col('name'), iPhone=col('phone','mobile','contact','ph'), iEmail=col('email','mail');
+  const map={};
+  rows.slice(1).forEach(r=>{
+    const phone=(r[iPhone]||'').toString().trim(); if(!phone) return;
+    const name=(r[iName]||'').trim(), email=(r[iEmail]||'').trim();
+    if(email) map[_normKey(email)]=phone;
+    if(name)  map[_normKey(name)] =phone;
+  });
+  return map;
+}
+function _normKey(s){ return (s||'').toLowerCase().replace(/[^a-z0-9@.]/g,' ').replace(/\s+/g,' ').trim(); }
+
+function _normNameRobust(raw){
+  if(!raw) return '';
+  let s=raw;
+  s=s.replace(/(mr|ms|mrs|dr|prof|sri|shri|smt|kumari|km)\.?/gi,' ');
+  s=s.replace(/[^a-zA-Z\s]/g,' ');
+  s=s.replace(/([a-z])([A-Z])/g,'$1 $2');
+  s=s.replace(/([A-Z]+)([A-Z][a-z])/g,'$1 $2');
+  s=s.toLowerCase();
+  s=s.replace(/(?:(?:^|\s)([a-z])\s(?=[a-z](?:\s|$)))+/g,m=>' '+m.replace(/\s+/g,'')+' ');
+  return s.replace(/\s+/g,' ').trim();
+}
+function _nameVariants(raw){
+  const robust=_normNameRobust(raw), tokens=robust.split(' ').filter(Boolean), variants=new Set();
+  variants.add(robust);
+  const initials=tokens.filter(t=>t.length===1).join(''), words=tokens.filter(t=>t.length>1);
+  if(initials){ variants.add([...words,initials].join(' ')); variants.add([initials,...words].join(' ')); }
+  variants.add(tokens.join(''));
+  if(words.length) variants.add(words[0]);
+  return [...variants].filter(Boolean);
+}
+function _levenshtein(a,b){
+  const m=a.length,n=b.length,dp=Array.from({length:m+1},(_,i)=>[i,...Array(n).fill(0)]);
+  for(let j=0;j<=n;j++)dp[0][j]=j;
+  for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)
+    dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+  return dp[m][n];
+}
+function _nameSimilarity(a,b){
+  if(!a||!b)return 0; if(a===b)return 1;
+  const ta=a.split(' ').filter(Boolean),tb=b.split(' ').filter(Boolean),setB=new Set(tb);
+  const shared=ta.filter(t=>setB.has(t)).length;
+  const tokScore=shared/Math.max(ta.length,tb.length);
+  const maxLen=Math.max(a.length,b.length);
+  const levScore=maxLen>0?1-_levenshtein(a,b)/maxLen:0;
+  const shortToks=ta.length<=tb.length?ta:tb,longSet=ta.length<=tb.length?setB:new Set(ta);
+  const containScore=shortToks.every(t=>longSet.has(t))?0.85:0;
+  const inits=(ta.length<=tb.length?ta:tb).filter(t=>t.length===1);
+  const longWords=ta.length<=tb.length?tb:ta;
+  const initialsScore=inits.length?inits.filter(i=>longWords.some(w=>w.startsWith(i))).length/Math.max(inits.length,1)*0.75:0;
+  return Math.max(tokScore,levScore*0.8,containScore,initialsScore);
+}
+function dbPhone(s){
+  if(!s) return '';
+  if(s.email){ const p=STUDENT_DB[_normKey(s.email)]; if(p) return p; }
+  if(!s.name) return '';
+  const variants=_nameVariants(s.name);
+  for(const v of variants){ const p=STUDENT_DB[v]; if(p) return p; }
+  const nameKeys=Object.keys(STUDENT_DB).filter(k=>!k.includes('@'));
+  let bestScore=0,bestPhone='';
+  for(const dbKey of nameKeys){
+    for(const variant of variants){
+      const score=_nameSimilarity(variant,dbKey);
+      if(score>bestScore){bestScore=score;bestPhone=STUDENT_DB[dbKey];}
+    }
+  }
+  if(bestScore>=0.65) return bestPhone;
+  const firstName=_normNameRobust(s.name).split(' ')[0];
+  if(firstName&&firstName.length>=4){
+    const matches=nameKeys.filter(k=>k.split(' ')[0]===firstName);
+    if(matches.length===1) return STUDENT_DB[matches[0]];
+  }
+  return '';
+}
+function enrichAllStudentPhones(){
+  COMPANIES.forEach(co=>{
+    ['studentsRegistered','studentsInterviewed','studentsSelected'].forEach(key=>{
+      (co[key]||[]).forEach(s=>{ if(!s.phone) s.phone=dbPhone(s); });
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
    OVERALL: UNIQUE PLACED HELPER
-   Handles name variants: "A A", "A.A", "A.A.", "AA" → same person
+   Robust normalisation handles ALL initial variants:
+   "A A", "A.A", "A.A.", "AA", "A A." → same person
 ═══════════════════════════════════════════════════════ */
 function normName(raw){
-  if(!raw) return '';
-  let s = raw.toLowerCase();
-  // Remove dots: "A.A." → "A A"
-  s = s.replace(/\./g, ' ');
-  // Split consonant-only runs ≤4 chars (initials jammed together): "aa" → "a a"
-  s = s.replace(/\b([b-df-hj-np-tv-z]{1,4})\b/g, tok => tok.split('').join(' '));
-  // Collapse spaces
-  s = s.replace(/\s+/g, ' ').trim();
-  return s;
+  // Reuse the robust normaliser from the phone DB
+  return _normNameRobust(raw || '');
 }
 
 function getUniquePlaced(){
