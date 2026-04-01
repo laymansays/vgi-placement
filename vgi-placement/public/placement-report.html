@@ -479,7 +479,7 @@ async function loadBannerLogo(){
 /* ═══════════════════════════════════════════════════════
    DRAW: SHARED HEADER — full-width logo_VVFGC.png banner
 ═══════════════════════════════════════════════════════ */
-const BANNER_H = 100; // canvas-px height of header area
+const BANNER_H = 130; // tall enough for logo_VVFGC.png at full width
 
 function drawHeader(X, txt, rr, PW, bannerImg, title, subtitle, rightTop, rightSub){
   /* White background for banner area */
@@ -487,22 +487,22 @@ function drawHeader(X, txt, rr, PW, bannerImg, title, subtitle, rightTop, rightS
   X.fillRect(0, 0, PW, BANNER_H);
 
   if(bannerImg){
-    /* Scale to fill full width, preserve aspect ratio, clip to BANNER_H */
+    /* Scale image to full canvas width, preserve aspect ratio */
     const aspect = bannerImg.naturalWidth / bannerImg.naturalHeight;
     const dh = Math.round(PW / aspect);
     const dy = Math.max(0, Math.round((BANNER_H - dh) / 2));
-    X.drawImage(bannerImg, 0, dy, PW, Math.min(dh, BANNER_H));
+    X.drawImage(bannerImg, 0, dy, PW, dh);
   }
 
   /* Thin purple separator line below banner */
   X.fillStyle='#570B54';
-  X.fillRect(0, BANNER_H, PW, 2.5);
+  X.fillRect(0, BANNER_H, PW, 3);
 
   /* Report title / subtitle / right text below the banner */
-  txt(title,    PW/2, BANNER_H+22, '#1e293b', 12, '700',   'center');
-  txt(subtitle, PW/2, BANNER_H+38, '#64748b', 10, 'normal', 'center');
-  if(rightTop) txt(rightTop, PW-18, BANNER_H+22, '#1e293b', 10, '700',   'right');
-  if(rightSub) txt(rightSub, PW-18, BANNER_H+38, '#64748b',  9, 'normal','right');
+  txt(title,    PW/2, BANNER_H+24, '#1e293b', 12, '700',   'center');
+  txt(subtitle, PW/2, BANNER_H+42, '#64748b', 10, 'normal', 'center');
+  if(rightTop) txt(rightTop, PW-18, BANNER_H+24, '#1e293b', 10, '700',   'right');
+  if(rightSub) txt(rightSub, PW-18, BANNER_H+42, '#64748b',  9, 'normal','right');
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -827,7 +827,7 @@ async function renderOverall(){
     {n:totalSel,lbl:'Total Selections',col:'#059669',icon:'✅'},
     {n:uniquePlaced,lbl:'Unique Placed',col:'#0891B2',icon:'🎓'},
   ];
-  drawKPITiles(X1,t1,r1,PW,kpis,160);
+  drawKPITiles(X1,t1,r1,PW,kpis,195);
 
   // Funnel
   const chartX=20,chartY=272,chartW=PW*0.52-20,chartH=192;
@@ -1017,7 +1017,7 @@ async function renderCompany(co){
     {n:att,lbl:'Attended',col:'#2563EB',icon:'🎯'},
     {n:sel,lbl:'Selected',col:'#059669',icon:'✅'},
     {n:jnd,lbl:'Joined',col:'#16A34A',icon:'🎉'},
-  ],160);
+  ],195);
 
   const chartX=20,chartY=272,chartW=PW*0.55-30,chartH=192;
   drawFunnel(X1,t1,r1,chartX,chartY,chartW,chartH,[
