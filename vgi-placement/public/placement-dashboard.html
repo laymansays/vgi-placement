@@ -1442,7 +1442,9 @@ function renderPCBar(){
   const r=document.getElementById('pc-bar');
   if(!r)return;
   if(!pcMode){ r.innerHTML=''; return; }
-  r.innerHTML=`<div class="pc-bar"><span>🔐 Placement Cell Mode active &nbsp;·&nbsp; Join status editing enabled on Selected Students</span><span class="pc-bar-badge">CONFIDENTIAL</span><div class="pc-bar-actions"><button onclick="exitPCMode()">Exit</button></div></div>`;
+  r.innerHTML=`<div class="pc-bar"><span>🔐 Placement Cell Mode active</span><span class="pc-bar-badge">CONFIDENTIAL</span><div class="pc-bar-actions"><button class="btn btn-admin-outline btn-sm" id="pc-circular">📄 Circular</button><button class="btn btn-admin-outline btn-sm" id="pc-repo">📁 Repository</button><button onclick="exitPCMode()">Exit</button></div></div>`;
+  document.getElementById('pc-circular').onclick=openCircularModal;
+  document.getElementById('pc-repo').onclick=openCircularRepo;
 }
 
 /* ════════════════════════════════════════════════════
@@ -4875,12 +4877,16 @@ function openCircularRepo(){
       ? `<a href="${c.driveUrl}" target="_blank" class="btn btn-outline btn-xs" style="color:var(--green);border-color:var(--green);margin-right:4px;">📁 Drive</a>`
       : `<button class="btn btn-outline btn-xs" style="margin-right:4px;" id="repo-drive-${i}"
            onclick="_saveToDriveRepo(${i},this)">
-           <img src="https://www.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png" style="width:11px;height:11px;vertical-align:middle;" onerror="this.style.display='none'"/> Save
+           <img src="https://www.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png" style="width:11px;height:11px;vertical-align:middle;" onerror="this.style.display='none'"/> Save to Drive
          </button>`;
+    const jdStatus = c.savedToDrive
+      ? `<span style="font-size:11px;color:var(--green);">✅ JD updated</span>`
+      : `<span style="font-size:11px;color:var(--text4);">Save to Drive to set JD</span>`;
     return `<tr>
       <td style="font-weight:700;color:var(--text);">${xe(c.company)}</td>
-      <td style="color:var(--text3);font-size:12px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${xe(c.roles||'—')}</td>
+      <td style="color:var(--text3);font-size:12px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${xe(c.roles||'—')}</td>
       <td style="color:var(--text3);font-size:12px;white-space:nowrap;">${xe(c.date)}<br><span style="font-size:11px;color:var(--text4);">${xe(c.time)}</span></td>
+      <td style="font-size:11px;">${jdStatus}</td>
       <td style="white-space:nowrap;">
         ${driveBtn}
         <button class="btn btn-outline btn-xs" style="margin-right:4px;"
@@ -4895,13 +4901,15 @@ function openCircularRepo(){
     `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
        <div style="font-size:12px;color:var(--text3);">
          <strong style="color:var(--text);">${_circularRepo.length}</strong> circular${_circularRepo.length!==1?'s':''} this session
-         <span style="margin-left:6px;color:var(--text4);font-style:italic;">Blob links valid until page refresh · Drive links are permanent</span>
+       </div>
+       <div style="font-size:11px;color:var(--text4);padding:6px 10px;background:var(--bg2);border-radius:6px;border:1px solid var(--border);">
+         💡 <strong>Save to Drive</strong> to automatically set the JD link on the Student Portal. Student portal must be refreshed to show the new JD.
        </div>
      </div>
      <div style="overflow-x:auto;border-radius:10px;border:1px solid var(--border);">
      <table class="student-table">
        <thead><tr>
-         <th>Company</th><th>Role(s)</th><th>Generated</th><th>Actions</th>
+         <th>Company</th><th>Role(s)</th><th>Generated</th><th>JD Status</th><th>Actions</th>
        </tr></thead>
        <tbody>${rows}</tbody>
      </table></div>`,
