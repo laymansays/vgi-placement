@@ -2071,42 +2071,39 @@ async function _buildReportPDF(title, subtitle, allSections){
   const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
   const DATE_STR = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
 
-  // ── Load logo as base64 ──
-  let logoB64 = null;
+  // ── Load banner logo ──
+  let bannerB64 = null;
   try {
-    const resp = await fetch('logo.jpg');
+    const resp = await fetch('logo_VVFGC.png');
     const blob = await resp.blob();
-    logoB64 = await new Promise(res => {
-      const r = new FileReader();
-      r.onload = () => res(r.result);
-      r.readAsDataURL(blob);
+    bannerB64 = await new Promise(res => {
+      const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(blob);
     });
-  } catch(e){ logoB64 = null; }
+  } catch(e){ bannerB64 = null; }
 
-  // ── Draw full page header: logo left, college name + title centred ──
+  const BH = 28; // banner height in mm
+
+  // ── Draw full page header: logo_VVFGC.png full-width ──
   function drawHeader(){
-    doc.setFillColor(109,14,106);
-    doc.rect(0, 0, 210, 30, 'F');
-    if(logoB64) doc.addImage(logoB64, 'JPEG', 10, 4, 22, 22);
-    doc.setTextColor(255,255,255);
-    doc.setFontSize(13); doc.setFont('helvetica','bold');
-    doc.text('Vidyavahini First Grade Degree College', 38, 13);
-    doc.setFontSize(9); doc.setFont('helvetica','normal');
-    doc.text('Placement Cell  —  ' + title, 38, 21);
+    doc.setFillColor(255,255,255);
+    doc.rect(0, 0, 210, BH, 'F');
+    if(bannerB64) doc.addImage(bannerB64, 'PNG', 0, 0, 210, BH);
+    doc.setFillColor(87,11,84);
+    doc.rect(0, BH, 210, 1, 'F');
   }
 
   // ── Company info block below header, returns table startY ──
   function drawCompanyBlock(companyName, roles, isContinued){
     doc.setTextColor(50,50,50);
     doc.setFontSize(11); doc.setFont('helvetica','bold');
-    doc.text(companyName + (isContinued ? '   (contd.)' : ''), 14, 40);
+    doc.text(companyName + (isContinued ? '   (contd.)' : ''), 14, BH+10);
     doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(80,80,80);
-    doc.text('Role(s): ' + (roles||'—'), 14, 47);
+    doc.text('Role(s): ' + (roles||'—'), 14, BH+17);
     doc.setTextColor(160,160,160);
-    doc.text('Generated: ' + DATE_STR, 14, 53);
+    doc.text('Generated: ' + DATE_STR, 14, BH+23);
     doc.setDrawColor(220,200,220); doc.setLineWidth(0.25);
-    doc.line(14, 57, 196, 57);
-    return 61;
+    doc.line(14, BH+27, 196, BH+27);
+    return BH+31;
   }
 
   // ── Footer ──
@@ -2857,45 +2854,39 @@ async function downloadAnalyticsPDF(companyId){
   const pending   = sel - joined - notJoined;
   const pct=(n,d)=>d>0?Math.round(n/d*100):0;
 
-  // Load logo
-  let logoB64=null;
+  // Load banner logo
+  let bannerB64=null;
   try {
-    const resp = await fetch('logo.jpg');
+    const resp = await fetch('logo_VVFGC.png');
     const blob = await resp.blob();
-    logoB64 = await new Promise(res=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.readAsDataURL(blob); });
-  } catch(e){ logoB64=null; }
+    bannerB64 = await new Promise(res=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.readAsDataURL(blob); });
+  } catch(e){ bannerB64=null; }
+
+  // Banner height: at 297mm wide, aspect ~7.5:1 → ~22mm
+  const BNR=22;
 
   // ── Page 1: Header + Funnel chart ──
-  // Header bar
-  doc.setFillColor(87,11,84);
-  doc.rect(0,0,W,28,'F');
-  if(logoB64) doc.addImage(logoB64,'JPEG',8,3,22,22);
-  doc.setTextColor(255,255,255);
-  doc.setFontSize(14); doc.setFont('helvetica','bold');
-  doc.text('Vidyavahini First Grade Degree College — Placement Analytics',38,12);
-  doc.setFontSize(10); doc.setFont('helvetica','normal');
-  doc.text(xe(co.name) + '  ·  Generated: ' + DATE_STR,38,21);
-
-  // Watermark logo (light)
-  if(logoB64){
-    doc.saveGraphicsState();
-    doc.setGState(new doc.GState({opacity:0.05}));
-    doc.addImage(logoB64,'JPEG',W/2-35,H/2-35,70,70);
-    doc.restoreGraphicsState();
-  }
+  doc.setFillColor(255,255,255); doc.rect(0,0,W,BNR,'F');
+  if(bannerB64) doc.addImage(bannerB64,'PNG',0,0,W,BNR);
+  doc.setFillColor(87,11,84); doc.rect(0,BNR,W,0.8,'F');
+  // Company name + date below banner
+  doc.setTextColor(30,30,46); doc.setFontSize(10); doc.setFont('helvetica','bold');
+  doc.text(xe(co.name), 14, BNR+8);
+  doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(100,116,139);
+  doc.text('Placement Analytics  ·  Generated: ' + DATE_STR, W-14, BNR+8, {align:'right'});
 
   // ── Draw funnel as canvas → image ──
   const offscreen = document.createElement('canvas');
   offscreen.width = 900; offscreen.height = 480;
   _drawFunnelBars(offscreen.getContext('2d'), offscreen.width, offscreen.height, reg, att, sel, joined, notJoined, pending, '#1A0519', '#64748B', '#E2E8F0', false);
   const chartImg = offscreen.toDataURL('image/png');
-  doc.addImage(chartImg,'PNG',14,32,180,96);
+  doc.addImage(chartImg,'PNG',14,BNR+12,180,96);
 
   // ── Conversion table (right of chart) ──
   doc.setFillColor(245,240,245);
-  doc.roundedRect(200,32,90,96,4,4,'F');
+  doc.roundedRect(200,BNR+12,90,96,4,4,'F');
   doc.setTextColor(87,11,84); doc.setFontSize(9); doc.setFont('helvetica','bold');
-  doc.text('CONVERSION RATIOS',202,41);
+  doc.text('CONVERSION RATIOS',202,BNR+21);
   const ratios=[
     ['Reg → Attended', pct(att,reg)+'%'],
     ['Attended → Selected', pct(sel,att)+'%'],
@@ -2904,7 +2895,7 @@ async function downloadAnalyticsPDF(companyId){
   ];
   doc.setFont('helvetica','normal'); doc.setTextColor(50,50,50); doc.setFontSize(8.5);
   ratios.forEach(([k,v],i)=>{
-    const y=50+i*11;
+    const y=BNR+30+i*11;
     doc.text(k,202,y);
     doc.setFont('helvetica','bold'); doc.setTextColor(87,11,84);
     doc.text(v,282,y,'right');
@@ -2914,12 +2905,12 @@ async function downloadAnalyticsPDF(companyId){
 
   // ── Joining breakdown ──
   doc.setFillColor(245,240,245);
-  doc.roundedRect(200,134,90,44,4,4,'F');
+  doc.roundedRect(200,BNR+114,90,44,4,4,'F');
   doc.setTextColor(87,11,84); doc.setFontSize(9); doc.setFont('helvetica','bold');
-  doc.text('JOINING STATUS',202,143);
+  doc.text('JOINING STATUS',202,BNR+123);
   const jRows=[['Joined',joined,'#22C55E'],['Not Joined',notJoined,'#EF4444'],['Pending',pending,'#F59E0B']];
   jRows.forEach(([k,v,col],i)=>{
-    const y=152+i*9;
+    const y=BNR+132+i*9;
     doc.setFont('helvetica','normal'); doc.setTextColor(50,50,50); doc.setFontSize(8.5);
     doc.text(k,202,y);
     const rgb=parseInt(col.slice(1),16);
@@ -2930,23 +2921,15 @@ async function downloadAnalyticsPDF(companyId){
 
   // ── Page 2: Presentation bullet points ──
   doc.addPage();
-  doc.setFillColor(87,11,84);
-  doc.rect(0,0,W,28,'F');
-  if(logoB64) doc.addImage(logoB64,'JPEG',8,3,22,22);
-  doc.setTextColor(255,255,255);
-  doc.setFontSize(14); doc.setFont('helvetica','bold');
-  doc.text('Placement Summary — ' + xe(co.name),38,12);
-  doc.setFontSize(10); doc.setFont('helvetica','normal');
-  doc.text('Vidyavahini First Grade Degree College  ·  ' + DATE_STR,38,21);
+  doc.setFillColor(255,255,255); doc.rect(0,0,W,BNR,'F');
+  if(bannerB64) doc.addImage(bannerB64,'PNG',0,0,W,BNR);
+  doc.setFillColor(87,11,84); doc.rect(0,BNR,W,0.8,'F');
+  doc.setTextColor(30,30,46); doc.setFontSize(10); doc.setFont('helvetica','bold');
+  doc.text('Placement Summary — ' + xe(co.name), 14, BNR+8);
+  doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(100,116,139);
+  doc.text(DATE_STR, W-14, BNR+8, {align:'right'});
 
-  if(logoB64){
-    doc.saveGraphicsState();
-    doc.setGState(new doc.GState({opacity:0.05}));
-    doc.addImage(logoB64,'JPEG',W/2-35,H/2-35,70,70);
-    doc.restoreGraphicsState();
-  }
-
-  let py = 40;
+  let py = BNR+18;
   const bullet=(text,indent=0,bold=false,col=[50,50,50],size=11)=>{
     doc.setFont('helvetica',bold?'bold':'normal');
     doc.setTextColor(...col);
