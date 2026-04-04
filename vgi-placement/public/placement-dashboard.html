@@ -2298,42 +2298,41 @@ async function _buildReportPDF(title, subtitle, allSections){
   const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
   const DATE_STR = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
 
-  // ── Load logo as base64 ──
-  let logoB64 = null;
+  // ── Load banner logo (logo_VVFGC.png) ──
+  let bannerB64 = null;
   try {
-    const resp = await fetch('logo.jpg');
+    const resp = await fetch('logo_VVFGC.png');
     const blob = await resp.blob();
-    logoB64 = await new Promise(res => {
-      const r = new FileReader();
-      r.onload = () => res(r.result);
-      r.readAsDataURL(blob);
+    bannerB64 = await new Promise(res => {
+      const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(blob);
     });
-  } catch(e){ logoB64 = null; }
+  } catch(e){ bannerB64 = null; }
 
-  // ── Draw full page header: logo left, college name + title centred ──
+  // Banner height in mm: image is ~7.5:1 ratio, at 210mm wide → ~28mm tall
+  const BH = 28;
+
+  // ── Draw full page header: logo_VVFGC.png full-width ──
   function drawHeader(){
-    doc.setFillColor(109,14,106);
-    doc.rect(0, 0, 210, 30, 'F');
-    if(logoB64) doc.addImage(logoB64, 'JPEG', 10, 4, 22, 22);
-    doc.setTextColor(255,255,255);
-    doc.setFontSize(13); doc.setFont('helvetica','bold');
-    doc.text('Vidyavahini First Grade Degree College', 38, 13);
-    doc.setFontSize(9); doc.setFont('helvetica','normal');
-    doc.text('Placement Cell  —  ' + title, 38, 21);
+    doc.setFillColor(255,255,255);
+    doc.rect(0, 0, 210, BH, 'F');
+    if(bannerB64) doc.addImage(bannerB64, 'PNG', 0, 0, 210, BH);
+    // Purple separator line
+    doc.setFillColor(87,11,84);
+    doc.rect(0, BH, 210, 1, 'F');
   }
 
   // ── Company info block below header, returns table startY ──
   function drawCompanyBlock(companyName, roles, isContinued){
     doc.setTextColor(50,50,50);
     doc.setFontSize(11); doc.setFont('helvetica','bold');
-    doc.text(companyName + (isContinued ? '   (contd.)' : ''), 14, 40);
+    doc.text(companyName + (isContinued ? '   (contd.)' : ''), 14, BH+10);
     doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(80,80,80);
-    doc.text('Role(s): ' + (roles||'—'), 14, 47);
+    doc.text('Role(s): ' + (roles||'—'), 14, BH+17);
     doc.setTextColor(160,160,160);
-    doc.text('Generated: ' + DATE_STR, 14, 53);
+    doc.text('Generated: ' + DATE_STR, 14, BH+23);
     doc.setDrawColor(220,200,220); doc.setLineWidth(0.25);
-    doc.line(14, 57, 196, 57);
-    return 61;
+    doc.line(14, BH+27, 196, BH+27);
+    return BH+31;
   }
 
   // ── Footer ──
@@ -3115,13 +3114,10 @@ async function downloadAnalyticsPDF(companyId){
   const DATE = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
   const rateCol = (pv) => pv>=70?'#16A34A':pv>=40?'#D97706':'#DC2626';
 
-  /* load logo */
-  let logo=null;
-  try{ const r=await fetch('logo.jpg'); if(r.ok){ const bl=await r.blob(); logo=await new Promise(res=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.readAsDataURL(bl); }); } }catch(e){}
-
-  /* helper: load img from dataURL */
-  const loadImg = (src) => new Promise(res=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=()=>res(null); i.src=src; });
-  const logoImg = logo ? await loadImg(logo) : null;
+  /* load banner logo */
+  let banner=null;
+  try{ const r=await fetch('logo_VVFGC.png'); if(r.ok){ const bl=await r.blob(); banner=await new Promise(res=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.readAsDataURL(bl); }); } }catch(e){}
+  const bannerImg = banner ? await loadImg(banner) : null;
 
   /* ══════════════════════════════════════════════
      BUILD ONE BIG CANVAS  (A4 landscape = 297×210mm @ 3.78px/mm ≈ 1123×794px)
@@ -3145,22 +3141,30 @@ async function downloadAnalyticsPDF(companyId){
     if(stroke){ X.strokeStyle=stroke; X.lineWidth=1.5; X.stroke(); }
   };
 
+  /* helper to draw the banner header on a page at y-offset pageY */
+  const BH=Math.round(PW/7.5); // banner height based on logo aspect ratio
+  function drawPageHeader(pageY){
+    X.fillStyle='#ffffff'; X.fillRect(0,pageY,PW,BH);
+    if(bannerImg){
+      const aspect=bannerImg.naturalWidth/bannerImg.naturalHeight;
+      const dh=Math.round(PW/aspect);
+      X.drawImage(bannerImg,0,pageY,PW,dh);
+    }
+    X.fillStyle='#570B54'; X.fillRect(0,pageY+BH,PW,3);
+  }
+
   /* ══════════════════════════════
      PAGE 1
   ══════════════════════════════ */
 
   /* — Header bar — */
-  const grad0=X.createLinearGradient(0,0,PW,0);
-  grad0.addColorStop(0,'#3b0764'); grad0.addColorStop(1,'#6D0E6A');
-  X.fillStyle=grad0; X.fillRect(0,0,PW,80);
-  if(logoImg){ X.save(); X.beginPath(); X.roundRect(18,10,60,60,10); X.clip(); X.drawImage(logoImg,18,10,60,60); X.restore(); }
-  txt('Vidyavahini First Grade Degree College',92,34,'#fff',16,'700');
-  txt('Placement Analytics Report',92,58,'rgba(255,255,255,.7)',12);
-  txt(xe(co.name)+' · '+DATE, PW-20, 34, '#FCD34D', 13, '700', 'right');
+  drawPageHeader(0);
+  txt(xe(co.name)+' · '+DATE, PW-20, BH+22, '#1e293b', 13, '700', 'right');
   if(co.driveDate||co.interviewMode){
     const sub=[(co.driveDate?'📅 '+fmtDate(co.driveDate):''),(co.interviewMode?'🖥 '+xe(co.interviewMode):'')].filter(Boolean).join('   ');
-    txt(sub, PW-20, 58, 'rgba(255,255,255,.6)', 10, 'normal', 'right');
+    txt(sub, PW-20, BH+38, '#64748b', 10, 'normal', 'right');
   }
+  txt('Placement Analytics Report', 20, BH+22, '#1e293b', 12, '700');
 
   /* watermark */
   if(logoImg){ X.save(); X.globalAlpha=0.04; X.drawImage(logoImg,PW/2-120,PH/2-120,240,240); X.restore(); }
@@ -3172,7 +3176,7 @@ async function downloadAnalyticsPDF(companyId){
     {n:sel, lbl:'Selected',   col:'#059669', icon:'✅'},
     {n:jnd, lbl:'Joined',     col:'#16A34A', icon:'🎉'},
   ];
-  const tileW=(PW-40)/4-10, tileH=90, tileY=95;
+  const tileW=(PW-40)/4-10, tileH=90, tileY=BH+55;
   kpis.forEach((k,i)=>{
     const tx=20+i*(tileW+10);
     roundRect(tx,tileY,tileW,tileH,10,k.col+'18','');
@@ -3301,13 +3305,9 @@ async function downloadAnalyticsPDF(companyId){
   if(logoImg){ X.save(); X.globalAlpha=0.04; X.drawImage(logoImg,PW/2-120,P2+PH/2-120,240,240); X.restore(); }
 
   /* — Page 2 header bar — */
-  const g2=X.createLinearGradient(0,P2,PW,P2);
-  g2.addColorStop(0,'#1e1b2e'); g2.addColorStop(1,'#3b0764');
-  X.fillStyle=g2; X.fillRect(0,P2,PW,64);
-  if(logoImg){ X.save(); X.beginPath(); X.roundRect(18,P2+8,48,48,8); X.clip(); X.drawImage(logoImg,18,P2+8,48,48); X.restore(); }
-  txt(xe(co.name),80,P2+28,'#fff',15,'800');
-  txt('Placement Summary  ·  '+DATE,80,P2+48,'rgba(255,255,255,.55)',10);
-  txt('VIDYAVAHINI FIRST GRADE DEGREE COLLEGE',PW-20,P2+28,'rgba(255,255,255,.35)',9,'600','right');
+  drawPageHeader(P2);
+  txt(xe(co.name), 20, P2+BH+22, '#1e293b', 15, '800');
+  txt('Placement Summary  ·  '+DATE, 20, P2+BH+38, '#64748b', 10);
 
   /* — 5 big pipeline conversion cards in a row — */
   const cards=[
@@ -3317,7 +3317,7 @@ async function downloadAnalyticsPDF(companyId){
     {l1:'Att',l2:'Joined',n:jnd,d:att},
     {l1:'Reg',l2:'Joined',n:jnd,d:reg},
   ];
-  const cPad=16, cW2=(PW-cPad*(cards.length+1))/cards.length, cH2=108, cY2=P2+76;
+  const cPad=16, cW2=(PW-cPad*(cards.length+1))/cards.length, cH2=108, cY2=P2+BH+54;
   cards.forEach((cd,i)=>{
     const cx2=cPad+i*(cW2+cPad), pv=p(cd.n,cd.d), col=rateCol(pv);
     /* card bg */
@@ -4355,12 +4355,21 @@ async function downloadCompanyReportPDF(){
   const doc = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' });
   const PW=297, PH=210;
 
-  // Header bar
-  doc.setFillColor(30,27,46); doc.rect(0,0,PW,22,'F');
-  doc.setTextColor(255,255,255); doc.setFontSize(13); doc.setFont('helvetica','bold');
-  doc.text('Company Report — Vidyavahini First Grade Degree College', 14, 14);
-  doc.setFontSize(8); doc.setFont('helvetica','normal');
-  doc.text(DATE+'   ·   '+list.length+' companies', PW-14, 14, {align:'right'});
+  // Load banner logo
+  let bnr=null;
+  try{ const r=await fetch('logo_VVFGC.png'); if(r.ok){ const bl=await r.blob(); bnr=await new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.readAsDataURL(bl);}); } }catch(e){}
+  // At 297mm wide, aspect ~7.5:1 → height ~40mm; use 22mm for compactness
+  const BNR_H=22;
+
+  // Banner header
+  doc.setFillColor(255,255,255); doc.rect(0,0,PW,BNR_H,'F');
+  if(bnr) doc.addImage(bnr,'PNG',0,0,PW,BNR_H);
+  doc.setFillColor(87,11,84); doc.rect(0,BNR_H,PW,0.8,'F');
+  // Report title below banner
+  doc.setTextColor(30,30,46); doc.setFontSize(10); doc.setFont('helvetica','bold');
+  doc.text('Company Report', 14, BNR_H+7);
+  doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(100,116,139);
+  doc.text(DATE+'   ·   '+list.length+' companies', PW-14, BNR_H+7, {align:'right'});
 
   // Active filters line
   const mode = (document.getElementById('cr-mode')||{}).value||'';
@@ -4372,14 +4381,14 @@ async function downloadCompanyReportPDF(){
   if(date)   filterParts.push('Date: '+fmtDate(date));
   if(filterParts.length){
     doc.setTextColor(150,150,180); doc.setFontSize(7);
-    doc.text('Filters: '+filterParts.join('  |  '), 14, 26);
+    doc.text('Filters: '+filterParts.join('  |  '), 14, BNR_H+14);
   }
 
   // Table
   const cols   = ['#','Company','Mode','Drive Date','POC Name','POC Email','POC Contact','Status'];
   const cW     = [8, 52, 28, 24, 34, 54, 28, 34];
   const startX = 10, rowH = 8;
-  let y = filterParts.length ? 32 : 26;
+  let y = filterParts.length ? BNR_H+20 : BNR_H+14;
 
   // Header row
   doc.setFillColor(248,250,252); doc.rect(startX, y, PW-startX*2, rowH, 'F');
@@ -4394,11 +4403,13 @@ async function downloadCompanyReportPDF(){
     // Page break
     if(y+rowH > PH-12){
       doc.addPage();
-      doc.setFillColor(30,27,46); doc.rect(0,0,PW,14,'F');
-      doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont('helvetica','bold');
-      doc.text('Company Report (continued)',14,10);
+      doc.setFillColor(255,255,255); doc.rect(0,0,PW,BNR_H,'F');
+      if(bnr) doc.addImage(bnr,'PNG',0,0,PW,BNR_H);
+      doc.setFillColor(87,11,84); doc.rect(0,BNR_H,PW,0.8,'F');
+      doc.setTextColor(100,116,139); doc.setFontSize(8); doc.setFont('helvetica','bold');
+      doc.text('Company Report (continued)', 14, BNR_H+7);
       doc.setFont('helvetica','normal');
-      y=20;
+      y=BNR_H+12;
     }
 
     const poc=co.poc||{};
