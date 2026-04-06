@@ -747,6 +747,7 @@ body.admin-mode .modal{border-top:3px solid var(--admin);}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 </head>
 <body>
@@ -1652,28 +1653,28 @@ function buildHome(){
       </div>
       <div class="home-banner-right">
         <div class="stat-tile" onclick="showStatModal('companies')">
-          <button class="tile-pdf-btn" onclick="event.stopPropagation();exportPDF('companies')" title="Download PDF">⬇ PDF</button>
+          <button class="tile-pdf-btn" onclick="event.stopPropagation();exportPDF('companies')" title="Download PDF">⬇ PDF</button><button class="tile-pdf-btn" onclick="event.stopPropagation();exportXLS('companies')" title="Download Excel" style="background:#217346;color:#fff;border-color:#217346;top:28px;">⬇ XLS</button>
           <div class="stat-tile-icon">🏢</div>
           <div class="stat-tile-num">${total}</div>
           <div class="stat-tile-lbl">Companies</div>
           <div class="stat-tile-hint">Click to view ↗</div>
         </div>
         <div class="stat-tile" onclick="showStatModal('registrations')">
-          <button class="tile-pdf-btn" onclick="event.stopPropagation();exportPDF('registrations')" title="Download PDF">⬇ PDF</button>
+          <button class="tile-pdf-btn" onclick="event.stopPropagation();exportPDF('registrations')" title="Download PDF">⬇ PDF</button><button class="tile-pdf-btn" onclick="event.stopPropagation();exportXLS('registrations')" title="Download Excel" style="background:#217346;color:#fff;border-color:#217346;top:28px;">⬇ XLS</button>
           <div class="stat-tile-icon">📋</div>
           <div class="stat-tile-num">${regs}</div>
           <div class="stat-tile-lbl">Registrations</div>
           <div class="stat-tile-hint">Click to view ↗</div>
         </div>
         <div class="stat-tile" onclick="showStatModal('drives')">
-          <button class="tile-pdf-btn" onclick="event.stopPropagation();exportPDF('drives')" title="Download PDF">⬇ PDF</button>
+          <button class="tile-pdf-btn" onclick="event.stopPropagation();exportPDF('drives')" title="Download PDF">⬇ PDF</button><button class="tile-pdf-btn" onclick="event.stopPropagation();exportXLS('drives')" title="Download Excel" style="background:#217346;color:#fff;border-color:#217346;top:28px;">⬇ XLS</button>
           <div class="stat-tile-icon">✅</div>
           <div class="stat-tile-num">${done}</div>
           <div class="stat-tile-lbl">Drives Done</div>
           <div class="stat-tile-hint">Click to view ↗</div>
         </div>
         <div class="stat-tile" onclick="showStatModal('placed')">
-          <button class="tile-pdf-btn" onclick="event.stopPropagation();exportPDF('placed')" title="Download PDF">⬇ PDF</button>
+          <button class="tile-pdf-btn" onclick="event.stopPropagation();exportPDF('placed')" title="Download PDF">⬇ PDF</button><button class="tile-pdf-btn" onclick="event.stopPropagation();exportXLS('placed')" title="Download Excel" style="background:#217346;color:#fff;border-color:#217346;top:28px;">⬇ XLS</button>
           <div class="stat-tile-icon">🎉</div>
           <div class="stat-tile-num">${uniquePlaced}</div>
           <div class="stat-tile-lbl">Unique Placed</div>
@@ -1833,17 +1834,17 @@ async function buildDetail(id){
 
     <div class="d-stats">
       <div class="d-stat" id="dsr">
-        <button class="tile-pdf-btn" onclick="event.stopPropagation();downloadPlacedPDF('dsr-full')" title="Download PDF">⬇ PDF</button>
+        <button class="tile-pdf-btn" onclick="event.stopPropagation();downloadPlacedPDF('dsr-full')" title="Download PDF">⬇ PDF</button><button class="tile-pdf-btn" onclick="event.stopPropagation();downloadPlacedXLS('dsr-full')" title="Download Excel" style="background:#217346;color:#fff;border-color:#217346;top:28px;">⬇ XLS</button>
         <div class="d-stat-num">${c.studentsRegistered.length}</div>
         <div class="d-stat-lbl">Registered${adminMode?' <small style="opacity:.5">✏</small>':''}</div>
       </div>
       <div class="d-stat" id="dsi">
-        <button class="tile-pdf-btn" onclick="event.stopPropagation();downloadPlacedPDF('dsi-full')" title="Download PDF">⬇ PDF</button>
+        <button class="tile-pdf-btn" onclick="event.stopPropagation();downloadPlacedPDF('dsi-full')" title="Download PDF">⬇ PDF</button><button class="tile-pdf-btn" onclick="event.stopPropagation();downloadPlacedXLS('dsi-full')" title="Download Excel" style="background:#217346;color:#fff;border-color:#217346;top:28px;">⬇ XLS</button>
         <div class="d-stat-num">${c.studentsInterviewed.length}</div>
         <div class="d-stat-lbl">Interviewed${adminMode?' <small style="opacity:.5">✏</small>':''}</div>
       </div>
       <div class="d-stat" id="dss">
-        <button class="tile-pdf-btn" onclick="event.stopPropagation();downloadPlacedPDF('dss-full')" title="Download PDF">⬇ PDF</button>
+        <button class="tile-pdf-btn" onclick="event.stopPropagation();downloadPlacedPDF('dss-full')" title="Download PDF">⬇ PDF</button><button class="tile-pdf-btn" onclick="event.stopPropagation();downloadPlacedXLS('dss-full')" title="Download Excel" style="background:#217346;color:#fff;border-color:#217346;top:28px;">⬇ XLS</button>
         <div class="d-stat-num">${c.studentsSelected.length}</div>
         <div class="d-stat-lbl">Selected${adminMode?' <small style="opacity:.5">✏</small>':''}</div>
       </div>
@@ -2207,7 +2208,7 @@ function buildStudentSection(title,students,anchorId,companyId){
 
   /* ── header action buttons (Selected section only) ── */
   const pdfBtn = isSelected
-    ? `<button class="btn-pdf-download" onclick="event.stopPropagation();downloadPlacedPDF('${anchorId}')">⬇ PDF</button>`
+    ? `<button class="btn-pdf-download" onclick="event.stopPropagation();downloadPlacedPDF('${anchorId}')">⬇ PDF</button><button class="btn-pdf-download" onclick="event.stopPropagation();downloadPlacedXLS('${anchorId}')" style="background:#217346;color:#fff;border-color:#217346;">⬇ XLS</button>`
     : '';
   const analyticBtn = isSelected
     ? `<button class="btn-pdf-download" style="background:linear-gradient(135deg,#570B54,#3A0838);color:#fff;border:none;" onclick="event.stopPropagation();openCompanyAnalytics(${companyId})">📊 Analytics</button>`
@@ -2495,7 +2496,123 @@ async function exportPDF(type){
 }
 
 /* ════════════════════════════════════════════════════
-   ADMIN EDIT MODALS
+   EXCEL EXPORTS — mirrors exportPDF data exactly
+════════════════════════════════════════════════════ */
+function _xlsGuard(){ if(typeof XLSX==='undefined'){ toast('Excel library not ready yet','error'); return false; } return true; }
+function _xlsSave(wb, name){ XLSX.writeFile(wb, name+'.xlsx'); toast('Excel downloaded','success','📊'); }
+
+function exportXLS(type){
+  if(!_xlsGuard()) return;
+  const DATE = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  const wb = XLSX.utils.book_new();
+
+  if(type==='companies'){
+    const rows = [['#','Company','Roles','Registered','Interviewed','Selected']];
+    COMPANIES.forEach((c,i)=>rows.push([i+1, c.name, (c.roles&&c.roles.length?c.roles.join(', '):'—'), c.studentsRegistered.length, c.studentsInterviewed.length, c.studentsSelected.length]));
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols']=[{wch:6},{wch:32},{wch:30},{wch:14},{wch:14},{wch:14}];
+    XLSX.utils.book_append_sheet(wb,ws,'Companies');
+    _xlsSave(wb,'All_Companies_Summary'); return;
+  }
+  if(type==='registrations'){
+    const rows=[['Company','#','Name','Email','Phone']];
+    COMPANIES.filter(c=>c.studentsRegistered.length).forEach(c=>{
+      c.studentsRegistered.forEach((s,i)=>rows.push([c.name,i+1,s.name||'—',s.email||'—',s.phone||'—']));
+    });
+    const ws=XLSX.utils.aoa_to_sheet(rows); ws['!cols']=[{wch:28},{wch:6},{wch:26},{wch:32},{wch:14}];
+    XLSX.utils.book_append_sheet(wb,ws,'Registrations');
+    _xlsSave(wb,'Registrations_Report'); return;
+  }
+  if(type==='drives'){
+    const rows=[['Company','#','Name','Email','Phone','Join Status']];
+    COMPANIES.filter(c=>c.studentsSelected.length||c.studentsInterviewed.length).forEach(c=>{
+      c.studentsSelected.forEach((s,i)=>rows.push([c.name,i+1,s.name||'—',s.email||'—',s.phone||'—',s.joinStatus||'Pending']));
+    });
+    const ws=XLSX.utils.aoa_to_sheet(rows); ws['!cols']=[{wch:28},{wch:6},{wch:26},{wch:32},{wch:14},{wch:14}];
+    XLSX.utils.book_append_sheet(wb,ws,'Drives Done');
+    _xlsSave(wb,'Drives_Done_Report'); return;
+  }
+  if(type==='placed'){
+    const rows=[['Company','#','Name','Email','Phone','Join Status']];
+    COMPANIES.filter(c=>c.studentsSelected.length).forEach(c=>{
+      c.studentsSelected.forEach((s,i)=>rows.push([c.name,i+1,s.name||'—',s.email||'—',s.phone||'—',s.joinStatus||'Pending']));
+    });
+    const ws=XLSX.utils.aoa_to_sheet(rows); ws['!cols']=[{wch:28},{wch:6},{wch:26},{wch:32},{wch:14},{wch:14}];
+    XLSX.utils.book_append_sheet(wb,ws,'Placed Students');
+    _xlsSave(wb,'Placement_Report'); return;
+  }
+}
+
+function downloadPlacedXLS(anchorId){
+  if(!_xlsGuard()) return;
+  const co = COMPANIES.find(c=>c.id===cId); if(!co) return;
+  const map = {
+    'dsr-full':{ key:'studentsRegistered', title:'Registered Students' },
+    'dsi-full':{ key:'studentsInterviewed', title:'Interviewed Students' },
+    'dss-full':{ key:'studentsSelected',    title:'Selected Students'   },
+  };
+  const cfg = map[anchorId]; if(!cfg) return;
+  // Also support dynamic per-section IDs
+  const students = co[cfg.key] || [];
+  const rows = [['#','Name','Email','Phone','Join Status']];
+  students.forEach((s,i)=>rows.push([i+1, s.name||'—', s.email||'—', s.phone||'—', s.joinStatus||'—']));
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet(rows); ws['!cols']=[{wch:6},{wch:26},{wch:32},{wch:14},{wch:14}];
+  XLSX.utils.book_append_sheet(wb,ws,cfg.title);
+  _xlsSave(wb, xe(co.name).replace(/[^a-zA-Z0-9]/g,'_')+'_'+cfg.title.replace(/ /g,'_'));
+}
+
+function downloadAnalyticsXLS(companyId){
+  if(!_xlsGuard()) return;
+  const co = COMPANIES.find(x=>x.id===companyId); if(!co) return;
+  const DATE = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  const wb = XLSX.utils.book_new();
+  // Summary sheet
+  const reg=co.studentsRegistered.length, att=co.studentsInterviewed.length, sel=co.studentsSelected.length;
+  const jnd=co.studentsSelected.filter(s=>s.joinStatus==='Joined').length;
+  const njnd=co.studentsSelected.filter(s=>s.joinStatus==='Not Joined').length;
+  const ws1=XLSX.utils.aoa_to_sheet([
+    ['Company',co.name],['Date',DATE],['Registered',reg],['Attended',att],
+    ['Selected',sel],['Joined',jnd],['Not Joined',njnd],['Pending',sel-jnd-njnd],
+    ['Reg→Sel %',reg>0?Math.round(sel/reg*100)+'%':'N/A'],
+    ['Reg→Jnd %',reg>0?Math.round(jnd/reg*100)+'%':'N/A'],
+  ]);
+  ws1['!cols']=[{wch:18},{wch:20}];
+  XLSX.utils.book_append_sheet(wb,ws1,'Summary');
+  // Selected students
+  const selRows=[['#','Name','Email','Phone','Join Status']];
+  co.studentsSelected.forEach((s,i)=>selRows.push([i+1,s.name||'—',s.email||'—',s.phone||'—',s.joinStatus||'Pending']));
+  const ws2=XLSX.utils.aoa_to_sheet(selRows); ws2['!cols']=[{wch:6},{wch:26},{wch:32},{wch:14},{wch:14}];
+  XLSX.utils.book_append_sheet(wb,ws2,'Selected');
+  // Registered students
+  const regRows=[['#','Name','Email','Phone']];
+  co.studentsRegistered.forEach((s,i)=>regRows.push([i+1,s.name||'—',s.email||'—',s.phone||'—']));
+  const ws3=XLSX.utils.aoa_to_sheet(regRows); ws3['!cols']=[{wch:6},{wch:26},{wch:32},{wch:14}];
+  XLSX.utils.book_append_sheet(wb,ws3,'Registered');
+  _xlsSave(wb, xe(co.name).replace(/[^a-zA-Z0-9]/g,'_')+'_Analytics');
+}
+
+function downloadCompanyReportXLS(){
+  if(!_xlsGuard()) return;
+  const DATE = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  const list = _getFilteredCompanies();
+  const rows=[['#','Company','Interview Mode','Drive Date','POC Name','POC Email','POC Phone','Roles','Registered','Interviewed','Selected','Status']];
+  list.forEach((co,i)=>{
+    const poc=co.poc||{};
+    rows.push([i+1, co.name, co.interviewMode||'—', co.driveDate||'—',
+      poc.name||'—', poc.email||'—', poc.phone||'—',
+      (co.roles&&co.roles.length?co.roles.join(', '):'—'),
+      co.studentsRegistered.length, co.studentsInterviewed.length, co.studentsSelected.length,
+      STATUS_LABELS[statusOf(co)]||statusOf(co)]);
+  });
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:6},{wch:30},{wch:18},{wch:14},{wch:22},{wch:32},{wch:14},{wch:28},{wch:12},{wch:12},{wch:12},{wch:18}];
+  XLSX.utils.book_append_sheet(wb,ws,'Companies');
+  _xlsSave(wb,'Company_Report');
+}
+
+
    Note: These allow overriding values in memory.
    To persist, the user edits the Admin Data tab in the Config Sheet.
    A note in each modal reminds them of this.
@@ -3089,7 +3206,7 @@ function openCompanyAnalytics(companyId){
 
   openModalWide(`📊 ${xe(co.name)} — Placement Analytics`, html,
     `<button class="btn btn-outline btn-sm" onclick="closeModal()">Close</button>
-     <button class="btn btn-admin btn-sm" onclick="closeModal();downloadAnalyticsPDF(${companyId})">⬇ Download Report</button>`
+     <button class="btn btn-admin btn-sm" onclick="closeModal();downloadAnalyticsPDF(${companyId})">⬇ PDF Report</button><button class="btn btn-sm" style="background:#217346;color:#fff;border:none;" onclick="closeModal();downloadAnalyticsXLS(${companyId})">⬇ Excel Report</button>`
   );
 }
 
@@ -4264,6 +4381,7 @@ function openCompanyReport(){
     <div style="margin-left:auto;display:flex;gap:8px;">
       <button class="btn btn-outline btn-sm" onclick="downloadCompanyReportCSV()">⬇ CSV</button>
       <button class="btn btn-outline btn-sm" style="background:linear-gradient(135deg,#570B54,#3A0838);color:#fff;border:none;" onclick="downloadCompanyReportPDF()">⬇ PDF</button>
+      <button class="btn btn-outline btn-sm" style="background:#217346;color:#fff;border:none;" onclick="downloadCompanyReportXLS()">⬇ Excel</button>
     </div>
   </div>
   <div id="cr-table-wrap"></div>`;
