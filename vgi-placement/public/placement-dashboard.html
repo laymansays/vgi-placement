@@ -848,8 +848,9 @@ const _WEBAPP         = '__WEBAPP_URL__';
 /* ════════════════════════════════════════════════════
    STATE
 ════════════════════════════════════════════════════ */
-let COMPANIES   = [];   // Built from config sheet
-let ADMIN_DATA  = {};   // Keyed by company name, from Admin Data tab
+let COMPANIES     = [];   // Built from config sheet
+let ADMIN_DATA    = {};   // Keyed by company name, from Admin Data tab
+let CIRCULAR_DATA = {};   // Keyed by company name, from CIRCULAR_DATA tab
 let JOB_SEEKERS  = [];   // Students looking for jobs — from JOB_SEEKERS tab
 let STUDENT_DB   = {};   // Phone lookup map: normEmail→phone, normName→phone
 let view        = 'home';
@@ -1301,6 +1302,15 @@ async function init(){
       ADMIN_DATA = {};
     }
 
+    // 2b. Fetch Circular Data tab (non-fatal)
+    try {
+      CIRCULAR_DATA = await loadCircularData();
+      console.log('[CircularData] loaded', Object.keys(CIRCULAR_DATA).length, 'companies');
+    } catch(e){
+      console.warn('[CircularData] tab not found or empty:', e.message);
+      CIRCULAR_DATA = {};
+    }
+
     // 3. Merge admin data into companies
     mergeAdminData();
 
@@ -1429,9 +1439,10 @@ function renderAdminBar(){
   const r=document.getElementById('admin-bar');
   if(!adminMode){ r.innerHTML=''; }
   else {
-    r.innerHTML=`<div class="admin-bar"><span>🛡️ Admin Mode active</span><div class="admin-bar-actions"><button class="btn btn-admin-outline btn-sm" id="ab-circular">📄 Circular</button><button class="btn btn-admin-outline btn-sm" id="ab-repo">📁 Repository</button><button class="btn btn-admin-outline btn-sm" id="ab-diag">🔍 Diagnostics</button><button class="btn btn-admin-outline btn-sm" id="ab-refresh">↺ Reload Config</button><button class="btn btn-admin-outline btn-sm" id="ab-exit">Exit Admin</button></div></div>`;
+    r.innerHTML=`<div class="admin-bar"><span>🛡️ Admin Mode active</span><div class="admin-bar-actions"><button class="btn btn-admin-outline btn-sm" id="ab-circular">📄 Circular</button><button class="btn btn-admin-outline btn-sm" id="ab-repo">📁 Repository</button><button class="btn btn-admin btn-sm" id="ab-gen-all" style="background:linear-gradient(135deg,#6D0E6A,#3B1A8A);border-color:#6D0E6A;">🔄 Generate All Circulars</button><button class="btn btn-admin-outline btn-sm" id="ab-diag">🔍 Diagnostics</button><button class="btn btn-admin-outline btn-sm" id="ab-refresh">↺ Reload Config</button><button class="btn btn-admin-outline btn-sm" id="ab-exit">Exit Admin</button></div></div>`;
     document.getElementById('ab-circular').onclick=openCircularModal;
     document.getElementById('ab-repo').onclick=openCircularRepo;
+    document.getElementById('ab-gen-all').onclick=generateAllCirculars;
     document.getElementById('ab-diag').onclick=showDiagnostics;
     document.getElementById('ab-refresh').onclick=()=>{ init(); toast('Reloading config…','info','↺'); };
     document.getElementById('ab-exit').onclick=()=>{ adminMode=false; document.body.classList.remove('admin-mode'); sessionStorage.removeItem('placementAdmin'); go(view,cId); toast('Admin Mode off','info','🔒'); };
@@ -4666,38 +4677,30 @@ function openCircularModal(){
   }
 }
 
-async function generateCircularPDF(){
-  const g=id=>(document.getElementById(id)||{}).value||'';
-  const dateVal=g('ci-date'),company=g('ci-company').trim(),roles=g('ci-roles').trim(),
-    about=g('ci-about').trim(),position=g('ci-position').trim(),education=g('ci-education').trim(),
-    location=g('ci-location').trim(),ctc=g('ci-ctc').trim(),selection=g('ci-selection').trim(),
-    benefits=g('ci-benefits').trim(),docs=g('ci-docs').trim(),culture=g('ci-culture').trim(),
-    regLink=g('ci-link').trim(),lastDate=g('ci-lastdate').trim();
+/* ── Shared image loader (used by both single + bulk generators) ── */
+const _loadDataUrl = async (src) => {
+  try {
+    const r = await fetch(src);
+    if(!r.ok) return null;
+    const bl = await r.blob();
+    return new Promise(res => { const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.readAsDataURL(bl); });
+  } catch(e){ return null; }
+};
+let _cachedLogoData = null, _cachedSigData = null;
+async function _loadCircularImages(){
+  if(!_cachedLogoData) _cachedLogoData = await _loadDataUrl('logo.jpg');
+  if(!_cachedSigData)  _cachedSigData  = await _loadDataUrl('cdc-signature.jpg');
+  return { logoData: _cachedLogoData, sigData: _cachedSigData };
+}
 
-  if(!company||!roles||!about||!position||!education||!location||!ctc||!selection){
-    toast('Please fill all required fields (marked *)','error'); return;
-  }
-  if(!window.jspdf){ toast('PDF library not ready yet','error'); return; }
-
-  /* ── Load images from repo files (same pattern as Analytics PDF) ── */
-  const loadDataUrl = async (src) => {
-    try {
-      const r = await fetch(src);
-      if(!r.ok) return null;
-      const bl = await r.blob();
-      return new Promise(res => { const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.readAsDataURL(bl); });
-    } catch(e){ return null; }
-  };
-
-  toast('Generating circular…','info','⏳');
-
-  /* logo.jpg is the VGI logo already used in the navbar */
-  const logoData = await loadDataUrl('logo.jpg');
-  /* cdc-signature.jpg — add this file to your repo (same folder as placement-dashboard.html) */
-  const sigData  = await loadDataUrl('cdc-signature.jpg');
+/* ── Core PDF builder — takes a plain data object, returns jsPDF doc ── */
+function _buildCircularDoc(data, logoData, sigData){
+  const { dateVal='', company='', roles='', about='', position='',
+          education='', location='', ctc='', selection='', benefits='',
+          docs='', culture='', regLink='', lastDate='' } = data;
 
   let fmtD='';
-  try{ fmtD=new Date(dateVal+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}); }catch(e){ fmtD=dateVal; }
+  try{ fmtD=new Date((dateVal||new Date().toISOString().split('T')[0])+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}); }catch(e){ fmtD=dateVal; }
 
   const {jsPDF}=window.jspdf;
   const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
@@ -4706,100 +4709,55 @@ async function generateCircularPDF(){
   const cPad=3,col1=46,col2=innerW-8-col1,tX=mL+4,pBot=H-mL-5;
 
   function drawFrame(d){
-    /* Outer page border */
     d.setDrawColor(nR,nG,nB); d.setLineWidth(0.8);
     d.rect(mL, mL, innerW, H-2*mL);
-    /* Header box — full rectangle like First Source template */
     d.setLineWidth(0.6);
     d.rect(mL, mL, innerW, 24);
-    /* Small box around logo */
     d.setLineWidth(0.4);
     d.rect(mL+1.5, mL+1.5, 21, 21);
-    /* Logo — fetched from logo.jpg in the repo */
-    if(logoData){
-      try{ d.addImage(logoData, 'JPEG', mL+2, mL+2, 20, 20); }catch(e){}
-    }
-    /* Institution name — center aligned in the text area right of the logo box */
-    const textAreaLeft = mL + 24;                   // right edge of logo box
-    const textAreaRight = mL + innerW;
-    const textCenterX = (textAreaLeft + textAreaRight) / 2;
+    if(logoData){ try{ d.addImage(logoData, 'JPEG', mL+2, mL+2, 20, 20); }catch(e){} }
+    const textAreaLeft = mL + 24;
+    const textCenterX = (textAreaLeft + mL + innerW) / 2;
     d.setFont('times','bold'); d.setFontSize(13); d.setTextColor(nR,nG,nB);
     d.text('Vidyavahini Group of Institutions, Tumakuru', textCenterX, mL+9, {align:'center'});
     d.setFontSize(12);
     d.text('Career Development Center', textCenterX, mL+17, {align:'center'});
   }
 
-  function cellH(txt,w){
-    doc.setFontSize(10);
-    return Math.max(doc.splitTextToSize(txt||'',w-cPad*2).length*5+cPad*2,10);
-  }
+  function clean(v){ return (v||'').split('\n').map(l=>l.replace(/\s{2,}/g,' ').trim()).filter(l=>l).join('\n'); }
 
-  /* Clean value — collapse multiple spaces per line but KEEP intentional newlines */
-  function clean(v){
-    return (v||'').split('\n').map(l=>l.replace(/\s{2,}/g,' ').trim()).filter(l=>l).join('\n');
-  }
-
-  /* Justify a single line of text by stretching inter-word spaces */
-  function drawJustifiedLine(d, line, x, y, maxW){
-    const words = line.split(' ').filter(Boolean);
-    if(words.length <= 1){ d.text(line, x, y); return; }
-    const totalWordW = words.reduce((s,w)=>s+d.getTextWidth(w), 0);
-    const gap = (maxW - totalWordW) / (words.length - 1);
-    let cx = x;
-    words.forEach((w,i)=>{
-      d.text(w, cx, y);
-      cx += d.getTextWidth(w) + gap;
-    });
-  }
-
-  /* Draw a block of text with full justification (last line left-aligned) */
-  function drawJustifiedBlock(d, txt, x, y, maxW, lineH){
-    d.setFontSize(10);
-    const lines = d.splitTextToSize(clean(txt), maxW);
-    lines.forEach((line, i)=>{
-      const isLast = i === lines.length - 1;
-      if(isLast){ d.text(line, x, y + i*lineH); }
-      else { drawJustifiedLine(d, line, x, y + i*lineH, maxW); }
-    });
-  }
-
-  /* Count total rendered lines, respecting explicit \n breaks */
   function countLines(txt, maxW){
     doc.setFontSize(10);
-    return clean(txt).split('\n').reduce((sum, seg)=>{
-      return sum + doc.splitTextToSize(seg||' ', maxW).length;
-    }, 0);
+    return clean(txt).split('\n').reduce((sum,seg)=>sum+doc.splitTextToSize(seg||' ',maxW).length,0);
+  }
+  function cellH(txt,w){ return Math.max(countLines(txt,w-cPad*2)*5+cPad*2,10); }
+
+  function drawJustifiedLine(d,line,x,y,maxW){
+    const words=line.split(' ').filter(Boolean);
+    if(words.length<=1){ d.text(line,x,y); return; }
+    const totalWordW=words.reduce((s,w)=>s+d.getTextWidth(w),0);
+    const gap=(maxW-totalWordW)/(words.length-1);
+    let cx=x; words.forEach(w=>{ d.text(w,cx,y); cx+=d.getTextWidth(w)+gap; });
+  }
+  function drawJustifiedBlock(d,txt,x,y,maxW,lineH){
+    d.setFontSize(10);
+    const lines=d.splitTextToSize(clean(txt),maxW);
+    lines.forEach((line,i)=>{ const isLast=i===lines.length-1; if(isLast) d.text(line,x,y+i*lineH); else drawJustifiedLine(d,line,x,y+i*lineH,maxW); });
   }
 
-  function cellH(txt, w){
-    return Math.max(countLines(txt, w - cPad*2) * 5 + cPad*2, 10);
-  }
-
-  function drawRow(d, x, y, w1, w2, lbl, val, justify){
-    const cleanedVal = clean(val);
-    const rh = Math.max(cellH(lbl, w1), cellH(cleanedVal, w2));
+  function drawRow(d,x,y,w1,w2,lbl,val,justify){
+    const cleanedVal=clean(val);
+    const rh=Math.max(cellH(lbl,w1),cellH(cleanedVal,w2));
     d.setDrawColor(nR,nG,nB); d.setLineWidth(0.3);
-    d.rect(x, y, w1, rh); d.rect(x+w1, y, w2, rh);
+    d.rect(x,y,w1,rh); d.rect(x+w1,y,w2,rh);
     d.setFont('times','bold'); d.setFontSize(10); d.setTextColor(rR,rG,rB);
-    d.text(d.splitTextToSize(lbl, w1-cPad*2), x+cPad, y+cPad+3.5);
+    d.text(d.splitTextToSize(lbl,w1-cPad*2),x+cPad,y+cPad+3.5);
     d.setFont('times','normal'); d.setTextColor(0,0,0);
-
-    if(justify && cleanedVal){
-      drawJustifiedBlock(d, cleanedVal, x+w1+cPad, y+cPad+3.5, w2-cPad*2, 5);
-    } else {
-      /* Render each \n-delimited segment separately so line breaks are preserved */
-      const segs = cleanedVal.split('\n');
-      let ly = y + cPad + 3.5;
-      segs.forEach(seg => {
-        const wrapped = d.splitTextToSize(seg||' ', w2-cPad*2);
-        d.text(wrapped, x+w1+cPad, ly);
-        ly += wrapped.length * 5;
-      });
-    }
+    if(justify&&cleanedVal){ drawJustifiedBlock(d,cleanedVal,x+w1+cPad,y+cPad+3.5,w2-cPad*2,5); }
+    else { const segs=cleanedVal.split('\n'); let ly=y+cPad+3.5; segs.forEach(seg=>{ const wrapped=d.splitTextToSize(seg||' ',w2-cPad*2); d.text(wrapped,x+w1+cPad,ly); ly+=wrapped.length*5; }); }
     return rh;
   }
 
-  /* ── PAGE 1 ── */
   drawFrame(doc); let y=mL+24+7;
   doc.setFont('times','normal'); doc.setFontSize(10); doc.setTextColor(0,0,0);
   doc.text('Ref: CDC / VGI / 2025',mL+4,y);
@@ -4815,21 +4773,14 @@ async function generateCircularPDF(){
   doc.setDrawColor(nR,nG,nB); doc.setLineWidth(0.6);
   doc.line(mL+4,y,mL+innerW-4,y); y+=4;
 
-  /* Skip blank / "-" / "NA" / "N/A" values entirely */
-  const isEmpty = v => !v || /^\s*[-–]\s*$|^n\/?a$/i.test(v.trim());
-
-  /* All rows — one continuous flow, page breaks inserted automatically */
-  const allRows = [
-    ['About the company', about,    true ],
-    ['Position',          position, false],
-    ['Education',         education,false],
-    ['Working Location',  location, false],
-    ['CTC Details',       ctc,      false],
-    ['Selection Process', selection,false],
-    ['Benefits',          benefits, false],
-    ['Documents Required',docs,     false],
-    ['Work Culture',      culture,  false],
-  ].filter(([,vl]) => !isEmpty(vl));
+  const isEmpty=v=>!v||/^\s*[-–]\s*$|^n\/?a$/i.test(v.trim());
+  const allRows=[
+    ['About the company',about,true],['Position',position,false],
+    ['Education',education,false],['Working Location',location,false],
+    ['CTC Details',ctc,false],['Selection Process',selection,false],
+    ['Benefits',benefits,false],['Documents Required',docs,false],
+    ['Work Culture',culture,false],
+  ].filter(([,vl])=>!isEmpty(vl));
 
   for(const [lb,vl,justify] of allRows){
     const rh=Math.max(cellH(lb,col1),cellH(clean(vl),col2));
@@ -4837,13 +4788,9 @@ async function generateCircularPDF(){
     y+=drawRow(doc,tX,y,col1,col2,lb,vl,justify);
   }
 
-  /* Registration link + last date — only if not empty */
   y+=6;
-  const showLink  = !isEmpty(regLink);
-  const showLDate = !isEmpty(lastDate);
-  if(y + (showLink?7:0) + (showLDate?7:0) + 40 > pBot){
-    doc.addPage(); drawFrame(doc); y=mL+24+7;
-  }
+  const showLink=!isEmpty(regLink), showLDate=!isEmpty(lastDate);
+  if(y+(showLink?7:0)+(showLDate?7:0)+40>pBot){ doc.addPage(); drawFrame(doc); y=mL+24+7; }
   if(showLink){
     doc.setFont('times','bold'); doc.setFontSize(10.5); doc.setTextColor(0,0,0);
     const lw=doc.getTextWidth('Registration Link: ');
@@ -4858,33 +4805,225 @@ async function generateCircularPDF(){
     doc.setFont('times','normal'); doc.text(lastDate,tX+lw2,y); y+=10;
   }
 
-  /* Signature — fetched from cdc-signature.jpg in the repo */
   const sX=W-mR-56, sY=y+4;
-  if(sigData){
-    try{ doc.addImage(sigData,'JPEG',sX,sY,40,16); }catch(e){}
-  }
+  if(sigData){ try{ doc.addImage(sigData,'JPEG',sX,sY,40,16); }catch(e){} }
   doc.setFont('times','bold'); doc.setFontSize(10.5); doc.setTextColor(0,0,0);
   doc.text('Dr. Prasanna Kumar T M',sX,sY+19);
   doc.setFont('times','normal'); doc.setFontSize(10);
   doc.text('Head – CDC',sX,sY+24);
   doc.text('Vidyavahini Samsthe, Tumakuru',sX,sY+29);
 
-  const safe=company.replace(/[^a-zA-Z0-9 ]/g,'').trim().replace(/\s+/g,'_');
-  const fileName=safe+'_Campus_Selection 2025-26.pdf';
+  return doc;
+}
 
-  /* Generate blob URL for preview */
+/* ── Single circular from modal form (unchanged UX) ── */
+async function generateCircularPDF(){
+  const g=id=>(document.getElementById(id)||{}).value||'';
+  const data={
+    dateVal:g('ci-date'), company:g('ci-company').trim(), roles:g('ci-roles').trim(),
+    about:g('ci-about').trim(), position:g('ci-position').trim(), education:g('ci-education').trim(),
+    location:g('ci-location').trim(), ctc:g('ci-ctc').trim(), selection:g('ci-selection').trim(),
+    benefits:g('ci-benefits').trim(), docs:g('ci-docs').trim(), culture:g('ci-culture').trim(),
+    regLink:g('ci-link').trim(), lastDate:g('ci-lastdate').trim()
+  };
+  if(!data.company||!data.roles||!data.about||!data.position||!data.education||!data.location||!data.ctc||!data.selection){
+    toast('Please fill all required fields (marked *)','error'); return;
+  }
+  if(!window.jspdf){ toast('PDF library not ready yet','error'); return; }
+
+  toast('Generating circular…','info','⏳');
+
+  const { logoData, sigData } = await _loadCircularImages();
+  const doc = _buildCircularDoc(data, logoData, sigData);
+  const { company, roles } = data;
+
+  const safe = company.replace(/[^a-zA-Z0-9 ]/g,'').trim().replace(/\s+/g,'_');
+  const fileName = safe + '_Campus_Selection 2025-26.pdf';
+
   const pdfBlob = doc.output('blob');
   const blobUrl = URL.createObjectURL(pdfBlob);
 
-  /* Save to circular repository */
   _circularRepo.unshift({
     company, roles, fileName, blobUrl,
     date: new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}),
     time: new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})
   });
 
-  /* Show preview modal */
   _showCircularPreview(company, fileName, blobUrl, doc);
+}
+
+/* ════════════════════════════════════════════════════
+   GENERATE ALL CIRCULARS — one click, all companies
+════════════════════════════════════════════════════ */
+async function generateAllCirculars(){
+  if(!window.jspdf){ toast('PDF library not loaded yet — please wait a moment','error'); return; }
+
+  /* Collect companies that have the minimum required fields in CIRCULAR_DATA */
+  const today = new Date().toISOString().split('T')[0];
+  const eligible = COMPANIES.filter(c => {
+    const circ = CIRCULAR_DATA[c.name.toLowerCase()] || {};
+    return circ.about && circ.position && circ.ctc && circ.selection;
+  });
+
+  if(!eligible.length){
+    openModal('🔄 Generate All Circulars',
+      `<div style="padding:24px;text-align:center;">
+        <div style="font-size:32px;margin-bottom:12px;">📋</div>
+        <div style="font-weight:700;color:var(--text);margin-bottom:8px;">No companies ready</div>
+        <div style="font-size:13px;color:var(--text3);line-height:1.6;">
+          Fill the circular columns in your <strong>ADMIN_MODE</strong> sheet first.<br>
+          Required: <strong>About, Position, CTC, Selection Process</strong>
+        </div>
+       </div>`,
+      `<button class="btn btn-outline btn-sm" onclick="closeModal()">Close</button>`);
+    return;
+  }
+
+  /* Progress modal */
+  openModal('🔄 Generating All Circulars',
+    `<div id="gen-all-body" style="padding:8px 0;">
+       <div style="font-size:13px;color:var(--text3);margin-bottom:16px;">
+         Generating circulars for <strong style="color:var(--text);">${eligible.length}</strong> companies…
+       </div>
+       <div id="gen-all-progress" style="display:flex;flex-direction:column;gap:8px;max-height:340px;overflow-y:auto;"></div>
+       <div id="gen-all-summary" style="display:none;margin-top:16px;padding:12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border);font-size:13px;"></div>
+     </div>`,
+    `<button class="btn btn-outline btn-sm" id="gen-all-close-btn" onclick="closeModal()">Close</button>
+     <button class="btn btn-admin-outline btn-sm" id="gen-all-repo-btn" style="display:none;" onclick="closeModal();openCircularRepo()">📁 View Repository</button>`);
+
+  const progressEl = document.getElementById('gen-all-progress');
+  const summaryEl  = document.getElementById('gen-all-summary');
+  const repoBtnEl  = document.getElementById('gen-all-repo-btn');
+
+  /* Add a status row per company */
+  eligible.forEach(c => {
+    const row = document.createElement('div');
+    row.id = `gen-row-${c.id}`;
+    row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg2);border-radius:8px;border:1px solid var(--border);';
+    row.innerHTML = `
+      <span id="gen-icon-${c.id}" style="font-size:16px;width:20px;text-align:center;">⏳</span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:700;font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${xe(c.name)}</div>
+        <div id="gen-status-${c.id}" style="font-size:11px;color:var(--text4);">Waiting…</div>
+      </div>
+      <span id="gen-action-${c.id}"></span>`;
+    progressEl.appendChild(row);
+  });
+
+  const { logoData, sigData } = await _loadCircularImages();
+
+  let generated = 0, failed = 0, saved = 0;
+
+  for(const c of eligible){
+    const ad   = ADMIN_DATA[c.name.toLowerCase()] || {};
+    const circ = CIRCULAR_DATA[c.name.toLowerCase()] || {};
+    const setStatus = (msg, icon) => {
+      const el = document.getElementById(`gen-status-${c.id}`);
+      const ic = document.getElementById(`gen-icon-${c.id}`);
+      if(el) el.textContent = msg;
+      if(ic) ic.textContent = icon;
+    };
+
+    try {
+      setStatus('Building PDF…', '⚙️');
+
+      const data = {
+        dateVal:   today,
+        company:   c.name,
+        roles:     (ad.roles||[]).join(', '),
+        about:     circ.about     || '',
+        position:  circ.position  || '',
+        education: circ.education || '',
+        location:  circ.location  || '',
+        ctc:       circ.ctc       || '',
+        selection: circ.selection || '',
+        benefits:  circ.benefits  || '',
+        docs:      circ.docs      || '',
+        culture:   circ.culture   || '',
+        regLink:   circ.regLink   || c.formUrl || '',
+        lastDate:  circ.lastDate  || '',
+      };
+
+      const doc = _buildCircularDoc(data, logoData, sigData);
+      const safe = c.name.replace(/[^a-zA-Z0-9 ]/g,'').trim().replace(/\s+/g,'_');
+      const fileName = safe + '_Campus_Selection 2025-26.pdf';
+      const pdfBlob = doc.output('blob');
+      const blobUrl = URL.createObjectURL(pdfBlob);
+
+      /* Add / update in-session repository */
+      const existing = _circularRepo.findIndex(r => r.company === c.name);
+      const entry = {
+        company: c.name, roles: data.roles, fileName, blobUrl,
+        date: new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}),
+        time: new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})
+      };
+      if(existing !== -1) _circularRepo[existing] = entry;
+      else _circularRepo.unshift(entry);
+
+      generated++;
+      setStatus('Generated ✓ — saving to Drive…', '📤');
+
+      /* Upload to Drive and write URL back to sheet */
+      try {
+        const b64 = doc.output('datauristring').split(',')[1];
+        const payload = { action:'uploadCircular', fileBase64:b64, filename:fileName, mimeType:'application/pdf' };
+        const res  = await fetch(_WEBAPP, { method:'POST', body: JSON.stringify(payload) });
+        const result = await res.json();
+        if(!result.ok) throw new Error(result.error || 'Upload failed');
+
+        /* Update in-session repo entry with Drive URL */
+        const repoEntry = _circularRepo.find(r => r.fileName === fileName);
+        if(repoEntry){ repoEntry.driveUrl = result.url; repoEntry.savedToDrive = true; }
+
+        /* Write Drive URL to CIRCULAR_DATA tab → student portal picks it up */
+        await _writeCircularUrlToSheet(c.name, result.url);
+
+        saved++;
+        setStatus('Saved to Drive ✓', '✅');
+
+        /* Show download link in the row */
+        const actionEl = document.getElementById(`gen-action-${c.id}`);
+        if(actionEl){
+          actionEl.innerHTML = `<a href="${result.url}" target="_blank"
+            style="font-size:11px;color:var(--blue);text-decoration:none;border:1px solid var(--blue);padding:3px 8px;border-radius:6px;white-space:nowrap;">
+            📄 Open</a>`;
+        }
+
+      } catch(driveErr) {
+        setStatus('PDF ready — Drive save failed', '⚠️');
+        console.warn('[generateAllCirculars] Drive upload failed for', c.name, driveErr.message);
+
+        /* Still show local download button */
+        const actionEl = document.getElementById(`gen-action-${c.id}`);
+        if(actionEl){
+          actionEl.innerHTML = `<button onclick="_downloadCircular('${blobUrl}','${xe(fileName).replace(/'/g,"\\'")}');return false;"
+            style="font-size:11px;cursor:pointer;color:var(--text);background:var(--bg2);border:1px solid var(--border);padding:3px 8px;border-radius:6px;white-space:nowrap;">
+            ⬇ Download</button>`;
+        }
+      }
+
+    } catch(err) {
+      failed++;
+      document.getElementById(`gen-icon-${c.id}`).textContent = '❌';
+      document.getElementById(`gen-status-${c.id}`).textContent = 'Failed: ' + err.message;
+      console.error('[generateAllCirculars]', c.name, err);
+    }
+
+    /* Small yield so the UI repaints between companies */
+    await new Promise(r => setTimeout(r, 0));
+  }
+
+  /* Final summary */
+  summaryEl.style.display = 'block';
+  summaryEl.innerHTML = `
+    <strong style="color:var(--text);">Done.</strong>
+    &nbsp; ✅ ${generated} generated
+    &nbsp; 📁 ${saved} saved to Drive & linked in student portal
+    ${failed ? `&nbsp; ❌ ${failed} failed` : ''}
+    ${generated - saved > 0 ? `<br><span style="font-size:12px;color:var(--text4);">Drive saves that failed still show a local download button above.</span>` : ''}`;
+
+  if(repoBtnEl) repoBtnEl.style.display = '';
+  toast(`${generated} circulars generated, ${saved} saved to Drive`, saved === generated ? 'success' : 'info', '📄');
 }
 
 /* ── Circular repository (session) ── */
@@ -4985,6 +5124,28 @@ async function _writeCircularJDToSheet(companyName, driveUrl){
     }
   } catch(e){
     console.warn('JD sheet update failed (non-fatal):', e.message);
+  }
+}
+
+/* Write circular Drive URL to CIRCULAR_DATA tab → student portal reads it from here */
+async function _writeCircularUrlToSheet(companyName, driveUrl){
+  try {
+    const payload = {
+      action:      'updateCircularUrl',
+      sheetId:     CONFIG_SHEET_ID,
+      tabName:     'CIRCULAR_DATA',
+      companyName: companyName,
+      driveUrl:    driveUrl
+    };
+    const res  = await fetch(_WEBAPP, { method:'POST', body: JSON.stringify(payload) });
+    const data = await res.json();
+    if(!data.ok) console.warn('[CircularData] URL write warning:', data.error);
+    /* Update in-memory CIRCULAR_DATA so the dashboard reflects it immediately */
+    const key = companyName.toLowerCase();
+    if(!CIRCULAR_DATA[key]) CIRCULAR_DATA[key] = {};
+    CIRCULAR_DATA[key].circularUrl = driveUrl;
+  } catch(e){
+    console.warn('[CircularData] URL write failed (non-fatal):', e.message);
   }
 }
 
