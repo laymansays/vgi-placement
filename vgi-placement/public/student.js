@@ -7,6 +7,7 @@
 let STUDENT   = null;   // current student object
 let S_CONFIG  = [];     // [{id, name, sheetId, tabReg, tabInt, tabSel, formUrl}]
 let S_ADMIN   = {};     // {companyNameLower: adminData}
+let S_CIRCULAR= {};     // {companyNameLower: circularData} from CIRCULAR_DATA tab
 let S_STATUS  = {};     // {companyId: {registered, interviewed, selected}}
 let EL        = {};     // cached DOM elements
 
@@ -103,7 +104,7 @@ async function doLogin(email){
 async function loadPortalData(){
   try{
     showLoading('Loading company data…', 'Fetching placement configuration');
-    [S_CONFIG, S_ADMIN] = await Promise.all([loadConfig(), loadAdminData()]);
+    [S_CONFIG, S_ADMIN, S_CIRCULAR] = await Promise.all([loadConfig(), loadAdminData(), loadCircularData()]);
 
     showLoading('Checking your applications…', `Checking ${S_CONFIG.length} companies`);
     await checkAllCompanies();
@@ -300,7 +301,9 @@ function renderAvailableCompanies(){
   }
 
   const cards = available.map(c => {
-    const ad = S_ADMIN[c.name.toLowerCase()]||{};
+    const ad  = S_ADMIN[c.name.toLowerCase()]||{};
+    const circ= S_CIRCULAR[c.name.toLowerCase()]||{};
+    const circUrl = circ.circularUrl || ad.jdUrl || '';
     const roleChips = (ad.roles||[]).slice(0,3).map(r=>`<span class="role-chip">${xe(r)}</span>`).join('');
 
     return `<div class="avail-card" data-id="${c.id}" onclick="openCompanyModal(${c.id})">
@@ -315,7 +318,7 @@ function renderAvailableCompanies(){
         <div class="avail-meta-item"><span class="meta-k">ELIGIBILITY</span><span class="meta-v">10th ≥ 60% · 12th ≥ 60% · No Backlogs</span></div>
       </div>
       <div class="avail-card-footer">
-        ${ad.jdUrl ? `<button class="btn-jd" onclick="event.stopPropagation();window.open('${xe(gdriveDirect(ad.jdUrl))}','_blank')">📄 View JD</button>` : ''}
+        ${circUrl ? `<button class="btn-jd" onclick="event.stopPropagation();window.open('${xe(gdriveDirect(circUrl))}','_blank')">📄 View Circular</button>` : ''}
         ${c.formUrl ? `<button class="btn-apply" onclick="event.stopPropagation();applyToCompany('${c.formUrl}')">Apply →</button>`
           : `<span class="no-form">Applications opening soon</span>`}
       </div>
@@ -356,7 +359,9 @@ function renderIneligibleNotice(){
 function openCompanyModal(companyId){
   const c = S_CONFIG.find(x => x.id === companyId);
   if(!c) return;
-  const ad = S_ADMIN[c.name.toLowerCase()]||{};
+  const ad   = S_ADMIN[c.name.toLowerCase()]||{};
+  const circ = S_CIRCULAR[c.name.toLowerCase()]||{};
+  const circUrl = circ.circularUrl || ad.jdUrl || '';
   const eligible = isEligible();
 
   const rows = [
@@ -381,8 +386,8 @@ function openCompanyModal(companyId){
     ? `<div class="modal-not-elig">You do not meet the eligibility criteria for this drive.</div>`
     : `<div class="modal-not-elig">Application form not yet available.</div>`;
 
-  const jdBtn = ad.jdUrl
-    ? `<button class="btn-jd-modal" onclick="window.open('${xe(gdriveDirect(ad.jdUrl))}','_blank')">📄 Download JD</button>`
+  const jdBtn = circUrl
+    ? `<button class="btn-jd-modal" onclick="window.open('${xe(gdriveDirect(circUrl))}','_blank')">📄 Download Circular</button>`
     : '';
 
   document.getElementById('sp-modal-box').innerHTML = `
@@ -430,7 +435,7 @@ function hideLoading(){
 }
 function logout(){
   sessionStorage.removeItem('sp_email');
-  STUDENT=null; S_CONFIG=[]; S_ADMIN={}; S_STATUS={};
+  STUDENT=null; S_CONFIG=[]; S_ADMIN={}; S_CIRCULAR={}; S_STATUS={};
   EL.loginView.hidden=false;
   EL.portalView.hidden=true;
   if(EL.emailInput) EL.emailInput.value='';
