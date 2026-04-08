@@ -177,6 +177,57 @@ async function loadAdminData(){
   return data;
 }
 
+/* ── LOAD CIRCULAR DATA from CIRCULAR_DATA tab ── */
+const CIRCULAR_DATA_TAB = 'CIRCULAR_DATA';
+
+async function loadCircularData(){
+  try{
+    const csv=await fetchSheetCSV(CONFIG_SHEET_ID, CIRCULAR_DATA_TAB);
+    const rows=parseCSV(csv);
+    if(rows.length<2) return {};
+    const hdr=rows[0].map(h=>h.toLowerCase().replace(/[^a-z0-9]/g,''));
+    const col=(...ks)=>{ for(const k of ks){ const i=hdr.findIndex(h=>h.includes(k)); if(i!==-1)return i; } return -1; };
+
+    const iComp      = col('company');
+    const iAbout     = col('about');
+    const iPosition  = col('position');
+    const iEducation = col('education','edu');
+    const iLocation  = col('location','loc');
+    const iCtc       = col('ctc','salary');
+    const iSelection = col('selection','process');
+    const iBenefits  = col('benefit');
+    const iDocs      = col('document','docs');
+    const iCulture   = col('culture','workculture');
+    const iRegLink   = col('reglink','registrationlink','formlink');
+    const iLastDate  = col('lastdate','deadline');
+    const iCircUrl   = col('circularurl','circular url','driveurl','url');
+
+    const data={};
+    rows.slice(1).forEach(r=>{
+      const name=(r[iComp]||'').trim(); if(!name) return;
+      const v=i=>(i!==-1&&r[i])?r[i].trim():'';
+      data[name.toLowerCase()]={
+        about:       v(iAbout),
+        position:    v(iPosition),
+        education:   v(iEducation),
+        location:    v(iLocation),
+        ctc:         v(iCtc),
+        selection:   v(iSelection),
+        benefits:    v(iBenefits),
+        docs:        v(iDocs),
+        culture:     v(iCulture),
+        regLink:     v(iRegLink),
+        lastDate:    v(iLastDate),
+        circularUrl: v(iCircUrl),
+      };
+    });
+    return data;
+  }catch(e){
+    console.warn('[loadCircularData] Could not load CIRCULAR_DATA tab:', e.message);
+    return {};
+  }
+}
+
 /* ── COMPANY LOGO HTML (triple-fallback: clearbit → favicon → initials) ── */
 const LOGO_HINTS={
   'tcs':'tcs.com','infosys':'infosys.com','wipro':'wipro.com','accenture':'accenture.com',
