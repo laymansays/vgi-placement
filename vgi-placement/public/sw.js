@@ -5,7 +5,7 @@
 
 // Bump this version string whenever you deploy new files.
 // Changing it forces all users to get fresh files immediately.
-const CACHE = 'vgi-placement-v3';
+const CACHE = 'vgi-placement-v4';
 
 const STATIC = [
   'logo.jpg',
