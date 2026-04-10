@@ -1086,6 +1086,58 @@ function parseConfigFromJSON(gvizJson, htmlLinks={}){
      Reg Date | Drive Date | POC Name | POC Designation |
      POC Email | POC Phone | Roles | Notes
 ════════════════════════════════════════════════════ */
+
+/* ════════════════════════════════════════════════════
+   LOAD CIRCULAR DATA from CIRCULAR_DATA tab
+════════════════════════════════════════════════════ */
+async function loadCircularData(){
+  try{
+    const csv = await fetchSheetCSV(CONFIG_SHEET_ID, 'CIRCULAR_DATA');
+    const rows = parseCSV(csv);
+    if(rows.length < 2) return {};
+    const hdr = rows[0].map(h=>h.toLowerCase().replace(/[^a-z0-9]/g,''));
+    const col = (...ks) => { for(const k of ks){ const i=hdr.findIndex(h=>h.includes(k)); if(i!==-1)return i; } return -1; };
+
+    const iComp      = col('company');
+    const iAbout     = col('about');
+    const iPosition  = col('position');
+    const iEducation = col('education','edu');
+    const iLocation  = col('location','loc');
+    const iCtc       = col('ctc','salary');
+    const iSelection = col('selection','process');
+    const iBenefits  = col('benefit');
+    const iDocs      = col('document','docs');
+    const iCulture   = col('culture','workculture');
+    const iRegLink   = col('reglink','registrationlink','formlink');
+    const iLastDate  = col('lastdate','deadline');
+    const iCircUrl   = col('circularurl','circular url','driveurl','url');
+
+    const data = {};
+    rows.slice(1).forEach(r => {
+      const name = (r[iComp]||'').trim(); if(!name) return;
+      const v = i => (i!==-1 && r[i]) ? r[i].trim() : '';
+      data[name.toLowerCase()] = {
+        about:       v(iAbout),
+        position:    v(iPosition),
+        education:   v(iEducation),
+        location:    v(iLocation),
+        ctc:         v(iCtc),
+        selection:   v(iSelection),
+        benefits:    v(iBenefits),
+        docs:        v(iDocs),
+        culture:     v(iCulture),
+        regLink:     v(iRegLink),
+        lastDate:    v(iLastDate),
+        circularUrl: v(iCircUrl),
+      };
+    });
+    return data;
+  } catch(e){
+    console.warn('[loadCircularData] Could not load CIRCULAR_DATA tab:', e.message);
+    return {};
+  }
+}
+
 function parseAdminData(csv){
   const rows = parseCSV(csv);
   if(rows.length < 2) return {};
@@ -4853,11 +4905,30 @@ async function generateCircularPDF(){
   _showCircularPreview(company, fileName, blobUrl, doc);
 }
 
+/* Reload CIRCULAR_DATA from sheet then immediately run generator */
+async function _reloadCircularDataAndGenerate(){
+  toast('Reloading circular data…','info','↺');
+  try{
+    CIRCULAR_DATA = await loadCircularData();
+    toast('Circular data refreshed','success','✓');
+  }catch(e){
+    toast('Could not reload: '+e.message,'error');
+  }
+  generateAllCirculars();
+}
+
 /* ════════════════════════════════════════════════════
    GENERATE ALL CIRCULARS — one click, all companies
 ════════════════════════════════════════════════════ */
 async function generateAllCirculars(){
   if(!window.jspdf){ toast('PDF library not loaded yet — please wait a moment','error'); return; }
+
+  /* Always fetch fresh circular data from sheet before generating */
+  try{
+    CIRCULAR_DATA = await loadCircularData();
+  }catch(e){
+    toast('Could not load CIRCULAR_DATA tab: '+e.message,'error'); return;
+  }
 
   /* Collect companies that have the minimum required fields in CIRCULAR_DATA */
   const today = new Date().toISOString().split('T')[0];
@@ -4875,8 +4946,12 @@ async function generateAllCirculars(){
           Fill the circular details in your <strong>CIRCULAR_DATA</strong> sheet tab first.<br>
           Required columns per company: <strong>Company Name, About, Position, CTC, Selection Process</strong>
         </div>
+        <div style="margin-top:16px;font-size:12px;color:var(--text4);">
+          Already filled the sheet? Click below to reload the data and try again.
+        </div>
        </div>`,
-      `<button class="btn btn-outline btn-sm" onclick="closeModal()">Close</button>`);
+      `<button class="btn btn-outline btn-sm" onclick="closeModal()">Close</button>
+       <button class="btn btn-admin btn-sm" onclick="closeModal();_reloadCircularDataAndGenerate()">↺ Reload & Generate</button>`);
     return;
   }
 
