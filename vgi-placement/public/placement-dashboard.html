@@ -1454,9 +1454,10 @@ function renderPCBar(){
   const r=document.getElementById('pc-bar');
   if(!r)return;
   if(!pcMode){ r.innerHTML=''; return; }
-  r.innerHTML=`<div class="pc-bar"><span>🔐 Placement Cell Mode active</span><span class="pc-bar-badge">CONFIDENTIAL</span><div class="pc-bar-actions"><button class="btn btn-admin-outline btn-sm" id="pc-circular">📄 Circular</button><button class="btn btn-admin-outline btn-sm" id="pc-repo">📁 Repository</button><button onclick="exitPCMode()">Exit</button></div></div>`;
+  r.innerHTML=`<div class="pc-bar"><span>🔐 Placement Cell Mode active</span><span class="pc-bar-badge">CONFIDENTIAL</span><div class="pc-bar-actions"><button class="btn btn-admin-outline btn-sm" id="pc-circular">📄 Circular</button><button class="btn btn-admin-outline btn-sm" id="pc-repo">📁 Repository</button><button class="btn btn-admin-outline btn-sm" id="pc-gen-all" style="background:linear-gradient(135deg,rgba(109,14,106,0.7),rgba(59,26,138,0.7));border-color:rgba(109,14,106,0.8);">🔄 Generate All Circulars</button><button onclick="exitPCMode()">Exit</button></div></div>`;
   document.getElementById('pc-circular').onclick=openCircularModal;
   document.getElementById('pc-repo').onclick=openCircularRepo;
+  document.getElementById('pc-gen-all').onclick=generateAllCirculars;
 }
 
 /* ════════════════════════════════════════════════════
