@@ -5052,10 +5052,10 @@ async function generateAllCirculars(){
         if(repoEntry){ repoEntry.driveUrl = result.url; repoEntry.savedToDrive = true; }
 
         /* Write Drive URL to CIRCULAR_DATA tab → student portal picks it up */
-        await _writeCircularUrlToSheet(c.name, result.url);
+        const sheetOk = await _writeCircularUrlToSheet(c.name, result.url);
 
         saved++;
-        setStatus('Saved to Drive ✓', '✅');
+        setStatus(sheetOk ? 'Saved to Drive ✓ · Sheet updated ✓' : 'Saved to Drive ✓ · Sheet write failed — redeploy Apps Script', sheetOk ? '✅' : '⚠️');
 
         /* Show download link in the row */
         const actionEl = document.getElementById(`gen-action-${c.id}`);
@@ -5215,13 +5215,20 @@ async function _writeCircularUrlToSheet(companyName, driveUrl){
     };
     const res  = await fetch(_WEBAPP, { method:'POST', body: JSON.stringify(payload) });
     const data = await res.json();
-    if(!data.ok) console.warn('[CircularData] URL write warning:', data.error);
+    if(!data.ok){
+      toast('Sheet write failed for ' + companyName + ': ' + (data.error||'unknown error') + ' — is Apps Script redeployed?', 'error', '⚠️');
+      console.warn('[CircularData] URL write failed:', data.error);
+      return false;
+    }
     /* Update in-memory CIRCULAR_DATA so the dashboard reflects it immediately */
     const key = companyName.toLowerCase();
     if(!CIRCULAR_DATA[key]) CIRCULAR_DATA[key] = {};
     CIRCULAR_DATA[key].circularUrl = driveUrl;
+    return true;
   } catch(e){
+    toast('Sheet write error for ' + companyName + ': ' + e.message, 'error', '⚠️');
     console.warn('[CircularData] URL write failed (non-fatal):', e.message);
+    return false;
   }
 }
 
