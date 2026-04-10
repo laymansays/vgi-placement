@@ -847,7 +847,7 @@ const _WEBAPP         = '__WEBAPP_URL__';
 
 /* Guard — call before any fetch(_WEBAPP, …) to catch un-injected placeholder */
 function _checkWebapp(){
-  if(!_WEBAPP || _WEBAPP === '__WEBAPP_URL__' || _WEBAPP.includes('__')){
+  if(!_WEBAPP || _WEBAPP === '__WEBAPP_URL__' || _WEBAPP.startsWith('__') || _WEBAPP.length < 20){
     toast('WEBAPP_URL not set — Render may be down or env vars missing. Hard-reload (Ctrl+Shift+R) after confirming the service is running.','error','⚙️');
     return false;
   }
