@@ -845,6 +845,15 @@ const DASHBOARD_PIN   = '__DASHBOARD_PIN__';   // Placement Cell Mode
 const CACHE_TTL       = 60000;          // 60s per company
 const _WEBAPP         = '__WEBAPP_URL__';
 
+/* Guard — call before any fetch(_WEBAPP, …) to catch un-injected placeholder */
+function _checkWebapp(){
+  if(!_WEBAPP || _WEBAPP === '__WEBAPP_URL__' || _WEBAPP.includes('__')){
+    toast('WEBAPP_URL not set — Render may be down or env vars missing. Hard-reload (Ctrl+Shift+R) after confirming the service is running.','error','⚙️');
+    return false;
+  }
+  return true;
+}
+
 /* ════════════════════════════════════════════════════
    STATE
 ════════════════════════════════════════════════════ */
@@ -4922,6 +4931,7 @@ async function _reloadCircularDataAndGenerate(){
 ════════════════════════════════════════════════════ */
 async function generateAllCirculars(){
   if(!window.jspdf){ toast('PDF library not loaded yet — please wait a moment','error'); return; }
+  if(!_checkWebapp()) return;
 
   /* Always fetch fresh circular data from sheet before generating */
   try{
@@ -5146,6 +5156,7 @@ function _downloadCircular(blobUrl, fileName){
 /* ── Save to Google Drive via Apps Script ── */
 async function _saveToDrive(doc, fileName, btn){
   if(!doc){ toast('No PDF to save','error'); return; }
+  if(!_checkWebapp()) return;
   const orig = btn ? btn.innerHTML : '';
   if(btn){ btn.disabled=true; btn.innerHTML='⏳ Saving…'; }
 
@@ -5293,6 +5304,7 @@ function openCircularRepo(){
 }
 
 async function _saveToDriveRepo(idx, btn){
+  if(!_checkWebapp()) return;
   const entry = _circularRepo[idx];
   if(!entry) return;
   const orig = btn.innerHTML;
