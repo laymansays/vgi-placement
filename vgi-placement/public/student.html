@@ -401,21 +401,23 @@ async function loadCircularData(){
     const rows = parseCSV(text);
     if(rows.length < 2) return {};
     const hdr = rows[0].map(h=>h.toLowerCase().replace(/[^a-z0-9]/g,''));
+    console.log('[CircularData] headers:', hdr);
     const col = (...ks) => { for(const k of ks){ const i=hdr.findIndex(h=>h.includes(k)); if(i!==-1)return i; } return -1; };
     const iComp    = col('company');
-    /* Match "Circular URL" column specifically — avoid matching "Reg Link" or other url-like cols */
-    const iCircUrl = col('circularurl','circularlink','driveurl');
-    /* If above fails (e.g. header is just "URL" or "Link"), fall back to last column heuristic */
-    const iUrl = iCircUrl !== -1 ? iCircUrl : hdr.length - 1;
+    const iCircUrl = col('circularurl','circularlink','driveurl','circular');
+    console.log('[CircularData] iComp=', iComp, 'iCircUrl=', iCircUrl);
+    if(iComp === -1 || iCircUrl === -1){
+      console.warn('[CircularData] Could not find required columns. Headers found:', rows[0]);
+      return {};
+    }
     const data = {};
     rows.slice(1).forEach(r => {
       const name = (r[iComp]||'').trim(); if(!name) return;
-      data[name.toLowerCase()] = {
-        circularUrl: (r[iUrl] || '').trim()
-      };
+      const circularUrl = (r[iCircUrl]||'').trim();
+      data[name.toLowerCase()] = { circularUrl };
+      if(circularUrl) console.log('[CircularData] company:', name, '→', circularUrl.slice(0,60)+'…');
     });
-    console.log('[CircularData] loaded', Object.keys(data).length, 'companies, circUrl col index:', iUrl);
-    console.log('[CircularData] data:', data);
+    console.log('[CircularData] total loaded:', Object.keys(data).length, '| with URL:', Object.values(data).filter(d=>d.circularUrl).length);
     return data;
   } catch(e){
     console.warn('[loadCircularData]', e.message);
@@ -1022,7 +1024,10 @@ function openCoModal(id){
       <iframe class="jd-preview-iframe" src="${embedUrl}" allow="autoplay" loading="lazy"
         onerror="this.parentElement.innerHTML='<div class=jd-preview-fallback><p style=color:#64748B;font-size:13px>Preview not available. <a href=${xe(circUrl)} target=_blank rel=noopener style=color:#6D0E6A>Open Circular &#8599;</a></p></div>'">
       </iframe>
-    </div>` : '';
+    </div>` :
+    `<div style="margin-top:12px;padding:12px 16px;background:#F8F9FA;border-radius:10px;border:1.5px dashed #E2E8F0;text-align:center;">
+      <span style="font-size:12px;color:#94A3B8;">&#128196; Campus circular not yet available for this company.</span>
+    </div>`;
 
   document.getElementById('co-modal-inner').innerHTML=`
     <div class="co-modal-head">
