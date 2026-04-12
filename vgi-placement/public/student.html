@@ -403,14 +403,19 @@ async function loadCircularData(){
     const hdr = rows[0].map(h=>h.toLowerCase().replace(/[^a-z0-9]/g,''));
     const col = (...ks) => { for(const k of ks){ const i=hdr.findIndex(h=>h.includes(k)); if(i!==-1)return i; } return -1; };
     const iComp    = col('company');
-    const iCircUrl = col('circularurl','circular url','driveurl','url');
+    /* Match "Circular URL" column specifically — avoid matching "Reg Link" or other url-like cols */
+    const iCircUrl = col('circularurl','circularlink','driveurl');
+    /* If above fails (e.g. header is just "URL" or "Link"), fall back to last column heuristic */
+    const iUrl = iCircUrl !== -1 ? iCircUrl : hdr.length - 1;
     const data = {};
     rows.slice(1).forEach(r => {
       const name = (r[iComp]||'').trim(); if(!name) return;
       data[name.toLowerCase()] = {
-        circularUrl: (iCircUrl!==-1 && r[iCircUrl]) ? r[iCircUrl].trim() : ''
+        circularUrl: (r[iUrl] || '').trim()
       };
     });
+    console.log('[CircularData] loaded', Object.keys(data).length, 'companies, circUrl col index:', iUrl);
+    console.log('[CircularData] data:', data);
     return data;
   } catch(e){
     console.warn('[loadCircularData]', e.message);
@@ -1006,7 +1011,7 @@ function openCoModal(id){
   }
 
   const circData = CIRC[c.name.toLowerCase()] || {};
-  const circUrl  = circData.circularUrl || c.jdUrl || '';
+  const circUrl  = circData.circularUrl || '';
   const embedUrl = circUrl ? toEmbedUrl(circUrl) : null;
   const jdSection = embedUrl ? `
     <div class="jd-preview-wrap">
