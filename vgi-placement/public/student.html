@@ -388,6 +388,35 @@ const CONFIG_SHEET_ID   = '__SHEET_ID__';
 const CONFIG_TAB_NAME   = 'CONFIG_TAB';
 const ADMIN_TAB_NAME    = 'ADMIN_MODE';
 const STUDENT_TAB_NAME  = 'STUDENT_MASTER';
+const CIRCULAR_TAB_NAME = 'CIRCULAR_DATA';
+
+/* ── Load circular data from CIRCULAR_DATA tab ── */
+async function loadCircularData(){
+  try{
+    const url = `https://docs.google.com/spreadsheets/d/${CONFIG_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(CIRCULAR_TAB_NAME)}`;
+    const res  = await fetch(url);
+    if(!res.ok) return {};
+    const text = await res.text();
+    if(text.trimStart().startsWith('<')) return {};
+    const rows = parseCSV(text);
+    if(rows.length < 2) return {};
+    const hdr = rows[0].map(h=>h.toLowerCase().replace(/[^a-z0-9]/g,''));
+    const col = (...ks) => { for(const k of ks){ const i=hdr.findIndex(h=>h.includes(k)); if(i!==-1)return i; } return -1; };
+    const iComp    = col('company');
+    const iCircUrl = col('circularurl','circular url','driveurl','url');
+    const data = {};
+    rows.slice(1).forEach(r => {
+      const name = (r[iComp]||'').trim(); if(!name) return;
+      data[name.toLowerCase()] = {
+        circularUrl: (iCircUrl!==-1 && r[iCircUrl]) ? r[iCircUrl].trim() : ''
+      };
+    });
+    return data;
+  } catch(e){
+    console.warn('[loadCircularData]', e.message);
+    return {};
+  }
+}
 
 function xe(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function ini(n){ return (n||'?').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'?'; }
@@ -472,6 +501,7 @@ function parseCSV(csv){
 let ST     = null;   // student object
 let COMPS  = [];     // company configs
 let STATUS = {};     // {compId: {reg,int,sel}}
+let CIRC   = {};     // {companyNameLower: {circularUrl}} from CIRCULAR_DATA tab
 
 /* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
    LOADING UI
@@ -558,6 +588,9 @@ async function loadCompanyData(){
     apiFetch(CONFIG_SHEET_ID, CONFIG_TAB_NAME, 'json'),
     apiFetch(CONFIG_SHEET_ID, ADMIN_TAB_NAME,  'json').catch(e=>{ console.error('[Portal] ADMIN_MODE fetch failed:',e.message); return null; }),
   ]);
+
+  /* Load circular data (non-fatal) */
+  CIRC = await loadCircularData().catch(()=>({}));
 
   // Parse config
   const cfgTable = configJ.table||{};
@@ -972,17 +1005,19 @@ function openCoModal(id){
     return url;
   }
 
-  const embedUrl=c.jdUrl?toEmbedUrl(c.jdUrl):null;
-  const jdSection=embedUrl?`
+  const circData = CIRC[c.name.toLowerCase()] || {};
+  const circUrl  = circData.circularUrl || c.jdUrl || '';
+  const embedUrl = circUrl ? toEmbedUrl(circUrl) : null;
+  const jdSection = embedUrl ? `
     <div class="jd-preview-wrap">
       <div class="jd-preview-bar">
-        <span class="jd-preview-label">&#128196; Job Description Preview</span>
-        <a href="${xe(c.jdUrl)}" target="_blank" rel="noopener" class="jd-preview-dl">&#11015; Download JD</a>
+        <span class="jd-preview-label">&#128196; Campus Circular</span>
+        <a href="${xe(circUrl)}" target="_blank" rel="noopener" class="jd-preview-dl">&#11015; Download Circular</a>
       </div>
       <iframe class="jd-preview-iframe" src="${embedUrl}" allow="autoplay" loading="lazy"
-        onerror="this.parentElement.innerHTML='<div class=jd-preview-fallback><p style=color:#64748B;font-size:13px>Preview not available. <a href=${xe(c.jdUrl)} target=_blank rel=noopener style=color:#6D0E6A>Open JD &#8599;</a></p></div>'">
+        onerror="this.parentElement.innerHTML='<div class=jd-preview-fallback><p style=color:#64748B;font-size:13px>Preview not available. <a href=${xe(circUrl)} target=_blank rel=noopener style=color:#6D0E6A>Open Circular &#8599;</a></p></div>'">
       </iframe>
-    </div>`:'';
+    </div>` : '';
 
   document.getElementById('co-modal-inner').innerHTML=`
     <div class="co-modal-head">
@@ -1035,7 +1070,7 @@ function applyNow(url){ window.open(url,'_blank','noopener'); }
    LOGOUT
 \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
 function doLogout(){
-  ST=null; COMPS=[]; STATUS={};
+  ST=null; COMPS=[]; STATUS={}; CIRC={};
   document.getElementById('portal-page').style.display='none';
   document.getElementById('login-page').style.display='';
   document.getElementById('email-inp').value='';
