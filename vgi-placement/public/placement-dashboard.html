@@ -743,6 +743,30 @@ body.admin-mode .modal{border-top:3px solid var(--admin);}
   -webkit-text-security:disc;
 }
 #cell-pin-field:focus{border-color:#570B54;background:#fff;box-shadow:0 0 0 3px rgba(109,14,106,0.12);}
+
+/* ── SPREADSHEET PREVIEW MODAL ── */
+#sheet-overlay{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;}
+#sheet-overlay.open{display:flex;}
+#sheet-modal{width:96vw;height:94vh;background:var(--bg);border-radius:16px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.55);}
+#sheet-toolbar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg2);}
+#sheet-title{font-size:15px;font-weight:700;color:var(--text);margin-right:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px;}
+.sh-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s,border-color .15s;white-space:nowrap;}
+.sh-btn:hover{background:var(--bg3,#f1f5f9);border-color:var(--text3);}
+.sh-btn.active{background:#EDE9FE;border-color:#7C3AED;color:#5B21B6;}
+.sh-btn.green{background:#217346;border-color:#217346;color:#fff;}
+.sh-btn.green:hover{background:#1a5c38;}
+.sh-btn.close-btn{background:transparent;border:none;font-size:18px;color:var(--text3);padding:4px 8px;}
+.sh-btn.close-btn:hover{color:var(--text);background:var(--border);}
+#sheet-pivot-panel{display:none;flex-shrink:0;border-bottom:1px solid var(--border);padding:12px 16px;background:var(--bg);gap:12px;flex-wrap:wrap;align-items:flex-end;}
+#sheet-pivot-panel.open{display:flex;}
+.pv-group{display:flex;flex-direction:column;gap:4px;}
+.pv-label{font-size:10px;font-weight:700;color:var(--text4);letter-spacing:.06em;text-transform:uppercase;}
+.pv-select{padding:5px 8px;border-radius:7px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-size:12px;font-family:inherit;min-width:120px;}
+#sheet-pivot-out{flex-shrink:0;max-height:220px;overflow:auto;border-top:1px solid var(--border);background:var(--bg);}
+#sheet-hot-wrap{flex:1;overflow:hidden;position:relative;min-height:0;}
+#sheet-hot-wrap .handsontable td{font-size:12.5px!important;font-family:inherit!important;}
+#sheet-hot-wrap .handsontable th{font-size:12px!important;font-family:inherit!important;background:var(--bg2)!important;color:var(--text)!important;}
+#sheet-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--text3);background:var(--bg);}
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -814,6 +838,36 @@ body.admin-mode .modal{border-top:3px solid var(--admin);}
   <div id="pc-bar"></div>
   <div id="refresh-bar" class="refresh-bar"><span class="spin">↻</span> Refreshing student data from sheets…</div>
   <main id="main"></main>
+</div>
+
+<!-- ── SPREADSHEET PREVIEW MODAL ── -->
+<div id="sheet-overlay">
+  <div id="sheet-modal">
+    <div id="sheet-toolbar">
+      <span id="sheet-title">Report</span>
+      <button class="sh-btn" id="sh-filter-btn" title="Toggle column filters" onclick="_shToggleFilter()">🔽 Filters</button>
+      <button class="sh-btn" id="sh-freeze-btn" title="Freeze header row" onclick="_shToggleFreeze()">📌 Freeze</button>
+      <button class="sh-btn" id="sh-pivot-btn" title="Open pivot table builder" onclick="_shTogglePivot()">⚙️ Pivot</button>
+      <button class="sh-btn green" onclick="_shDownload()">⬇ Download XLS</button>
+      <button class="sh-btn close-btn" onclick="_shClose()" title="Close">✕</button>
+    </div>
+    <div id="sheet-pivot-panel">
+      <div class="pv-group"><span class="pv-label">Row Field</span><select class="pv-select" id="pv-row"></select></div>
+      <div class="pv-group"><span class="pv-label">Column Field</span><select class="pv-select" id="pv-col"><option value="">— None —</option></select></div>
+      <div class="pv-group"><span class="pv-label">Value Field</span><select class="pv-select" id="pv-val"></select></div>
+      <div class="pv-group"><span class="pv-label">Aggregation</span>
+        <select class="pv-select" id="pv-agg">
+          <option value="count">Count</option>
+          <option value="sum">Sum</option>
+          <option value="avg">Average</option>
+        </select>
+      </div>
+      <button class="sh-btn active" onclick="_shBuildPivot()">▶ Generate</button>
+      <button class="sh-btn" onclick="_shClosePivot()">✕ Close Pivot</button>
+    </div>
+    <div id="sheet-pivot-out" style="display:none;"></div>
+    <div id="sheet-hot-wrap"><div id="sheet-loading">Loading spreadsheet…</div><div id="sheet-hot"></div></div>
+  </div>
 </div>
 
 <div id="modal-overlay" class="modal-overlay">
@@ -1726,28 +1780,28 @@ function buildHome(){
       </div>
       <div class="home-banner-right">
         <div class="stat-tile" onclick="showStatModal('companies')">
-          <button class="tile-pdf-btn" onclick="event.stopPropagation();exportPDF('companies')" title="Download PDF">⬇ PDF</button><button class="tile-pdf-btn" onclick="event.stopPropagation();exportXLS('companies')" title="Download Excel" style="background:#217346;color:#fff;border-color:#217346;top:28px;">⬇ XLS</button>
+          <button class="tile-pdf-btn" onclick="event.stopPropagation();exportPDF('companies')" title="Download PDF">⬇ PDF</button><button class="tile-pdf-btn" onclick="event.stopPropagation();previewXLS('companies')" title="Preview in Spreadsheet" style="background:#217346;color:#fff;border-color:#217346;top:28px;">📊 Sheet</button>
           <div class="stat-tile-icon">🏢</div>
           <div class="stat-tile-num">${total}</div>
           <div class="stat-tile-lbl">Companies</div>
           <div class="stat-tile-hint">Click to view ↗</div>
         </div>
         <div class="stat-tile" onclick="showStatModal('registrations')">
-          <button class="tile-pdf-btn" onclick="event.stopPropagation();exportPDF('registrations')" title="Download PDF">⬇ PDF</button><button class="tile-pdf-btn" onclick="event.stopPropagation();exportXLS('registrations')" title="Download Excel" style="background:#217346;color:#fff;border-color:#217346;top:28px;">⬇ XLS</button>
+          <button class="tile-pdf-btn" onclick="event.stopPropagation();exportPDF('registrations')" title="Download PDF">⬇ PDF</button><button class="tile-pdf-btn" onclick="event.stopPropagation();previewXLS('registrations')" title="Preview in Spreadsheet" style="background:#217346;color:#fff;border-color:#217346;top:28px;">📊 Sheet</button>
           <div class="stat-tile-icon">📋</div>
           <div class="stat-tile-num">${regs}</div>
           <div class="stat-tile-lbl">Registrations</div>
           <div class="stat-tile-hint">Click to view ↗</div>
         </div>
         <div class="stat-tile" onclick="showStatModal('drives')">
-          <button class="tile-pdf-btn" onclick="event.stopPropagation();exportPDF('drives')" title="Download PDF">⬇ PDF</button><button class="tile-pdf-btn" onclick="event.stopPropagation();exportXLS('drives')" title="Download Excel" style="background:#217346;color:#fff;border-color:#217346;top:28px;">⬇ XLS</button>
+          <button class="tile-pdf-btn" onclick="event.stopPropagation();exportPDF('drives')" title="Download PDF">⬇ PDF</button><button class="tile-pdf-btn" onclick="event.stopPropagation();previewXLS('drives')" title="Preview in Spreadsheet" style="background:#217346;color:#fff;border-color:#217346;top:28px;">📊 Sheet</button>
           <div class="stat-tile-icon">✅</div>
           <div class="stat-tile-num">${done}</div>
           <div class="stat-tile-lbl">Drives Done</div>
           <div class="stat-tile-hint">Click to view ↗</div>
         </div>
         <div class="stat-tile" onclick="showStatModal('placed')">
-          <button class="tile-pdf-btn" onclick="event.stopPropagation();exportPDF('placed')" title="Download PDF">⬇ PDF</button><button class="tile-pdf-btn" onclick="event.stopPropagation();exportXLS('placed')" title="Download Excel" style="background:#217346;color:#fff;border-color:#217346;top:28px;">⬇ XLS</button>
+          <button class="tile-pdf-btn" onclick="event.stopPropagation();exportPDF('placed')" title="Download PDF">⬇ PDF</button><button class="tile-pdf-btn" onclick="event.stopPropagation();previewXLS('placed')" title="Preview in Spreadsheet" style="background:#217346;color:#fff;border-color:#217346;top:28px;">📊 Sheet</button>
           <div class="stat-tile-icon">🎉</div>
           <div class="stat-tile-num">${uniquePlaced}</div>
           <div class="stat-tile-lbl">Unique Placed</div>
@@ -1907,17 +1961,17 @@ async function buildDetail(id){
 
     <div class="d-stats">
       <div class="d-stat" id="dsr">
-        <button class="tile-pdf-btn" onclick="event.stopPropagation();downloadPlacedPDF('dsr-full')" title="Download PDF">⬇ PDF</button><button class="tile-pdf-btn" onclick="event.stopPropagation();downloadPlacedXLS('dsr-full')" title="Download Excel" style="background:#217346;color:#fff;border-color:#217346;top:28px;">⬇ XLS</button>
+        <button class="tile-pdf-btn" onclick="event.stopPropagation();downloadPlacedPDF('dsr-full')" title="Download PDF">⬇ PDF</button><button class="tile-pdf-btn" onclick="event.stopPropagation();previewPlacedXLS('dsr-full')" title="Preview in Spreadsheet" style="background:#217346;color:#fff;border-color:#217346;top:28px;">📊 Sheet</button>
         <div class="d-stat-num">${c.studentsRegistered.length}</div>
         <div class="d-stat-lbl">Registered${adminMode?' <small style="opacity:.5">✏</small>':''}</div>
       </div>
       <div class="d-stat" id="dsi">
-        <button class="tile-pdf-btn" onclick="event.stopPropagation();downloadPlacedPDF('dsi-full')" title="Download PDF">⬇ PDF</button><button class="tile-pdf-btn" onclick="event.stopPropagation();downloadPlacedXLS('dsi-full')" title="Download Excel" style="background:#217346;color:#fff;border-color:#217346;top:28px;">⬇ XLS</button>
+        <button class="tile-pdf-btn" onclick="event.stopPropagation();downloadPlacedPDF('dsi-full')" title="Download PDF">⬇ PDF</button><button class="tile-pdf-btn" onclick="event.stopPropagation();previewPlacedXLS('dsi-full')" title="Preview in Spreadsheet" style="background:#217346;color:#fff;border-color:#217346;top:28px;">📊 Sheet</button>
         <div class="d-stat-num">${c.studentsInterviewed.length}</div>
         <div class="d-stat-lbl">Interviewed${adminMode?' <small style="opacity:.5">✏</small>':''}</div>
       </div>
       <div class="d-stat" id="dss">
-        <button class="tile-pdf-btn" onclick="event.stopPropagation();downloadPlacedPDF('dss-full')" title="Download PDF">⬇ PDF</button><button class="tile-pdf-btn" onclick="event.stopPropagation();downloadPlacedXLS('dss-full')" title="Download Excel" style="background:#217346;color:#fff;border-color:#217346;top:28px;">⬇ XLS</button>
+        <button class="tile-pdf-btn" onclick="event.stopPropagation();downloadPlacedPDF('dss-full')" title="Download PDF">⬇ PDF</button><button class="tile-pdf-btn" onclick="event.stopPropagation();previewPlacedXLS('dss-full')" title="Preview in Spreadsheet" style="background:#217346;color:#fff;border-color:#217346;top:28px;">📊 Sheet</button>
         <div class="d-stat-num">${c.studentsSelected.length}</div>
         <div class="d-stat-lbl">Selected${adminMode?' <small style="opacity:.5">✏</small>':''}</div>
       </div>
@@ -2281,7 +2335,7 @@ function buildStudentSection(title,students,anchorId,companyId){
 
   /* ── header action buttons (Selected section only) ── */
   const pdfBtn = isSelected
-    ? `<button class="btn-pdf-download" onclick="event.stopPropagation();downloadPlacedPDF('${anchorId}')">⬇ PDF</button><button class="btn-pdf-download" onclick="event.stopPropagation();downloadPlacedXLS('${anchorId}')" style="background:#217346;color:#fff;border-color:#217346;">⬇ XLS</button>`
+    ? `<button class="btn-pdf-download" onclick="event.stopPropagation();downloadPlacedPDF('${anchorId}')">⬇ PDF</button><button class="btn-pdf-download" onclick="event.stopPropagation();previewPlacedXLS('${anchorId}')" style="background:#217346;color:#fff;border-color:#217346;">📊 Sheet</button>`
     : '';
   const analyticBtn = isSelected
     ? `<button class="btn-pdf-download" style="background:linear-gradient(135deg,#570B54,#3A0838);color:#fff;border:none;" onclick="event.stopPropagation();openCompanyAnalytics(${companyId})">📊 Analytics</button>`
@@ -2683,6 +2737,291 @@ function downloadCompanyReportXLS(){
   ws['!cols']=[{wch:6},{wch:30},{wch:18},{wch:14},{wch:22},{wch:32},{wch:14},{wch:28},{wch:12},{wch:12},{wch:12},{wch:18}];
   XLSX.utils.book_append_sheet(wb,ws,'Companies');
   _xlsSave(wb,'Company_Report');
+}
+
+/* ════════════════════════════════════════════════════
+   SPREADSHEET PREVIEW ENGINE
+   Opens any report as a live in-browser spreadsheet
+   with filtering, sorting, editing, and pivot tables.
+════════════════════════════════════════════════════ */
+
+let _shHot        = null;   // Handsontable instance
+let _shRows       = [];     // original data rows (header + data)
+let _shTitle      = '';
+let _shFileName   = '';
+let _shFilterOn   = false;
+let _shFreezeOn   = false;
+let _shPivotOpen  = false;
+let _shHotLoaded  = false;
+
+/* Lazy-load Handsontable (CSS + JS) once */
+async function _shLoadHot(){
+  if(_shHotLoaded) return;
+  await new Promise((res,rej)=>{
+    const lnk=document.createElement('link');
+    lnk.rel='stylesheet';
+    lnk.href='https://cdnjs.cloudflare.com/ajax/libs/handsontable/12.3.3/handsontable.full.min.css';
+    document.head.appendChild(lnk);
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/handsontable/12.3.3/handsontable.full.min.js';
+    s.onload=()=>{ _shHotLoaded=true; res(); };
+    s.onerror=()=>rej(new Error('Could not load Handsontable from CDN'));
+    document.head.appendChild(s);
+  });
+}
+
+/* Main entry — call this instead of _xlsSave */
+async function openSpreadsheetModal(rows, title, fileName){
+  if(!rows||rows.length<2){ toast('No data to preview','info'); return; }
+  _shRows    = rows.map(r=>r.map(c=>c??''));
+  _shTitle   = title;
+  _shFileName= fileName;
+  _shFilterOn= false;
+  _shFreezeOn= false;
+
+  document.getElementById('sheet-title').textContent = title;
+  document.getElementById('sh-filter-btn').classList.remove('active');
+  document.getElementById('sh-freeze-btn').classList.remove('active');
+  document.getElementById('sheet-loading').style.display='flex';
+  document.getElementById('sheet-hot').innerHTML='';
+  document.getElementById('sheet-pivot-panel').classList.remove('open');
+  document.getElementById('sheet-pivot-out').style.display='none';
+  document.getElementById('sheet-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+
+  /* Populate pivot selectors */
+  const hdr = _shRows[0];
+  ['pv-row','pv-col','pv-val'].forEach(id=>{
+    const sel=document.getElementById(id);
+    const hasNone = id==='pv-col';
+    sel.innerHTML=(hasNone?'<option value="">— None —</option>':'')+hdr.map(h=>`<option value="${xe(String(h))}">${xe(String(h))}</option>`).join('');
+  });
+
+  try{
+    await _shLoadHot();
+  }catch(e){
+    toast('Failed to load spreadsheet library: '+e.message,'error');
+    _shClose(); return;
+  }
+
+  document.getElementById('sheet-loading').style.display='none';
+  _shInitHot();
+}
+
+function _shInitHot(){
+  if(_shHot){ _shHot.destroy(); _shHot=null; }
+  const container = document.getElementById('sheet-hot');
+  const header    = _shRows[0].map(h=>String(h));
+  const data      = _shRows.slice(1).map(r=>r.map(c=>c===undefined||c===null?'':c));
+
+  _shHot = new Handsontable(container, {
+    data,
+    colHeaders:         header,
+    rowHeaders:         true,
+    height:             '100%',
+    width:              '100%',
+    stretchH:           'all',
+    licenseKey:         'non-commercial-and-evaluation',
+    filters:            _shFilterOn,
+    dropdownMenu:       _shFilterOn ? ['filter_by_condition','filter_operators','filter_by_value','filter_action_bar'] : false,
+    columnSorting:      true,
+    manualColumnResize: true,
+    manualRowResize:    true,
+    contextMenu:        true,
+    copyPaste:          true,
+    fixedRowsTop:       _shFreezeOn ? 0 : 0,
+    multiColumnSorting: true,
+    search:             true,
+    autoWrapRow:        true,
+    autoWrapCol:        true,
+    outsideClickDeselects: false,
+    afterChange(changes){
+      if(!changes) return;
+      changes.forEach(([row, , , newVal])=>{
+        if(_shRows[row+1]) _shRows[row+1] = [..._shHot.getDataAtRow(row)];
+      });
+    },
+  });
+}
+
+function _shToggleFilter(){
+  _shFilterOn = !_shFilterOn;
+  document.getElementById('sh-filter-btn').classList.toggle('active', _shFilterOn);
+  if(_shHot){
+    _shHot.updateSettings({
+      filters:      _shFilterOn,
+      dropdownMenu: _shFilterOn ? ['filter_by_condition','filter_operators','filter_by_value','filter_action_bar'] : false,
+    });
+  }
+}
+
+function _shToggleFreeze(){
+  _shFreezeOn = !_shFreezeOn;
+  document.getElementById('sh-freeze-btn').classList.toggle('active', _shFreezeOn);
+  if(_shHot) _shHot.updateSettings({ fixedRowsTop: 0, fixedColumnsStart: _shFreezeOn ? 0 : 0 });
+  /* Re-render with frozen col headers by re-init */
+  if(_shHot){ _shHot.destroy(); _shHot=null; }
+  _shInitHot();
+}
+
+function _shTogglePivot(){
+  _shPivotOpen = !_shPivotOpen;
+  document.getElementById('sh-pivot-btn').classList.toggle('active', _shPivotOpen);
+  document.getElementById('sheet-pivot-panel').classList.toggle('open', _shPivotOpen);
+  if(!_shPivotOpen){
+    document.getElementById('sheet-pivot-out').style.display='none';
+  }
+}
+
+function _shClosePivot(){
+  _shPivotOpen = false;
+  document.getElementById('sh-pivot-btn').classList.remove('active');
+  document.getElementById('sheet-pivot-panel').classList.remove('open');
+  document.getElementById('sheet-pivot-out').style.display='none';
+}
+
+function _shBuildPivot(){
+  const rowField = document.getElementById('pv-row').value;
+  const colField = document.getElementById('pv-col').value;
+  const valField = document.getElementById('pv-val').value;
+  const aggFn    = document.getElementById('pv-agg').value;
+  if(!rowField){ toast('Select a Row field','info'); return; }
+
+  const headers  = _shRows[0].map(h=>String(h));
+  const data     = _shRows.slice(1);
+  const rowIdx   = headers.indexOf(rowField);
+  const colIdx   = colField ? headers.indexOf(colField) : -1;
+  const valIdx   = valField ? headers.indexOf(valField) : -1;
+
+  const rowVals  = [...new Set(data.map(r=>String(r[rowIdx]||'')))].filter(Boolean).sort();
+  const colVals  = colIdx>=0 ? [...new Set(data.map(r=>String(r[colIdx]||'')))].filter(Boolean).sort() : ['Total'];
+
+  const grid = {};
+  data.forEach(row=>{
+    const rv = String(row[rowIdx]||'');
+    const cv = colIdx>=0 ? String(row[colIdx]||'') : 'Total';
+    if(!grid[rv]) grid[rv]={};
+    if(!grid[rv][cv]) grid[rv][cv]=[];
+    grid[rv][cv].push(valIdx>=0 ? row[valIdx] : 1);
+  });
+
+  const agg = vals=>{
+    if(!vals||!vals.length) return '';
+    if(aggFn==='count') return vals.length;
+    const nums = vals.map(Number).filter(n=>!isNaN(n));
+    if(!nums.length) return vals.length;
+    if(aggFn==='sum') return nums.reduce((a,b)=>a+b,0);
+    if(aggFn==='avg') return (nums.reduce((a,b)=>a+b,0)/nums.length).toFixed(2);
+    return vals.length;
+  };
+
+  const pivotHdr = [rowField, ...colVals, 'Grand Total'];
+  const pivotRows = rowVals.map(rv=>{
+    const cells = colVals.map(cv=>agg(grid[rv]?.[cv]));
+    const total = aggFn==='count' ? cells.reduce((a,b)=>a+(Number(b)||0),0)
+                : aggFn==='sum'   ? cells.reduce((a,b)=>a+(Number(b)||0),0)
+                : '';
+    return [rv, ...cells, total];
+  });
+
+  /* Grand total row */
+  const grandCells = colVals.map((_,ci)=>{
+    const vals = pivotRows.map(r=>Number(r[ci+1])||0);
+    return aggFn==='avg' ? (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2) : vals.reduce((a,b)=>a+b,0);
+  });
+  pivotRows.push(['Grand Total', ...grandCells, grandCells.reduce((a,b)=>a+(Number(b)||0),0)]);
+
+  /* Render pivot table */
+  const allRows = [pivotHdr, ...pivotRows];
+  const out = document.getElementById('sheet-pivot-out');
+  out.style.display='block';
+
+  let html=`<table style="border-collapse:collapse;font-size:12px;width:100%;">`;
+  allRows.forEach((row,ri)=>{
+    const isHdr = ri===0, isTotal = ri===allRows.length-1;
+    html+=`<tr style="background:${isHdr?'#EDE9FE':isTotal?'#F1F5F9':'#fff'}">`;
+    row.forEach((cell,ci)=>{
+      const bold = isHdr||isTotal||ci===0;
+      html+=`<${isHdr?'th':'td'} style="padding:5px 10px;border:1px solid #E2E8F0;white-space:nowrap;font-weight:${bold?700:400};color:${isHdr?'#5B21B6':'#0F172A'};">${xe(String(cell??''))}</${isHdr?'th':'td'}>`;
+    });
+    html+=`</tr>`;
+  });
+  html+=`</table>`;
+  out.innerHTML=html;
+}
+
+function _shDownload(){
+  if(!_xlsGuard()) return;
+  const wb = XLSX.utils.book_new();
+  /* Sync any edits from Handsontable back into _shRows */
+  if(_shHot){
+    const editedData = _shHot.getData();
+    editedData.forEach((row,i)=>{ _shRows[i+1]=row; });
+  }
+  const ws = XLSX.utils.aoa_to_sheet(_shRows);
+  XLSX.utils.book_append_sheet(wb, ws, _shTitle.slice(0,31));
+  _xlsSave(wb, _shFileName);
+}
+
+function _shClose(){
+  document.getElementById('sheet-overlay').classList.remove('open');
+  document.body.style.overflow='';
+  if(_shHot){ _shHot.destroy(); _shHot=null; }
+  document.getElementById('sheet-pivot-out').style.display='none';
+  document.getElementById('sheet-pivot-panel').classList.remove('open');
+}
+
+/* ── Row-builder wrappers (one per report type) ── */
+function previewXLS(type){
+  const DATE = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  if(type==='companies'){
+    const rows=[['#','Company','Roles','Registered','Interviewed','Selected']];
+    COMPANIES.forEach((c,i)=>rows.push([i+1,c.name,(c.roles&&c.roles.length?c.roles.join(', '):'—'),c.studentsRegistered.length,c.studentsInterviewed.length,c.studentsSelected.length]));
+    openSpreadsheetModal(rows,'All Companies Summary','All_Companies_Summary'); return;
+  }
+  if(type==='registrations'){
+    const rows=[['Company','#','Name','Email','Phone']];
+    COMPANIES.filter(c=>c.studentsRegistered.length).forEach(c=>{c.studentsRegistered.forEach((s,i)=>rows.push([c.name,i+1,s.name||'—',s.email||'—',s.phone||'—']));});
+    openSpreadsheetModal(rows,'Registrations Report','Registrations_Report'); return;
+  }
+  if(type==='drives'){
+    const rows=[['Company','#','Name','Email','Phone','Join Status']];
+    COMPANIES.filter(c=>c.studentsSelected.length||c.studentsInterviewed.length).forEach(c=>{c.studentsSelected.forEach((s,i)=>rows.push([c.name,i+1,s.name||'—',s.email||'—',s.phone||'—',s.joinStatus||'Pending']));});
+    openSpreadsheetModal(rows,'Drives Done Report','Drives_Done_Report'); return;
+  }
+  if(type==='placed'){
+    const rows=[['Company','#','Name','Email','Phone','Join Status']];
+    COMPANIES.filter(c=>c.studentsSelected.length).forEach(c=>{c.studentsSelected.forEach((s,i)=>rows.push([c.name,i+1,s.name||'—',s.email||'—',s.phone||'—',s.joinStatus||'Pending']));});
+    openSpreadsheetModal(rows,'Placement Report','Placement_Report'); return;
+  }
+}
+
+function previewPlacedXLS(anchorId){
+  const co=COMPANIES.find(c=>c.id===cId); if(!co) return;
+  const map={'dsr-full':{key:'studentsRegistered',title:'Registered Students'},'dsi-full':{key:'studentsInterviewed',title:'Interviewed Students'},'dss-full':{key:'studentsSelected',title:'Selected Students'}};
+  const cfg=map[anchorId]; if(!cfg) return;
+  const rows=[['#','Name','Email','Phone','Join Status']];
+  (co[cfg.key]||[]).forEach((s,i)=>rows.push([i+1,s.name||'—',s.email||'—',s.phone||'—',s.joinStatus||'—']));
+  const safe=xe(co.name).replace(/[^a-zA-Z0-9]/g,'_');
+  openSpreadsheetModal(rows,`${co.name} — ${cfg.title}`,safe+'_'+cfg.title.replace(/ /g,'_'));
+}
+
+function previewAnalyticsXLS(companyId){
+  const co=COMPANIES.find(x=>x.id===companyId); if(!co) return;
+  const rows=[['#','Name','Email','Phone','Join Status']];
+  (co.studentsSelected||[]).forEach((s,i)=>rows.push([i+1,s.name||'—',s.email||'—',s.phone||'—',s.joinStatus||'Pending']));
+  if(rows.length<2){ toast('No selected students to preview','info'); return; }
+  openSpreadsheetModal(rows,`${co.name} — Selected Students`,xe(co.name).replace(/[^a-zA-Z0-9]/g,'_')+'_Analytics');
+}
+
+function previewCompanyReportXLS(){
+  const list=_getFilteredCompanies();
+  const rows=[['#','Company','Interview Mode','Drive Date','POC Name','POC Email','POC Phone','Roles','Registered','Interviewed','Selected','Status']];
+  list.forEach((co,i)=>{
+    const poc=co.poc||{};
+    rows.push([i+1,co.name,co.interviewMode||'—',co.driveDate||'—',poc.name||'—',poc.email||'—',poc.phone||'—',(co.roles&&co.roles.length?co.roles.join(', '):'—'),co.studentsRegistered.length,co.studentsInterviewed.length,co.studentsSelected.length,STATUS_LABELS[statusOf(co)]||statusOf(co)]);
+  });
+  openSpreadsheetModal(rows,'Company Report','Company_Report');
 }
 
 /* ════════════════════════════════════════════════════
@@ -3280,7 +3619,7 @@ function openCompanyAnalytics(companyId){
 
   openModalWide(`📊 ${xe(co.name)} — Placement Analytics`, html,
     `<button class="btn btn-outline btn-sm" onclick="closeModal()">Close</button>
-     <button class="btn btn-admin btn-sm" onclick="closeModal();downloadAnalyticsPDF(${companyId})">⬇ PDF Report</button><button class="btn btn-sm" style="background:#217346;color:#fff;border:none;" onclick="closeModal();downloadAnalyticsXLS(${companyId})">⬇ Excel Report</button>`
+     <button class="btn btn-admin btn-sm" onclick="closeModal();downloadAnalyticsPDF(${companyId})">⬇ PDF Report</button><button class="btn btn-sm" style="background:#217346;color:#fff;border:none;" onclick="closeModal();previewAnalyticsXLS(${companyId})">📊 Sheet Report</button>`
   );
 }
 
@@ -4455,7 +4794,7 @@ function openCompanyReport(){
     <div style="margin-left:auto;display:flex;gap:8px;">
       <button class="btn btn-outline btn-sm" onclick="downloadCompanyReportCSV()">⬇ CSV</button>
       <button class="btn btn-outline btn-sm" style="background:linear-gradient(135deg,#570B54,#3A0838);color:#fff;border:none;" onclick="downloadCompanyReportPDF()">⬇ PDF</button>
-      <button class="btn btn-outline btn-sm" style="background:#217346;color:#fff;border:none;" onclick="downloadCompanyReportXLS()">⬇ Excel</button>
+      <button class="btn btn-outline btn-sm" style="background:#217346;color:#fff;border:none;" onclick="previewCompanyReportXLS()">📊 Sheet</button>
     </div>
   </div>
   <div id="cr-table-wrap"></div>`;
