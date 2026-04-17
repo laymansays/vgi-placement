@@ -767,6 +767,11 @@ body.admin-mode .modal{border-top:3px solid var(--admin);}
 #sheet-hot-wrap .handsontable td{font-size:12.5px!important;font-family:inherit!important;}
 #sheet-hot-wrap .handsontable th{font-size:12px!important;font-family:inherit!important;background:var(--bg2)!important;color:var(--text)!important;}
 #sheet-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--text3);background:var(--bg);}
+#sheet-formula-bar{display:flex;align-items:center;gap:8px;padding:6px 14px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg);}
+#sheet-cell-ref{min-width:60px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--text);font-size:12px;font-family:'Courier New',monospace;text-align:center;}
+#sheet-formula-input{flex:1;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-size:13px;font-family:'Courier New',monospace;}
+#sheet-formula-input:focus{outline:none;border-color:#7C3AED;box-shadow:0 0 0 2px rgba(124,58,237,.15);}
+#sheet-formula-input::placeholder{font-family:inherit;font-size:12px;}
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -848,8 +853,16 @@ body.admin-mode .modal{border-top:3px solid var(--admin);}
       <button class="sh-btn" id="sh-filter-btn" title="Toggle column filters" onclick="_shToggleFilter()">🔽 Filters</button>
       <button class="sh-btn" id="sh-freeze-btn" title="Freeze header row" onclick="_shToggleFreeze()">📌 Freeze</button>
       <button class="sh-btn" id="sh-pivot-btn" title="Open pivot table builder" onclick="_shTogglePivot()">⚙️ Pivot</button>
+      <button class="sh-btn" title="Add a custom formula column" onclick="_shAddColumn()">➕ Add Column</button>
       <button class="sh-btn green" onclick="_shDownload()">⬇ Download XLS</button>
       <button class="sh-btn close-btn" onclick="_shClose()" title="Close">✕</button>
+    </div>
+    <div id="sheet-formula-bar">
+      <span id="sheet-cell-ref">A1</span>
+      <span style="font-size:13px;color:var(--text3);font-style:italic;">ƒx</span>
+      <input id="sheet-formula-input" placeholder="Type a value or formula, e.g.  =IF(E2=&quot;BCA&quot;,&quot;Eligible&quot;,&quot;—&quot;)  or  =CONCATENATE(C2,&quot; &quot;,D2)" spellcheck="false"
+        onkeydown="_shFormulaKeydown(event)"
+        oninput="_shFormulaInput(this.value)"/>
     </div>
     <div id="sheet-pivot-panel">
       <div class="pv-group"><span class="pv-label">Row Field</span><select class="pv-select" id="pv-row"></select></div>
@@ -2755,19 +2768,36 @@ let _shPivotOpen  = false;
 let _shHotLoaded  = false;
 
 /* Lazy-load Handsontable (CSS + JS) once */
+let _shHFLoaded = false;
+
 async function _shLoadHot(){
-  if(_shHotLoaded) return;
-  await new Promise((res,rej)=>{
-    const lnk=document.createElement('link');
-    lnk.rel='stylesheet';
-    lnk.href='https://cdnjs.cloudflare.com/ajax/libs/handsontable/12.3.3/handsontable.full.min.css';
-    document.head.appendChild(lnk);
-    const s=document.createElement('script');
-    s.src='https://cdnjs.cloudflare.com/ajax/libs/handsontable/12.3.3/handsontable.full.min.js';
-    s.onload=()=>{ _shHotLoaded=true; res(); };
-    s.onerror=()=>rej(new Error('Could not load Handsontable from CDN'));
-    document.head.appendChild(s);
-  });
+  if(_shHotLoaded && _shHFLoaded) return;
+
+  /* Load both libraries in parallel */
+  await Promise.all([
+    /* Handsontable */
+    new Promise((res,rej)=>{
+      if(_shHotLoaded){ res(); return; }
+      const lnk=document.createElement('link');
+      lnk.rel='stylesheet';
+      lnk.href='https://cdnjs.cloudflare.com/ajax/libs/handsontable/12.3.3/handsontable.full.min.css';
+      document.head.appendChild(lnk);
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/handsontable/12.3.3/handsontable.full.min.js';
+      s.onload=()=>{ _shHotLoaded=true; res(); };
+      s.onerror=()=>rej(new Error('Could not load Handsontable'));
+      document.head.appendChild(s);
+    }),
+    /* HyperFormula — formula engine */
+    new Promise((res,rej)=>{
+      if(_shHFLoaded){ res(); return; }
+      const s=document.createElement('script');
+      s.src='https://cdn.jsdelivr.net/npm/hyperformula@2.6.1/dist/hyperformula.full.min.js';
+      s.onload=()=>{ _shHFLoaded=true; res(); };
+      s.onerror=()=>{ console.warn('[SpreadsheetPreview] HyperFormula failed to load — formulas disabled'); res(); };
+      document.head.appendChild(s);
+    }),
+  ]);
 }
 
 /* Main entry — call this instead of _xlsSave */
@@ -2814,7 +2844,8 @@ function _shInitHot(){
   const header    = _shRows[0].map(h=>String(h));
   const data      = _shRows.slice(1).map(r=>r.map(c=>c===undefined||c===null?'':c));
 
-  _shHot = new Handsontable(container, {
+  /* Build Handsontable config */
+  const hotConfig = {
     data,
     colHeaders:         header,
     rowHeaders:         true,
@@ -2829,19 +2860,102 @@ function _shInitHot(){
     manualRowResize:    true,
     contextMenu:        true,
     copyPaste:          true,
-    fixedRowsTop:       _shFreezeOn ? 0 : 0,
     multiColumnSorting: true,
     search:             true,
     autoWrapRow:        true,
     autoWrapCol:        true,
     outsideClickDeselects: false,
-    afterChange(changes){
-      if(!changes) return;
-      changes.forEach(([row, , , newVal])=>{
-        if(_shRows[row+1]) _shRows[row+1] = [..._shHot.getDataAtRow(row)];
+
+    /* Formula bar — update ref + value on selection */
+    afterSelectionEnd(row, col){
+      const colLetter = _shColLetter(col);
+      document.getElementById('sheet-cell-ref').textContent = colLetter+(row+1);
+      const raw = _shHot.getSourceDataAtCell(row, col);
+      document.getElementById('sheet-formula-input').value = raw===null||raw===undefined ? '' : String(raw);
+    },
+
+    afterChange(changes, source){
+      if(!changes||source==='loadData') return;
+      changes.forEach(([row, col])=>{
+        const raw = _shHot.getSourceDataAtCell(row, col);
+        /* Sync back to _shRows */
+        if(_shRows[row+1]){
+          _shRows[row+1] = _shHot.getDataAtRow(row).map(v=>v??'');
+        }
+        /* Update formula bar if this cell is selected */
+        const selected = _shHot.getSelectedLast();
+        if(selected && selected[0]===row && selected[1]===col){
+          document.getElementById('sheet-formula-input').value = raw===null||raw===undefined ? '' : String(raw);
+        }
       });
     },
-  });
+  };
+
+  /* Attach HyperFormula if loaded */
+  if(typeof HyperFormula !== 'undefined'){
+    try{
+      const hf = HyperFormula.buildEmpty({ licenseKey:'gpl-v3' });
+      hotConfig.formulas = { engine: hf };
+    }catch(e){
+      console.warn('[SpreadsheetPreview] HyperFormula init failed:', e.message);
+    }
+  }
+
+  _shHot = new Handsontable(container, hotConfig);
+}
+
+/* ── Formula bar handlers ── */
+function _shFormulaInput(val){
+  /* Live preview: update cell as user types */
+  const selected = _shHot && _shHot.getSelectedLast();
+  if(!selected) return;
+  const [row, col] = selected;
+  _shHot.setDataAtCell(row, col, val, 'formulaBar');
+}
+
+function _shFormulaKeydown(e){
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    /* Commit and move down */
+    const selected = _shHot && _shHot.getSelectedLast();
+    if(!selected) return;
+    const [row, col] = selected;
+    _shHot.setDataAtCell(row, col, e.target.value, 'formulaBar');
+    if(row + 1 < _shHot.countRows()) _shHot.selectCell(row+1, col);
+  }
+  if(e.key === 'Escape'){
+    /* Restore original value */
+    const selected = _shHot && _shHot.getSelectedLast();
+    if(!selected) return;
+    const [row, col] = selected;
+    const raw = _shHot.getSourceDataAtCell(row, col);
+    e.target.value = raw===null||raw===undefined ? '' : String(raw);
+    _shHot.deselectCell();
+  }
+}
+
+/* Convert zero-based col index to spreadsheet letter (0→A, 25→Z, 26→AA) */
+function _shColLetter(col){
+  let s='';
+  col++;
+  while(col>0){ const r=(col-1)%26; s=String.fromCharCode(65+r)+s; col=Math.floor((col-r-1)/26); }
+  return s;
+}
+
+/* ── Add a new blank named column ── */
+function _shAddColumn(){
+  const name = prompt('Column name (e.g. "Course", "CGPA", "Notes"):');
+  if(!name||!name.trim()) return;
+  const colName = name.trim();
+
+  /* Add header */
+  _shRows[0] = [..._shRows[0], colName];
+  /* Add empty cell to every data row */
+  for(let i=1;i<_shRows.length;i++) _shRows[i] = [..._shRows[i], ''];
+
+  /* Re-init the table with the new column */
+  _shInitHot();
+  toast(`Column "${colName}" added — click any cell in it to enter a value or formula`,'success','➕');
 }
 
 function _shToggleFilter(){
