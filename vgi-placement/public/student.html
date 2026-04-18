@@ -399,6 +399,7 @@ async function loadCircularData(){
     const text = await res.text();
     if(text.trimStart().startsWith('<')) return {};
     const rows = parseCSV(text);
+    console.log('[CircularData] raw row count:', rows.length, '| first row:', rows[0]);
     if(rows.length < 2) return {};
     const hdr = rows[0].map(h=>h.toLowerCase().replace(/[^a-z0-9]/g,''));
     console.log('[CircularData] headers:', hdr);
@@ -1012,7 +1013,12 @@ function openCoModal(id){
     return url;
   }
 
-  const circData = CIRC[c.name.toLowerCase()] || {};
+  /* Robust lookup — exact match first, then normalised (strips spaces/punctuation) */
+  const _circKey = n => n.toLowerCase().replace(/[^a-z0-9]/g,'');
+  const circData = CIRC[c.name.toLowerCase()]
+    || Object.entries(CIRC).find(([k])=>_circKey(k)===_circKey(c.name))?.[1]
+    || {};
+  console.log('[CircularModal] company:', c.name, '| circData:', circData, '| CIRC keys:', Object.keys(CIRC));
   const circUrl  = circData.circularUrl || '';
   const embedUrl = circUrl ? toEmbedUrl(circUrl) : null;
   const jdSection = embedUrl ? `
