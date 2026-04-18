@@ -394,10 +394,13 @@ const CIRCULAR_TAB_NAME = 'CIRCULAR_DATA';
 async function loadCircularData(){
   try{
     const url = `https://docs.google.com/spreadsheets/d/${CONFIG_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(CIRCULAR_TAB_NAME)}`;
+    console.log('[CircularData] fetching:', url);
     const res  = await fetch(url);
-    if(!res.ok) return {};
+    console.log('[CircularData] HTTP status:', res.status, res.ok);
+    if(!res.ok){ console.warn('[CircularData] fetch not ok'); return {}; }
     const text = await res.text();
-    if(text.trimStart().startsWith('<')) return {};
+    console.log('[CircularData] response first 120 chars:', text.slice(0,120));
+    if(text.trimStart().startsWith('<')){ console.warn('[CircularData] got HTML — tab not public or name mismatch'); return {}; }
     const rows = parseCSV(text);
     console.log('[CircularData] raw row count:', rows.length, '| first row:', rows[0]);
     if(rows.length < 2) return {};
