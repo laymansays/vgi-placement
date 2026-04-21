@@ -2402,10 +2402,14 @@ function buildStudentSection(title,students,anchorId,companyId){
   const initChevron  = startOpen ? '▼' : '▶';
   const initHintTxt  = startOpen ? 'click to collapse' : 'click to expand';
 
+  const genDocsBtn = isSelected && (adminMode||pcMode)
+    ? `<button class="btn-pdf-download" style="background:linear-gradient(135deg,#1e3a5f,#1e40af);color:#fff;border:none;" onclick="event.stopPropagation();openGenerateDocsModal(${companyId})" title="Generate Placement Report, Student Lists & Offer Letters">📋 Generate Docs</button>`
+    : '';
+
   // Right side of header: action buttons for Selected, hint text for others
   const headerRight = isSelected
     ? `<div style="display:flex;gap:8px;" onclick="event.stopPropagation()">
-         ${analyticBtn}${bulkUploadBtn}${pdfBtn}
+         ${analyticBtn}${genDocsBtn}${bulkUploadBtn}${pdfBtn}
        </div>`
     : `<div style="font-size:11px;color:var(--text4);padding-right:4px;" id="${anchorId}-hint">${initHintTxt}</div>`;
 
@@ -2750,6 +2754,379 @@ function downloadCompanyReportXLS(){
   ws['!cols']=[{wch:6},{wch:30},{wch:18},{wch:14},{wch:22},{wch:32},{wch:14},{wch:28},{wch:12},{wch:12},{wch:12},{wch:18}];
   XLSX.utils.book_append_sheet(wb,ws,'Companies');
   _xlsSave(wb,'Company_Report');
+}
+
+/* ════════════════════════════════════════════════════
+   COMPANY DOCUMENT GENERATOR
+   Generates: Placement Report · Student Lists · Offer Letters
+   Triggered from "📋 Generate Docs" on Selected section
+════════════════════════════════════════════════════ */
+
+/* ── Load college banner (logo_VVFGC.png) once and cache ── */
+
+/* ══════════════════════════════════════════════════
+   1. PLACEMENT REPORT
+══════════════════════════════════════════════════ */
+async function generatePlacementReport(co, banner){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210, ML=15, MR=15, IW=180, pBot=282;
+  const DATE = new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+
+  let y = _drawLetterhead(doc, banner);
+
+  /* Title */
+  y += 6;
+  doc.setFont('helvetica','bold'); doc.setFontSize(14); doc.setTextColor(0,0,0);
+  doc.text('PLACEMENT REPORT', W/2, y, {align:'center'}); y+=8;
+  doc.setDrawColor(87,11,84); doc.setLineWidth(0.6);
+  doc.line(ML+20, y, W-MR-20, y); y+=8;
+
+  /* Key-value fields */
+  const reg  = co.studentsRegistered.length;
+  const att  = co.studentsInterviewed.length;
+  const sel  = co.studentsSelected.length;
+  const jnd  = co.studentsSelected.filter(s=>s.joinStatus==='Joined').length;
+  const roles= (co.roles&&co.roles.length) ? co.roles.join(', ') : '—';
+
+  const kvRows = [
+    ['Company Name',              co.name],
+    ['Mode of Drive',             co.interviewMode||'—'],
+    ['Job Role',                  roles],
+    ['Number of Students Registered', String(reg)],
+    ['Number of Students Attended',   String(att)],
+    ['Number of Students Selected',   String(sel)],
+    ['Number of Students Joined',     String(jnd)],
+    ['Date of Report',            DATE],
+  ];
+
+  const kW=70;
+  kvRows.forEach(([k,v])=>{
+    doc.setFontSize(10);
+    const vW = IW - kW;
+    const vLines = doc.splitTextToSize(v||'—', vW-6);
+    const rh = Math.max(vLines.length*5+6, 10);
+    doc.setDrawColor(180,180,180); doc.setLineWidth(0.3);
+    doc.rect(ML, y, kW, rh);
+    doc.rect(ML+kW, y, vW, rh);
+    doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(87,11,84);
+    doc.text(k, ML+3, y+4);
+    doc.setFont('helvetica','normal'); doc.setTextColor(0,0,0);
+    doc.text(vLines, ML+kW+3, y+4);
+    y += rh;
+  });
+
+  y += 8;
+
+  /* Body paragraphs */
+  const para1 = `We are pleased to announce the successful completion of a campus recruitment drive conducted by "${co.name}", aimed at providing placement opportunities for students of Vidyavahini Group of Institutions, Tumakuru.`;
+  const para2 = `As part of this initiative, a total of ${sel} student${sel!==1?'s':''} were selected after a systematic selection process${att>0?`, which included screening of applications among ${att} attendees`:''}. The selection was carried out to identify students with strong learning skills, communication skills, and readiness for industry-oriented training.`;
+  const para3 = `We congratulate the selected students on their achievement and thank ${co.name} for offering our students a valuable opportunity to enhance their professional skills and workplace experience. We also acknowledge the dedicated efforts of the Training and Placement Cell in facilitating and coordinating this drive successfully.`;
+
+  doc.setFont('helvetica','normal'); doc.setFontSize(10.5); doc.setTextColor(0,0,0);
+  [para1, para2, para3].forEach(para=>{
+    const lines = doc.splitTextToSize(para, IW);
+    if(y + lines.length*6 + 6 > pBot){ doc.addPage(); y = _drawLetterhead(doc,banner)+6; }
+    doc.text(lines, ML, y, {align:'justify', maxWidth:IW}); y += lines.length*6+5;
+  });
+
+  y += 10;
+
+  /* Signature block */
+  if(y + 30 > pBot){ doc.addPage(); y = _drawLetterhead(doc,banner)+10; }
+  doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(0,0,0);
+  doc.text('Placement Co-ordinator', ML, y+20);
+  doc.text('Vidyavahini First Grade & PG College', ML, y+25);
+  doc.text('Kuvempunagara, Tumkur', ML, y+30);
+
+  doc.text('PRINCIPAL', W-MR, y+20, {align:'right'});
+  doc.text('Vidyavahini First Grade College', W-MR, y+25, {align:'right'});
+  doc.text('Kuvempunagar, TUMKUR-572103', W-MR, y+30, {align:'right'});
+
+  return doc;
+}
+
+/* ══════════════════════════════════════════════════
+   2. STUDENT LIST (one doc, three sheets via pages)
+══════════════════════════════════════════════════ */
+async function generateStudentListPDF(co, banner, category){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210, ML=15, MR=15, IW=180, pBot=282;
+  const DATE = new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+
+  const sections = category === 'all'
+    ? [
+        {title:'Registered Students', students: co.studentsRegistered},
+        {title:'Attended / Interviewed Students', students: co.studentsInterviewed},
+        {title:'Selected Students', students: co.studentsSelected},
+      ]
+    : [{
+        title: category==='registered'?'Registered Students':category==='interviewed'?'Attended / Interviewed Students':'Selected Students',
+        students: category==='registered'?co.studentsRegistered:category==='interviewed'?co.studentsInterviewed:co.studentsSelected,
+      }];
+
+  let firstPage = true;
+  for(const sec of sections){
+    if(!firstPage) doc.addPage();
+    firstPage = false;
+
+    let y = _drawLetterhead(doc, banner);
+    y += 6;
+
+    /* Section heading */
+    doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(0,0,0);
+    doc.text(sec.title, W/2, y, {align:'center'}); y+=5;
+    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(87,11,84);
+    doc.text(co.name + '  ·  ' + DATE, W/2, y, {align:'center'}); y+=6;
+    doc.setDrawColor(87,11,84); doc.setLineWidth(0.5);
+    doc.line(ML, y, W-MR, y); y+=5;
+
+    if(!sec.students.length){
+      doc.setFont('helvetica','italic'); doc.setFontSize(10); doc.setTextColor(120,120,120);
+      doc.text('No records for this category.', W/2, y+10, {align:'center'});
+      continue;
+    }
+
+    const hasBranch = sec.students.some(s=>s.class);
+    const hasPhone  = sec.students.some(s=>s.phone);
+    const hasEmail  = sec.students.some(s=>s.email);
+
+    /* Table header */
+    const cols = ['Sl No', 'Name', hasBranch?'Course/Branch':'', hasEmail?'Email':'', hasPhone?'Phone':''].filter(Boolean);
+    const colW = [14, hasBranch?38:hasEmail?50:90, hasBranch?40:0, hasEmail?55:0, hasPhone?28:0].filter((w,i)=>cols[i]);
+    /* Normalise widths to sum to IW */
+    const sumW = colW.reduce((a,b)=>a+b,0);
+    const scaledW = colW.map(w=>Math.round(w/sumW*IW));
+
+    const drawTableHeader = (yy)=>{
+      doc.setFillColor(87,11,84);
+      doc.rect(ML, yy, IW, 8, 'F');
+      doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(255,255,255);
+      let cx=ML;
+      cols.forEach((h,i)=>{ doc.text(h, cx+2, yy+5.5); cx+=scaledW[i]; });
+      doc.setTextColor(0,0,0);
+      return yy+8;
+    };
+
+    y = drawTableHeader(y);
+
+    sec.students.forEach((s,idx)=>{
+      const rowH = 7;
+      if(y+rowH > pBot){
+        doc.addPage();
+        y = _drawLetterhead(doc,banner)+6;
+        y = drawTableHeader(y);
+      }
+      /* Alternating row bg */
+      if(idx%2===0){ doc.setFillColor(245,240,250); doc.rect(ML,y,IW,rowH,'F'); }
+      doc.setDrawColor(220,220,220); doc.setLineWidth(0.2);
+      doc.line(ML,y+rowH,ML+IW,y+rowH);
+
+      doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(0,0,0);
+      const vals = [String(idx+1), s.name||'—', hasBranch?s.class||'—':'', hasEmail?s.email||'—':'', hasPhone?s.phone||'—':''].filter((_,i)=>cols[i]);
+      let cx=ML;
+      vals.forEach((v,i)=>{
+        const maxW = scaledW[i]-4;
+        const truncated = doc.getTextWidth(v)>maxW ? v.slice(0,Math.floor(v.length*maxW/doc.getTextWidth(v))-1)+'…' : v;
+        doc.text(truncated, cx+2, y+4.8);
+        cx+=scaledW[i];
+      });
+      y+=rowH;
+    });
+
+    /* Total row */
+    y+=2;
+    doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(0,0,0);
+    doc.text(`Total: ${sec.students.length} students`, ML, y); y+=8;
+
+    /* Signature */
+    if(y+20>pBot){ doc.addPage(); y=_drawLetterhead(doc,banner)+10; }
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(0,0,0);
+    doc.text('Placement Co-ordinator', ML, y+18);
+    doc.text('PRINCIPAL', W-MR, y+18, {align:'right'});
+  }
+  return doc;
+}
+
+/* ══════════════════════════════════════════════════
+   3. OFFER LETTERS (one page per selected student)
+══════════════════════════════════════════════════ */
+async function generateOfferLettersPDF(co, banner){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210, ML=20, MR=20, IW=170, pBot=280;
+  const DATE = new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+  const role = (co.roles&&co.roles.length) ? co.roles[0] : 'the offered position';
+
+  const selected = co.studentsSelected;
+  if(!selected.length){
+    let y = _drawLetterhead(doc,banner)+10;
+    doc.setFont('helvetica','italic'); doc.setFontSize(11); doc.setTextColor(100,100,100);
+    doc.text('No selected students found for this company.', W/2, y+20, {align:'center'});
+    return doc;
+  }
+
+  selected.forEach((s,idx)=>{
+    if(idx>0) doc.addPage();
+    let y = _drawLetterhead(doc,banner);
+    y+=8;
+
+    /* Ref + Date */
+    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(0,0,0);
+    doc.text('Ref: CDC/VGI/OL/'+String(idx+1).padStart(3,'0')+'/2025', ML, y);
+    doc.text(DATE, W-MR, y, {align:'right'}); y+=8;
+
+    /* To block */
+    doc.setFont('helvetica','bold'); doc.setFontSize(10.5);
+    doc.text('To,', ML, y); y+=5;
+    doc.text(s.name||'Student', ML, y); y+=5;
+    if(s.email){ doc.setFont('helvetica','normal'); doc.text(s.email, ML, y); y+=5; }
+    if(s.phone){ doc.text(s.phone, ML, y); y+=5; }
+    y+=4;
+
+    /* Subject */
+    doc.setFont('helvetica','bold'); doc.setFontSize(11);
+    const subj = `Sub: Placement Offer — ${co.name} — ${role}`;
+    const subjLines = doc.splitTextToSize(subj, IW);
+    doc.text(subjLines, ML, y); y+=subjLines.length*6+4;
+    doc.setDrawColor(87,11,84); doc.setLineWidth(0.4);
+    doc.line(ML, y, W-MR, y); y+=6;
+
+    /* Salutation */
+    doc.setFont('helvetica','normal'); doc.setFontSize(10.5);
+    doc.text(`Dear ${(s.name||'Student').split(' ')[0]},`, ML, y); y+=7;
+
+    /* Body */
+    const paras = [
+      `We are pleased to inform you that you have been successfully selected for the position of ${role} at ${co.name} through the Campus Placement Drive conducted at Vidyavahini Group of Institutions, Tumakuru.`,
+      `This selection is a testament to your skills, dedication, and academic performance. The Training and Placement Cell congratulates you on this achievement and wishes you great success in your professional journey.`,
+      `Please contact the Career Development Center at the earliest to complete the necessary joining formalities and documentation. Kindly carry all original mark sheets, ID proof, and passport-size photographs at the time of joining.`,
+    ];
+
+    paras.forEach(para=>{
+      const lines = doc.splitTextToSize(para, IW);
+      if(y+lines.length*6+5 > pBot){ doc.addPage(); y=_drawLetterhead(doc,banner)+10; }
+      doc.text(lines, ML, y, {align:'justify', maxWidth:IW}); y+=lines.length*6+5;
+    });
+
+    y+=4;
+    doc.text('Yours sincerely,', ML, y); y+=14;
+
+    /* Signature block */
+    doc.setFont('helvetica','bold');
+    doc.text('Dr. Prasanna Kumar T M', ML, y); y+=5;
+    doc.setFont('helvetica','normal');
+    doc.text('Head – CDC', ML, y); y+=5;
+    doc.text('Vidyavahini Samsthe, Tumakuru', ML, y);
+  });
+
+  return doc;
+}
+
+/* ══════════════════════════════════════════════════
+   GENERATE DOCS MODAL
+══════════════════════════════════════════════════ */
+function openGenerateDocsModal(companyId){
+  const co = COMPANIES.find(c=>c.id===companyId);
+  if(!co){ toast('Company not found','error'); return; }
+
+  const sel = co.studentsSelected.length;
+  const reg = co.studentsRegistered.length;
+  const att = co.studentsInterviewed.length;
+
+  openModal(`📋 Generate Documents — ${xe(co.name)}`,
+    `<div style="display:flex;flex-direction:column;gap:12px;padding:4px 0;">
+      <div style="font-size:12px;color:var(--text3);padding:8px 12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border);">
+        <strong style="color:var(--text);">${xe(co.name)}</strong> &nbsp;·&nbsp;
+        ${reg} registered &nbsp;·&nbsp; ${att} attended &nbsp;·&nbsp;
+        <strong style="color:var(--green)">${sel} selected</strong>
+      </div>
+
+      <div style="font-weight:700;font-size:13px;color:var(--text);margin-bottom:4px;">Select documents to generate:</div>
+
+      <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;" id="gdoc-lbl-report">
+        <input type="checkbox" id="gdoc-report" checked style="width:16px;height:16px;cursor:pointer;">
+        <div>
+          <div style="font-weight:700;font-size:13px;color:var(--text);">📄 Placement Report</div>
+          <div style="font-size:11px;color:var(--text3);">College letterhead · company details · statistics · signature block</div>
+        </div>
+      </label>
+
+      <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;" id="gdoc-lbl-list">
+        <input type="checkbox" id="gdoc-list" checked style="width:16px;height:16px;cursor:pointer;">
+        <div>
+          <div style="font-weight:700;font-size:13px;color:var(--text);">📋 Student Lists</div>
+          <div style="font-size:11px;color:var(--text3);">Registered · Attended · Selected — all in one PDF</div>
+        </div>
+      </label>
+
+      <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;${sel===0?'opacity:.5;pointer-events:none;':''}" id="gdoc-lbl-offers">
+        <input type="checkbox" id="gdoc-offers" ${sel>0?'checked':''} ${sel===0?'disabled':''} style="width:16px;height:16px;cursor:pointer;">
+        <div>
+          <div style="font-weight:700;font-size:13px;color:var(--text);">📩 Offer Letters</div>
+          <div style="font-size:11px;color:var(--text3);">${sel>0?`${sel} individual letters — one per selected student`:'No selected students yet'}</div>
+        </div>
+      </label>
+
+      <div id="gdoc-progress" style="display:none;padding:10px 12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border);font-size:12px;color:var(--text3);"></div>
+    </div>`,
+
+    `<button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button>
+     <button class="btn btn-admin btn-sm" id="gdoc-generate-btn" onclick="runGenerateDocs(${companyId})">⬇ Generate & Download</button>`
+  );
+}
+
+async function runGenerateDocs(companyId){
+  const co = COMPANIES.find(c=>c.id===companyId);
+  if(!co || !window.jspdf){ toast('PDF library not ready','error'); return; }
+
+  const doReport = document.getElementById('gdoc-report')?.checked;
+  const doList   = document.getElementById('gdoc-list')?.checked;
+  const doOffers = document.getElementById('gdoc-offers')?.checked;
+
+  if(!doReport && !doList && !doOffers){
+    toast('Select at least one document type','info'); return;
+  }
+
+  const btn = document.getElementById('gdoc-generate-btn');
+  if(btn){ btn.disabled=true; btn.textContent='Generating…'; }
+  const prog = document.getElementById('gdoc-progress');
+  if(prog) prog.style.display='block';
+
+  const setStatus = msg => { if(prog) prog.textContent = msg; };
+  const safe = co.name.replace(/[^a-zA-Z0-9 ]/g,'').trim().replace(/\s+/g,'_');
+
+  setStatus('Loading college letterhead…');
+  const banner = await _loadDocBanner();
+
+  try{
+    if(doReport){
+      setStatus('Generating Placement Report…');
+      const doc = await generatePlacementReport(co, banner);
+      doc.save(safe+'_Placement_Report.pdf');
+      await new Promise(r=>setTimeout(r,400));
+    }
+    if(doList){
+      setStatus('Generating Student Lists…');
+      const doc = await generateStudentListPDF(co, banner, 'all');
+      doc.save(safe+'_Student_Lists.pdf');
+      await new Promise(r=>setTimeout(r,400));
+    }
+    if(doOffers){
+      setStatus(`Generating ${co.studentsSelected.length} Offer Letters…`);
+      const doc = await generateOfferLettersPDF(co, banner);
+      doc.save(safe+'_Offer_Letters.pdf');
+    }
+    setStatus('✅ Done! Check your downloads folder.');
+    if(btn){ btn.textContent='✅ Downloaded'; btn.style.background='var(--green)'; }
+    toast('Documents generated successfully','success','📄');
+  }catch(e){
+    toast('Error generating documents: '+e.message,'error');
+    console.error('[GenerateDocs]', e);
+    if(btn){ btn.disabled=false; btn.textContent='⬇ Generate & Download'; }
+    setStatus('❌ Error: '+e.message);
+  }
 }
 
 /* ════════════════════════════════════════════════════
