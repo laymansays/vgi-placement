@@ -2763,9 +2763,40 @@ function downloadCompanyReportXLS(){
 ════════════════════════════════════════════════════ */
 
 /* ── Load college banner (logo_VVFGC.png) once and cache ── */
+let _docBannerB64 = null;
+async function _loadDocBanner(){
+  if(_docBannerB64) return _docBannerB64;
+  try{
+    const r = await fetch('logo_VVFGC.png');
+    if(!r.ok) return null;
+    const bl = await r.blob();
+    _docBannerB64 = await new Promise(res=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.readAsDataURL(bl); });
+    return _docBannerB64;
+  }catch(e){ return null; }
+}
 
-/* ══════════════════════════════════════════════════
-   1. PLACEMENT REPORT
+/* ── Draw college letterhead, return y after header ── */
+function _drawLetterhead(doc, banner){
+  const W=210, ML=15, MR=15;
+  if(banner){
+    try{ doc.addImage(banner,'JPEG',0,0,W,28); }catch(e){
+      try{ doc.addImage(banner,'PNG',0,0,W,28); }catch(e2){}
+    }
+  } else {
+    doc.setFillColor(87,11,84);
+    doc.rect(0,0,W,28,'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(255,255,255);
+    doc.text('VIDYAVAHINI GROUP OF INSTITUTIONS',W/2,10,{align:'center'});
+    doc.setFontSize(10);
+    doc.text('First Grade & P.G. College · Tumakuru',W/2,17,{align:'center'});
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
+    doc.text('Affiliated to Tumakuru University',W/2,23,{align:'center'});
+    doc.setTextColor(0,0,0);
+  }
+  doc.setDrawColor(87,11,84); doc.setLineWidth(0.8);
+  doc.line(ML,29,W-MR,29);
+  return 33;
+}
 ══════════════════════════════════════════════════ */
 async function generatePlacementReport(co, banner){
   const { jsPDF } = window.jspdf;
@@ -3035,6 +3066,11 @@ function openGenerateDocsModal(companyId){
   const reg = co.studentsRegistered.length;
   const att = co.studentsInterviewed.length;
 
+  /* Check if circular exists in CIRCULAR_DATA */
+  const circData = (typeof CIRCULAR_DATA!=='undefined') ? (CIRCULAR_DATA[co.name.toLowerCase()]||{}) : {};
+  const hasCircular = !!(circData.about && circData.position && circData.ctc && circData.selection);
+  const circUrl = circData.circularUrl || '';
+
   openModal(`📋 Generate Documents — ${xe(co.name)}`,
     `<div style="display:flex;flex-direction:column;gap:12px;padding:4px 0;">
       <div style="font-size:12px;color:var(--text3);padding:8px 12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border);">
@@ -3045,23 +3081,31 @@ function openGenerateDocsModal(companyId){
 
       <div style="font-weight:700;font-size:13px;color:var(--text);margin-bottom:4px;">Select documents to generate:</div>
 
-      <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;" id="gdoc-lbl-report">
+      <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;${!hasCircular?'opacity:.5;pointer-events:none;':''}">
+        <input type="checkbox" id="gdoc-circular" ${hasCircular?'checked':''} ${!hasCircular?'disabled':''} style="width:16px;height:16px;cursor:pointer;">
+        <div>
+          <div style="font-weight:700;font-size:13px;color:var(--text);">📄 Campus Circular</div>
+          <div style="font-size:11px;color:var(--text3);">${hasCircular?(circUrl?'Regenerate from CIRCULAR_DATA sheet data':'Generate from CIRCULAR_DATA sheet data'):'Fill CIRCULAR_DATA sheet for this company first'}</div>
+        </div>
+      </label>
+
+      <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;">
         <input type="checkbox" id="gdoc-report" checked style="width:16px;height:16px;cursor:pointer;">
         <div>
-          <div style="font-weight:700;font-size:13px;color:var(--text);">📄 Placement Report</div>
+          <div style="font-weight:700;font-size:13px;color:var(--text);">📋 Placement Report</div>
           <div style="font-size:11px;color:var(--text3);">College letterhead · company details · statistics · signature block</div>
         </div>
       </label>
 
-      <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;" id="gdoc-lbl-list">
+      <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;">
         <input type="checkbox" id="gdoc-list" checked style="width:16px;height:16px;cursor:pointer;">
         <div>
-          <div style="font-weight:700;font-size:13px;color:var(--text);">📋 Student Lists</div>
+          <div style="font-weight:700;font-size:13px;color:var(--text);">👥 Student Lists</div>
           <div style="font-size:11px;color:var(--text3);">Registered · Attended · Selected — all in one PDF</div>
         </div>
       </label>
 
-      <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;${sel===0?'opacity:.5;pointer-events:none;':''}" id="gdoc-lbl-offers">
+      <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;${sel===0?'opacity:.5;pointer-events:none;':''}">
         <input type="checkbox" id="gdoc-offers" ${sel>0?'checked':''} ${sel===0?'disabled':''} style="width:16px;height:16px;cursor:pointer;">
         <div>
           <div style="font-weight:700;font-size:13px;color:var(--text);">📩 Offer Letters</div>
@@ -3079,53 +3123,98 @@ function openGenerateDocsModal(companyId){
 
 async function runGenerateDocs(companyId){
   const co = COMPANIES.find(c=>c.id===companyId);
-  if(!co || !window.jspdf){ toast('PDF library not ready','error'); return; }
+  if(!co){ toast('Company not found','error'); return; }
+  if(!window.jspdf){ toast('PDF library not ready — wait a moment and retry','error'); return; }
 
-  const doReport = document.getElementById('gdoc-report')?.checked;
-  const doList   = document.getElementById('gdoc-list')?.checked;
-  const doOffers = document.getElementById('gdoc-offers')?.checked;
+  const doCircular = document.getElementById('gdoc-circular')?.checked;
+  const doReport   = document.getElementById('gdoc-report')?.checked;
+  const doList     = document.getElementById('gdoc-list')?.checked;
+  const doOffers   = document.getElementById('gdoc-offers')?.checked;
 
-  if(!doReport && !doList && !doOffers){
+  if(!doCircular && !doReport && !doList && !doOffers){
     toast('Select at least one document type','info'); return;
   }
 
-  const btn = document.getElementById('gdoc-generate-btn');
-  if(btn){ btn.disabled=true; btn.textContent='Generating…'; }
+  const btn  = document.getElementById('gdoc-generate-btn');
   const prog = document.getElementById('gdoc-progress');
-  if(prog) prog.style.display='block';
+  if(btn)  { btn.disabled=true; btn.textContent='Generating…'; }
+  if(prog) { prog.style.display='block'; prog.textContent='Starting…'; }
 
-  const setStatus = msg => { if(prog) prog.textContent = msg; };
+  const setStatus = msg => { if(prog) prog.innerHTML = msg; console.log('[GenerateDocs]', msg); };
   const safe = co.name.replace(/[^a-zA-Z0-9 ]/g,'').trim().replace(/\s+/g,'_');
-
-  setStatus('Loading college letterhead…');
-  const banner = await _loadDocBanner();
+  let errors = [];
 
   try{
+    setStatus('Loading college letterhead…');
+    const banner = await _loadDocBanner();
+
+    if(doCircular){
+      setStatus('Generating circular…');
+      try{
+        const circData = (typeof CIRCULAR_DATA!=='undefined') ? (CIRCULAR_DATA[co.name.toLowerCase()]||{}) : {};
+        const { logoData, sigData } = await _loadCircularImages();
+        const circDoc = _buildCircularDoc({
+          dateVal:   new Date().toISOString().split('T')[0],
+          company:   co.name,
+          roles:     (co.roles||[]).join(', '),
+          about:     circData.about||'',
+          position:  circData.position||'',
+          education: circData.education||'',
+          location:  circData.location||'',
+          ctc:       circData.ctc||'',
+          selection: circData.selection||'',
+          benefits:  circData.benefits||'',
+          docs:      circData.docs||'',
+          culture:   circData.culture||'',
+          regLink:   circData.regLink||co.formUrl||'',
+          lastDate:  circData.lastDate||'',
+        }, logoData, sigData);
+        circDoc.save(safe+'_Circular.pdf');
+        await new Promise(r=>setTimeout(r,300));
+      }catch(e){ errors.push('Circular: '+e.message); console.error('[GenerateDocs] Circular error',e); }
+    }
+
     if(doReport){
-      setStatus('Generating Placement Report…');
-      const doc = await generatePlacementReport(co, banner);
-      doc.save(safe+'_Placement_Report.pdf');
-      await new Promise(r=>setTimeout(r,400));
+      setStatus('Generating placement report…');
+      try{
+        const doc = await generatePlacementReport(co, banner);
+        doc.save(safe+'_Placement_Report.pdf');
+        await new Promise(r=>setTimeout(r,300));
+      }catch(e){ errors.push('Placement Report: '+e.message); console.error('[GenerateDocs] Report error',e); }
     }
+
     if(doList){
-      setStatus('Generating Student Lists…');
-      const doc = await generateStudentListPDF(co, banner, 'all');
-      doc.save(safe+'_Student_Lists.pdf');
-      await new Promise(r=>setTimeout(r,400));
+      setStatus('Generating student lists…');
+      try{
+        const doc = await generateStudentListPDF(co, banner, 'all');
+        doc.save(safe+'_Student_Lists.pdf');
+        await new Promise(r=>setTimeout(r,300));
+      }catch(e){ errors.push('Student Lists: '+e.message); console.error('[GenerateDocs] Lists error',e); }
     }
+
     if(doOffers){
-      setStatus(`Generating ${co.studentsSelected.length} Offer Letters…`);
-      const doc = await generateOfferLettersPDF(co, banner);
-      doc.save(safe+'_Offer_Letters.pdf');
+      setStatus(`Generating ${co.studentsSelected.length} offer letters…`);
+      try{
+        const doc = await generateOfferLettersPDF(co, banner);
+        doc.save(safe+'_Offer_Letters.pdf');
+      }catch(e){ errors.push('Offer Letters: '+e.message); console.error('[GenerateDocs] Offers error',e); }
     }
-    setStatus('✅ Done! Check your downloads folder.');
-    if(btn){ btn.textContent='✅ Downloaded'; btn.style.background='var(--green)'; }
-    toast('Documents generated successfully','success','📄');
+
+    if(errors.length){
+      setStatus('⚠️ Completed with errors:<br>' + errors.map(e=>`• ${e}`).join('<br>'));
+      if(btn){ btn.disabled=false; btn.textContent='⬇ Retry'; }
+      toast('Some documents had errors — see modal for details','error');
+    } else {
+      setStatus('✅ All documents downloaded successfully.');
+      if(btn){ btn.textContent='✅ Done'; btn.style.background='var(--green)'; }
+      toast('Documents generated successfully','success','📄');
+    }
+
   }catch(e){
-    toast('Error generating documents: '+e.message,'error');
-    console.error('[GenerateDocs]', e);
+    setStatus('❌ Unexpected error: '+e.message);
     if(btn){ btn.disabled=false; btn.textContent='⬇ Generate & Download'; }
-    setStatus('❌ Error: '+e.message);
+    toast('Error: '+e.message,'error');
+    console.error('[GenerateDocs] Fatal error',e);
   }
 }
 
