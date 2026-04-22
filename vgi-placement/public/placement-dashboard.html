@@ -2797,7 +2797,9 @@ function _drawLetterhead(doc, banner){
   doc.line(ML,29,W-MR,29);
   return 33;
 }
-══════════════════════════════════════════════════ */
+/* ──────────────────────────────────────────────
+   GENERATE PLACEMENT REPORT
+────────────────────────────────────────────── */
 async function generatePlacementReport(co, banner){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
