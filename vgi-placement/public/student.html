@@ -164,6 +164,12 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;}
 /* ── COMPANY GRID ── */
 .co-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;}
 .co-card{background:#fff;border:1.5px solid #E2E8F0;border-radius:16px;padding:20px;cursor:pointer;transition:all .22s;box-shadow:0 1px 8px rgba(0,0,0,.04);}
+.co-card-circular{margin-top:12px;border:1.5px solid #D3B6D2;border-radius:10px;overflow:hidden;background:#F7F0F7;}
+.co-card-circular-bar{display:flex;align-items:center;justify-content:space-between;padding:7px 12px;background:#F1E8F1;}
+.co-card-circular-label{font-size:11px;font-weight:700;color:#570B54;letter-spacing:.04em;display:flex;align-items:center;gap:5px;}
+.co-card-circular-open{font-size:11px;font-weight:700;color:#6D0E6A;text-decoration:none;padding:4px 10px;border:1.5px solid #D3B6D2;border-radius:6px;background:#fff;cursor:pointer;white-space:nowrap;}
+.co-card-circular-open:hover{background:#F7F0F7;}
+.co-card-circular-frame{width:100%;height:200px;border:none;display:block;pointer-events:none;}
 .co-card:hover{border-color:#A76EA5;box-shadow:0 6px 20px rgba(109,14,106,.12);transform:translateY(-2px);}
 .co-card-head{display:flex;align-items:center;gap:14px;margin-bottom:14px;}
 .co-card-name{font-size:15px;font-weight:800;color:#0F172A;}
@@ -941,11 +947,25 @@ function renderAvailable(){
       c.driveDate     ?mkChip('Drive Date',fmtD(c.driveDate)):null,
       c.interviewMode ?mkChip('Mode',c.interviewMode):null,
     ].filter(Boolean).join('');
+    const circ  = CIRC[c.name.toLowerCase()]||{};
+    const cUrl  = circ.circularUrl||'';
+    const embedU= cUrl ? toEmbedUrl(cUrl) : '';
+    const circStrip = cUrl ? `
+      <div class="co-card-circular" onclick="event.stopPropagation()">
+        <div class="co-card-circular-bar">
+          <span class="co-card-circular-label">📄 Campus Circular</span>
+          <a href="${xe(cUrl)}" target="_blank" rel="noopener" class="co-card-circular-open">Open ↗</a>
+        </div>
+        <iframe class="co-card-circular-frame" src="${xe(embedU)}" loading="lazy" title="Campus Circular"
+          onload="this.style.opacity=1" style="opacity:0;transition:opacity .3s;"
+          onerror="this.parentElement.style.display='none'"></iframe>
+      </div>` : '';
     return`<div class="co-card" onclick="openCoModal(${c.id})">
       <div class="co-card-head">${logoHtml(c.name,c.website,c.id-1,52)}<div class="co-card-name">${xe(c.name)}</div></div>
       ${c.adminStatus?statusBadge(c.adminStatus):''}
       <div class="co-chips">${chips||''}</div>
       ${c.eligSummary?`<div class="elig-sum">${xe(c.eligSummary)}</div>`:''}
+      ${circStrip}
       <button class="btn-apply-card" onclick="event.stopPropagation();openCoModal(${c.id})">View Details &amp; Apply \u2192</button>
     </div>`;
   }).join('');
@@ -1004,6 +1024,18 @@ function mkChip(label,text){
   return`<div class="chip"><span class="chip-label">${xe(label)}</span><span class="chip-txt">${xe(text)}</span></div>`;
 }
 
+/* Convert any Drive/Docs share URL to an embeddable preview URL */
+function toEmbedUrl(url){
+  if(!url)return null;
+  let m=url.match(/drive\.google\.com\/file\/d\/([\w-]+)/);
+  if(m)return`https://drive.google.com/file/d/${m[1]}/preview`;
+  m=url.match(/docs\.google\.com\/document\/d\/([\w-]+)/);
+  if(m)return`https://docs.google.com/document/d/${m[1]}/preview`;
+  m=url.match(/docs\.google\.com\/presentation\/d\/([\w-]+)/);
+  if(m)return`https://docs.google.com/presentation/d/${m[1]}/preview`;
+  return url;
+}
+
 /* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
    COMPANY MODAL
 \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
@@ -1020,22 +1052,6 @@ function openCoModal(id){
     c.interviewMode         ?mfRow('Interview Mode',     c.interviewMode):null,
     mfRow('Eligibility', c.eligSummary||'10th \u2265 60%, 12th \u2265 60%, No Active Backlogs'),
   ].filter(Boolean).join('');
-
-  /* Convert any Drive/Docs share URL to an embeddable preview URL */
-  function toEmbedUrl(url){
-    if(!url)return null;
-    // Google Drive file: /file/d/ID/view → /file/d/ID/preview
-    let m=url.match(/drive\.google\.com\/file\/d\/([\w-]+)/);
-    if(m)return`https://drive.google.com/file/d/${m[1]}/preview`;
-    // Google Docs: /document/d/ID → /document/d/ID/preview
-    m=url.match(/docs\.google\.com\/document\/d\/([\w-]+)/);
-    if(m)return`https://docs.google.com/document/d/${m[1]}/preview`;
-    // Google Slides
-    m=url.match(/docs\.google\.com\/presentation\/d\/([\w-]+)/);
-    if(m)return`https://docs.google.com/presentation/d/${m[1]}/preview`;
-    // Already a preview or other URL — try embedding directly
-    return url;
-  }
 
   /* Robust lookup — exact match first, then normalised (strips spaces/punctuation) */
   const _circKey = n => n.toLowerCase().replace(/[^a-z0-9]/g,'');
