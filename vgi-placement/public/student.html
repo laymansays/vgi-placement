@@ -263,8 +263,29 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;}
 /* ── FORMAT FOR PLACEMENT MODAL ── */
 .rw-modal-overlay{position:fixed;inset:0;background:rgba(26,5,25,.55);z-index:9999;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
 .rw-modal-overlay.show{opacity:1;pointer-events:all;}
-.rw-modal-box{background:#fff;border-radius:20px;width:90%;max-width:620px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(26,5,25,.28);transform:translateY(20px);transition:transform .25s;}
+.rw-modal-box{background:#fff;border-radius:20px;width:96%;max-width:780px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(26,5,25,.28);transform:translateY(20px);transition:transform .25s;}
 .rw-modal-overlay.show .rw-modal-box{transform:translateY(0);}
+
+/* ── Editable form styles ── */
+.rf-form{display:flex;flex-direction:column;gap:0;}
+.rf-section{border-bottom:1px solid #F1E8F1;padding:14px 20px;}
+.rf-section:last-child{border-bottom:none;}
+.rf-sec-title{font-size:11px;font-weight:800;color:#6D0E6A;letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.rf-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;}
+.rf-row.full{grid-template-columns:1fr;}
+.rf-field{display:flex;flex-direction:column;gap:4px;}
+.rf-label{font-size:10px;font-weight:700;color:#94A3B8;letter-spacing:.05em;text-transform:uppercase;}
+.rf-input{padding:8px 10px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:13px;font-family:inherit;color:#1A0519;background:#fff;outline:none;transition:border-color .15s;}
+.rf-input:focus{border-color:#6D0E6A;box-shadow:0 0 0 3px rgba(109,14,106,.08);}
+.rf-textarea{padding:8px 10px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:12.5px;font-family:'Courier New',monospace;color:#1A0519;background:#fff;outline:none;resize:vertical;min-height:72px;line-height:1.6;transition:border-color .15s;}
+.rf-textarea:focus{border-color:#6D0E6A;box-shadow:0 0 0 3px rgba(109,14,106,.08);}
+.rf-hint{font-size:10.5px;color:#94A3B8;margin-top:3px;line-height:1.5;}
+.rf-edu-block{background:#F9F5F9;border:1px solid #E2E8F0;border-radius:10px;padding:10px 12px;margin-bottom:8px;}
+.rf-edu-block .rf-row{margin-bottom:6px;}
+.rf-add-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border:1.5px dashed #D3B6D2;border-radius:8px;background:none;color:#6D0E6A;font-size:12px;font-weight:600;cursor:pointer;margin-top:4px;}
+.rf-add-btn:hover{background:#F7F0F7;}
+.rf-remove-btn{padding:3px 8px;border:none;background:#FEE2E2;color:#DC2626;border-radius:6px;font-size:11px;cursor:pointer;font-weight:700;}
+
 .rw-modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 14px;border-bottom:1.5px solid #F1E8F1;flex-shrink:0;}
 .rw-modal-title{font-size:16px;font-weight:800;color:#1A0519;}
 .rw-modal-sub{font-size:11.5px;color:#94A3B8;margin-top:2px;}
@@ -1170,8 +1191,8 @@ function autoSizeForEmail(){
 }
 
 /* ── FORMAT FOR PLACEMENT ── */
-let _rwHtml='',_gradeMode='percentage';
-function openRewriteModal(){document.getElementById('rw-modal').classList.add('show');document.getElementById('rw-dl-btn').style.display='none';_rwHtml='';showGradePrompt();}
+let _rwHtml='', _gradeMode='percentage', _rwParsed=null;
+function openRewriteModal(){document.getElementById('rw-modal').classList.add('show');document.getElementById('rw-dl-btn').style.display='none';_rwHtml='';_rwParsed=null;showGradePrompt();}
 function closeRwModal(){document.getElementById('rw-modal').classList.remove('show');}
 function setRwBody(html){document.getElementById('rw-body').innerHTML=html;}
 function showGradePrompt(){setRwBody(`<div style="padding:8px 0 4px;"><p style="font-size:13.5px;font-weight:700;color:#1A0519;margin:0 0 4px;">How should academic performance be shown?</p><p style="font-size:12px;color:#64748B;margin:0 0 20px;">Applied consistently across all education entries in your resume.</p><div style="display:flex;gap:12px;"><button onclick="pickGrade('percentage')" style="flex:1;padding:14px;border-radius:12px;border:2px solid #D3B6D2;background:#fff;cursor:pointer;font-size:13px;font-weight:700;color:#6D0E6A;" onmouseover="this.style.background='#F7F0F7'" onmouseout="this.style.background='#fff'">&#128202; Percentage<br><span style="font-size:11px;color:#94A3B8;font-weight:500;">e.g. 79.5%</span></button><button onclick="pickGrade('cgpa')" style="flex:1;padding:14px;border-radius:12px;border:2px solid #D3B6D2;background:#fff;cursor:pointer;font-size:13px;font-weight:700;color:#6D0E6A;" onmouseover="this.style.background='#F7F0F7'" onmouseout="this.style.background='#fff'">&#127891; CGPA<br><span style="font-size:11px;color:#94A3B8;font-weight:500;">e.g. 8.37 CGPA</span></button></div></div>`);}
@@ -1204,7 +1225,148 @@ async function pickGrade(mode){
 function setLoading(msg,sub){setRwBody(`<div class="rw-loading"><div class="rw-spinner"></div><div class="rw-loading-txt">${msg}</div><div class="rw-loading-sub">${sub||''}</div></div>`);}
 function showUploadFallback(err){setRwBody(`${err?`<div class="rw-error">&#9888; ${err}<br><small style="font-weight:400;color:#9F1239">Upload your PDF directly below instead.</small></div>`:''}
 <label class="rw-drop-zone" id="rw-drop"><div class="rw-drop-icon">&#128196;</div><div class="rw-drop-title">Upload Resume PDF</div><div class="rw-drop-hint">Click here or drag &amp; drop your PDF</div><div class="rw-drop-note">Processed locally — not uploaded to any server</div></label><input type="file" id="rw-file-inp" accept=".pdf" style="display:none"/>`);document.getElementById('rw-file-inp').onchange=e=>{if(e.target.files[0])handleResumeFile(e.target.files[0]);};const drop=document.getElementById('rw-drop');drop.addEventListener('click',()=>document.getElementById('rw-file-inp').click());drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('rw-drag-over');});drop.addEventListener('dragleave',()=>drop.classList.remove('rw-drag-over'));drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('rw-drag-over');const f=e.dataTransfer.files[0];if(f&&f.type==='application/pdf')handleResumeFile(f);});}
-async function handleResumeFile(file){if(!file||file.type!=='application/pdf'){setRwBody('<div class="rw-error">&#10060; Please select a PDF file.</div>');return;}try{setLoading('Reading PDF…','Extracting text from your resume');const text=await extractTextFromPDF(file);setLoading('Formatting…','Applying placement cell template');const parsed=parseResumeText(text);if(typeof cleanParsedSections==='function')cleanParsedSections(parsed.sections,_gradeMode==='cgpa');const html=buildResumeHTML(parsed);_rwHtml=html;setRwBody(`<div class="rw-preview">${html}</div>`);document.getElementById('rw-dl-btn').style.display='block';}catch(err){setRwBody(`<div class="rw-error">&#10060; ${err.message||'Failed to read PDF.'}</div><div style="text-align:center;margin-top:16px;"><button style="padding:9px 20px;border:1.5px solid #6D0E6A;border-radius:8px;background:#fff;color:#6D0E6A;font-size:12.5px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;" onclick="showUploadFallback('')">&#8617; Upload Instead</button></div>`);}}
+async function handleResumeFile(file){
+  if(!file||file.type!=='application/pdf'){setRwBody('<div class="rw-error">&#10060; Please select a PDF file.</div>');return;}
+  try{
+    setLoading('Reading PDF…','Extracting text from your resume');
+    const text = await extractTextFromPDF(file);
+    setLoading('Parsing…','Detecting sections');
+    const parsed = parseResumeText(text);
+    if(typeof cleanParsedSections==='function') cleanParsedSections(parsed.sections, _gradeMode==='cgpa');
+    _rwParsed = parsed;
+    showEditForm(parsed);
+  }catch(err){
+    setRwBody(`<div class="rw-error">&#10060; ${err.message||'Failed to read PDF.'}</div><div style="text-align:center;margin-top:16px;"><button style="padding:9px 20px;border:1.5px solid #6D0E6A;border-radius:8px;background:#fff;color:#6D0E6A;font-size:12.5px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;" onclick="showUploadFallback('')">&#8617; Upload Instead</button></div>`);
+  }
+}
+
+/* ── Show editable form with parsed data ── */
+function showEditForm(p){
+  const s = p.sections;
+  const eduBlocks = (s.education||[]).join('\n');
+  const expLines  = (s.experience||[]).join('\n');
+  const projLines = (s.projects||[]).join('\n');
+  const skillLine = (s.skills||[]).join('\n');
+  const awLine    = [...(s.awards||[]),...(s.certifications||[])].join('\n');
+  const sumLine   = (s.summary||[]).join(' ');
+
+  setRwBody(`<div class="rf-form" id="rf-form">
+
+    <div class="rf-section">
+      <div class="rf-sec-title">👤 Personal Details</div>
+      <div class="rf-row">
+        <div class="rf-field"><span class="rf-label">Full Name</span><input class="rf-input" id="rf-name" value="${xe(p.name||'')}" placeholder="e.g. RAHUL SHARMA"></div>
+        <div class="rf-field"><span class="rf-label">Phone</span><input class="rf-input" id="rf-phone" value="${xe(p.phone||'')}" placeholder="e.g. 9876543210"></div>
+      </div>
+      <div class="rf-row">
+        <div class="rf-field"><span class="rf-label">Email</span><input class="rf-input" id="rf-email" value="${xe(p.email||'')}" placeholder="e.g. rahul@gmail.com"></div>
+        <div class="rf-field"><span class="rf-label">LinkedIn (optional)</span><input class="rf-input" id="rf-linkedin" value="${xe(p.linkedin||'')}" placeholder="linkedin.com/in/rahul"></div>
+      </div>
+    </div>
+
+    <div class="rf-section">
+      <div class="rf-sec-title">📝 About Me / Objective</div>
+      <div class="rf-row full">
+        <div class="rf-field">
+          <textarea class="rf-textarea" id="rf-summary" rows="3" placeholder="Write a 2–3 line career objective or personal summary…">${xe(sumLine)}</textarea>
+          <span class="rf-hint">Leave blank to skip this section.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="rf-section">
+      <div class="rf-sec-title">🎓 Education <span style="font-weight:400;color:#94A3B8;font-size:10px;margin-left:4px;">— each entry on its own line</span></div>
+      <div class="rf-row full">
+        <div class="rf-field">
+          <textarea class="rf-textarea" id="rf-education" rows="5" placeholder="B.Com — Vidyavahini First Grade College — 2022–2025 — 78.4%
+PUC (12th) — St. Mary's College — 2020–2022 — 82%
+SSLC (10th) — Government High School — 2020 — 91%">${xe(eduBlocks)}</textarea>
+          <span class="rf-hint">One entry per line. Include degree/course, institution, year, percentage/CGPA.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="rf-section">
+      <div class="rf-sec-title">💼 Work Experience <span style="font-weight:400;color:#94A3B8;font-size:10px;margin-left:4px;">— one bullet per line</span></div>
+      <div class="rf-row full">
+        <div class="rf-field">
+          <textarea class="rf-textarea" id="rf-experience" rows="4" placeholder="Interned at XYZ Corp as a data analyst for 3 months
+Assisted in building dashboards using Excel and Power BI
+Presented weekly reports to the management team">${xe(expLines)}</textarea>
+          <span class="rf-hint">Leave blank if no experience. Each line becomes one bullet point.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="rf-section">
+      <div class="rf-sec-title">🔨 Projects <span style="font-weight:400;color:#94A3B8;font-size:10px;margin-left:4px;">— one bullet per line</span></div>
+      <div class="rf-row full">
+        <div class="rf-field">
+          <textarea class="rf-textarea" id="rf-projects" rows="4" placeholder="Library Management System — Built using Python and SQLite
+E-Commerce Website — Frontend using HTML, CSS, JavaScript
+Campus Placement Tracker — Tracks registrations and selections">${xe(projLines)}</textarea>
+          <span class="rf-hint">Leave blank if no projects.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="rf-section">
+      <div class="rf-sec-title">⚡ Skills <span style="font-weight:400;color:#94A3B8;font-size:10px;margin-left:4px;">— one skill per line, or comma-separated</span></div>
+      <div class="rf-row full">
+        <div class="rf-field">
+          <textarea class="rf-textarea" id="rf-skills" rows="3" placeholder="MS Excel, PowerPoint, Word
+Python, SQL
+Communication, Teamwork, Leadership">${xe(skillLine)}</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="rf-section">
+      <div class="rf-sec-title">🏆 Awards &amp; Certifications <span style="font-weight:400;color:#94A3B8;font-size:10px;margin-left:4px;">— one per line</span></div>
+      <div class="rf-row full">
+        <div class="rf-field">
+          <textarea class="rf-textarea" id="rf-awards" rows="3" placeholder="Google Digital Marketing Certificate — 2024
+Best Student Award — Vidyavahini College — 2023
+First Prize, Business Quiz — District Level — 2022">${xe(awLine)}</textarea>
+          <span class="rf-hint">Leave blank if none.</span>
+        </div>
+      </div>
+    </div>
+
+  </div>`);
+
+  /* Show the download button now — it reads from the form */
+  const dlBtn = document.getElementById('rw-dl-btn');
+  if(dlBtn){ dlBtn.style.display='block'; dlBtn.textContent='⬇ Generate & Download PDF'; }
+}
+
+/* ── Read form, rebuild parsed object, generate PDF ── */
+function _readFormIntoParsed(){
+  const g = id => (document.getElementById(id)||{}).value||'';
+  const lines = (txt, splitOnComma) => {
+    const raw = txt.trim();
+    if(!raw) return [];
+    if(splitOnComma && !raw.includes('\n')) return raw.split(',').map(s=>s.trim()).filter(Boolean);
+    return raw.split('\n').map(s=>s.trim()).filter(Boolean);
+  };
+
+  return {
+    name:    g('rf-name').trim(),
+    phone:   g('rf-phone').trim(),
+    email:   g('rf-email').trim(),
+    linkedin:g('rf-linkedin').trim(),
+    github:  '',
+    sections:{
+      summary:      g('rf-summary').trim() ? [g('rf-summary').trim()] : [],
+      education:    lines(g('rf-education')),
+      experience:   lines(g('rf-experience')),
+      projects:     lines(g('rf-projects')),
+      skills:       lines(g('rf-skills'), true),
+      awards:       lines(g('rf-awards')),
+      certifications:[],
+    }
+  };
+}
 function fixCharSpacing(s){
   if(typeof s!=='string')return String(s||'');
   // Collapse "A c c o u n t i n g" style char-spaced words (no lookbehind — broad browser support)
@@ -1465,40 +1627,27 @@ function cleanParsedSections(sections,wantCGPA){if(sections.summary&&sections.su
 }return sections;}
 function buildEntries(lines){return rejoinBullets(lines).map(l=>{const t=procBullet(l);return t?`<li>${xeR(t)}</li>`:''}).filter(Boolean).join('');}
 function buildResumeHTML(parsed){const{name,email,phone,linkedin,github,sections}=parsed;let html='';if(name)html+=`<h1 class="rw-name">${xeR(stripEmoji(name))}</h1>`;const contacts=[];if(phone)contacts.push(stripEmoji(phone));if(email)contacts.push(email);if(linkedin)contacts.push(linkedin.replace(/^https?:\/\/(www\.)?/i,''));if(github)contacts.push(github.replace(/^https?:\/\/(www\.)?/i,''));if(contacts.length)html+=`<p class="rw-contact-line">${contacts.map(xeR).join(' &nbsp;&middot;&nbsp; ')}</p>`;html+=`<hr class="rw-header-rule">`;const sumL=(sections.summary||[]).filter(l=>cleanS(l).length>4);if(sumL.length){html+=`<h2 class="rw-section">ABOUT ME</h2><p class="rw-about">${xeR(sumL.join(' ').replace(/\s{2,}/g,' ').trim())}</p><hr class="rw-rule">`;}const edu=sections.education||[];if(edu.length){html+=`<h2 class="rw-section">EDUCATION</h2>${buildEduHTML(edu,_gradeMode==='cgpa')}<hr class="rw-rule">`;}const proj=sections.projects||[];if(proj.length){html+=`<h2 class="rw-section">PROJECTS</h2><ul class="rw-list">${buildEntries(proj)}</ul><hr class="rw-rule">`;}const exp=sections.experience||[];if(exp.length){html+=`<h2 class="rw-section">WORK EXPERIENCE</h2><ul class="rw-list">${buildEntries(exp)}</ul><hr class="rw-rule">`;}const sk=sections.skills||[];if(sk.length){html+=`<h2 class="rw-section">SKILLS</h2><div class="rw-skills">`;for(const s of sk){const rawSk=cleanS(s);rawSk.split(/[•·●▪▸►]/).map(p=>p.replace(/^[\s\-–*]+|[\s\-–*]+$/g,'').trim()).filter(Boolean).forEach(p=>{html+=`<div class="rw-skill-item">${xeR(p)}</div>`;});}html+=`</div><hr class="rw-rule">`;}const aw=[...(sections.awards||[]),...(sections.certifications||[])];if(aw.length)html+=`<h2 class="rw-section">AWARDS &amp; CERTIFICATIONS</h2><ul class="rw-list">${buildEntries(aw)}</ul>`;return html;}
-async function downloadRewrittenPDF(){if(!_rwHtml)return;try{
-const{jsPDF}=window.jspdf;
-const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-const PW=210,PH=297,ML=20,MR=20,MT=20,MB=24,TW=170;
-let y=MT;
+async function downloadRewrittenPDF(){
+  /* Read from the editable form if it exists, otherwise fall back to _rwParsed */
+  let parsed;
+  if(document.getElementById('rf-name')){
+    parsed = _readFormIntoParsed();
+  } else if(_rwParsed){
+    parsed = _rwParsed;
+  } else {
+    toast('No resume data — please re-upload your PDF','error'); return;
+  }
+  const html = buildResumeHTML(parsed);
+  _rwHtml = html;
+
+  try{
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const PW=210,PH=297,ML=20,MR=20,MT=20,MB=24,TW=170;
+  let y=MT;
 
 /* ── Pre-build watermark PNG via img.onload (guarantees decode) ── */
-const _VGB64='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';
-const _wmPng=await new Promise(resolve=>{
-  const img=new Image();
-  img.onload=()=>{
-    try{
-      const cvs=document.createElement('canvas');
-      cvs.width=500;cvs.height=500;
-      const ctx=cvs.getContext('2d');
-      ctx.globalAlpha=0.22;
-      ctx.drawImage(img,0,0,500,500);
-      resolve(cvs.toDataURL('image/png'));
-    }catch(e){resolve(null);}
-  };
-  img.onerror=()=>resolve(null);
-  img.src='data:image/jpeg;base64,'+_VGB64;
-});
-
-/* ── helpers ── */
-function addWatermark(){
-  if(!_wmPng)return;
-  try{const sz=130,wx=(PW-sz)/2,wy=(PH-sz)/2;doc.addImage(_wmPng,'PNG',wx,wy,sz,sz);}
-  catch(e){console.warn('WM:',e.message);}
-}
-// Stamp watermark on page 1 immediately (behind all content)
-addWatermark();
-
-function chkY(n){if(y+n>PH-MB){doc.addPage();addWatermark();y=MT;}}
+function chkY(n){if(y+n>PH-MB){doc.addPage();y=MT;}}
 function txt(s,o={}){
   const fs=o.fs||10.5;
   doc.setFontSize(fs);doc.setFont('helvetica',o.bold?'bold':'normal');
