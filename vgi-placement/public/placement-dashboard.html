@@ -1790,6 +1790,7 @@ function buildHome(){
         <button class="btn-primary-inv" onclick="go('dashboard')">View All Companies →</button>
         ${(adminMode||pcMode)?`<a href="placement-report.html" target="_blank" class="btn-primary-inv" style="display:inline-flex;align-items:center;gap:8px;margin-top:8px;background:linear-gradient(135deg,rgba(109,14,106,0.45),rgba(87,11,84,0.45));border-color:rgba(211,182,210,0.45);text-decoration:none;">📊 Visual Analytics Report ↗</a>`:''}
         ${(adminMode||pcMode)?`<button onclick="openCircularModal()" class="btn-primary-inv" style="display:inline-flex;align-items:center;gap:8px;margin-top:8px;background:linear-gradient(135deg,rgba(194,65,12,0.45),rgba(154,52,18,0.45));border-color:rgba(251,146,60,0.45);">📄 Create Circular</button>`:''}
+        ${(adminMode||pcMode)?`<button onclick="openAddCompanyModal()" class="btn-primary-inv" style="display:inline-flex;align-items:center;gap:8px;margin-top:8px;background:linear-gradient(135deg,rgba(20,83,45,0.6),rgba(21,128,61,0.6));border-color:rgba(74,222,128,0.4);">➕ Add Company</button>`:''}
       </div>
       <div class="home-banner-right">
         <div class="stat-tile" onclick="showStatModal('companies')">
@@ -2797,9 +2798,10 @@ function _drawLetterhead(doc, banner){
   doc.line(ML,29,W-MR,29);
   return 33;
 }
-/* ──────────────────────────────────────────────
-   GENERATE PLACEMENT REPORT
-────────────────────────────────────────────── */
+
+/* ══════════════════════════════════════════════════
+   1. PLACEMENT REPORT
+══════════════════════════════════════════════════ */
 async function generatePlacementReport(co, banner){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
@@ -5836,6 +5838,241 @@ async function generateCircularPDF(){
 }
 
 /* Reload CIRCULAR_DATA from sheet then immediately run generator */
+/* ════════════════════════════════════════════════════
+   ADD COMPANY
+   Creates sheet, writes CONFIG_TAB row, CIRCULAR_DATA
+   row, generates circular PDF, uploads to Drive.
+════════════════════════════════════════════════════ */
+function openAddCompanyModal(){
+  if(!_checkWebapp()) return;
+  openModal('➕ Add New Company',
+    `<div style="display:flex;flex-direction:column;gap:0;max-height:62vh;overflow-y:auto;padding-right:4px;">
+
+      <!-- ── Identity ── -->
+      <div style="padding:14px 2px 10px;border-bottom:1px solid var(--border);">
+        <div style="font-size:10px;font-weight:800;color:#6D0E6A;letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px;">🏢 Company Identity</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div style="display:flex;flex-direction:column;gap:4px;grid-column:1/-1;">
+            <span style="font-size:10px;font-weight:700;color:#94A3B8;letter-spacing:.05em;text-transform:uppercase;">Company Name *</span>
+            <input id="ac-name" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--text);" placeholder="e.g. Infosys BPM">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <span style="font-size:10px;font-weight:700;color:#94A3B8;letter-spacing:.05em;text-transform:uppercase;">Website</span>
+            <input id="ac-website" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--text);" placeholder="infosys.com">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <span style="font-size:10px;font-weight:700;color:#94A3B8;letter-spacing:.05em;text-transform:uppercase;">Roles Offered *</span>
+            <input id="ac-roles" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--text);" placeholder="Process Associate, Data Analyst">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <span style="font-size:10px;font-weight:700;color:#94A3B8;letter-spacing:.05em;text-transform:uppercase;">Interview Mode</span>
+            <select id="ac-mode" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--text);">
+              <option value="In-Office">In-Office</option>
+              <option value="Virtual">Virtual</option>
+              <option value="Hybrid">Hybrid</option>
+            </select>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <span style="font-size:10px;font-weight:700;color:#94A3B8;letter-spacing:.05em;text-transform:uppercase;">Registration Deadline</span>
+            <input id="ac-regdate" type="date" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--text);">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <span style="font-size:10px;font-weight:700;color:#94A3B8;letter-spacing:.05em;text-transform:uppercase;">Drive Date</span>
+            <input id="ac-drivedate" type="date" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--text);">
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Circular content ── -->
+      <div style="padding:14px 2px 10px;border-bottom:1px solid var(--border);">
+        <div style="font-size:10px;font-weight:800;color:#6D0E6A;letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px;">📄 Circular Details</div>
+        ${['ac-position:Position *:e.g. Customer Support Associate',
+           'ac-education:Education / Eligibility *:e.g. Any Graduate – B.A, B.Com, BBA',
+           'ac-location:Work Location *:e.g. Bengaluru',
+           'ac-ctc:CTC Details *:e.g. 3.5 LPA / As per company norms',
+           'ac-selection:Selection Process *:e.g. Online Test → HR Interview → Offer'].map(f=>{
+          const [id,label,ph]=f.split(':');
+          return `<div style="display:flex;flex-direction:column;gap:4px;margin-bottom:8px;">
+            <span style="font-size:10px;font-weight:700;color:#94A3B8;letter-spacing:.05em;text-transform:uppercase;">${label}</span>
+            <input id="${id}" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--text);" placeholder="${ph}">
+          </div>`;}).join('')}
+        <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:8px;">
+          <span style="font-size:10px;font-weight:700;color:#94A3B8;letter-spacing:.05em;text-transform:uppercase;">About the Company *</span>
+          <textarea id="ac-about" rows="3" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--text);resize:vertical;" placeholder="Brief description of the company…"></textarea>
+        </div>
+        ${['ac-benefits:Benefits:e.g. PF, ESI, Medical Insurance',
+           'ac-docs:Documents Required:e.g. Resume, Aadhaar, Mark sheets',
+           'ac-culture:Work Culture:e.g. 5-day week, rotational shifts',
+           'ac-reglink:Registration Link:https://forms.gle/…',
+           'ac-lastdate:Last Date to Register:e.g. 30th May 2026 before 5 PM'].map(f=>{
+          const [id,label,ph]=f.split(':');
+          return `<div style="display:flex;flex-direction:column;gap:4px;margin-bottom:8px;">
+            <span style="font-size:10px;font-weight:700;color:#94A3B8;letter-spacing:.05em;text-transform:uppercase;">${label}</span>
+            <input id="${id}" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--text);" placeholder="${ph}">
+          </div>`;}).join('')}
+      </div>
+
+      <div id="ac-progress" style="display:none;padding:12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border);font-size:12px;color:var(--text3);margin-top:10px;"></div>
+    </div>`,
+    `<button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button>
+     <button class="btn btn-admin btn-sm" id="ac-submit-btn" onclick="submitNewCompany()" style="background:linear-gradient(135deg,#14532d,#15803d);border-color:#14532d;">➕ Add Company</button>`
+  );
+  /* Make modal wider */
+  const box = document.getElementById('modal-box');
+  if(box) box.style.maxWidth = '640px';
+}
+
+async function submitNewCompany(){
+  if(!_checkWebapp()) return;
+
+  const g = id => (document.getElementById(id)||{}).value||'';
+  const name      = g('ac-name').trim();
+  const roles     = g('ac-roles').trim();
+  const about     = g('ac-about').trim();
+  const position  = g('ac-position').trim();
+  const education = g('ac-education').trim();
+  const location  = g('ac-location').trim();
+  const ctc       = g('ac-ctc').trim();
+  const selection = g('ac-selection').trim();
+
+  /* Validate required fields */
+  if(!name)     { toast('Company name is required','error'); return; }
+  if(!roles)    { toast('Roles offered is required','error'); return; }
+  if(!about)    { toast('About the company is required','error'); return; }
+  if(!position) { toast('Position is required','error'); return; }
+  if(!education){ toast('Education/Eligibility is required','error'); return; }
+  if(!location) { toast('Work location is required','error'); return; }
+  if(!ctc)      { toast('CTC details are required','error'); return; }
+  if(!selection){ toast('Selection process is required','error'); return; }
+
+  const btn  = document.getElementById('ac-submit-btn');
+  const prog = document.getElementById('ac-progress');
+  if(btn)  { btn.disabled=true; btn.textContent='Working…'; }
+  if(prog) { prog.style.display='block'; }
+
+  const setStep = msg => { if(prog) prog.innerHTML = '⏳ ' + msg; console.log('[AddCompany]', msg); };
+  const today   = new Date().toISOString().split('T')[0];
+
+  try {
+    /* ── Step 1: Create Google Sheet via Apps Script ── */
+    setStep('Creating company Google Sheet…');
+    const sheetRes = await fetch(_WEBAPP, {
+      method: 'POST',
+      body: JSON.stringify({
+        action:      'createCompanySheet',
+        companyName: name,
+        tabReg:      'Registered Students',
+        tabInt:      'Attended Students',
+        tabSel:      'Selected Students',
+      })
+    }).then(r=>r.json());
+
+    if(!sheetRes.ok) throw new Error('Sheet creation failed: ' + (sheetRes.error||'unknown'));
+    const newSheetId  = sheetRes.sheetId;
+    const newSheetUrl = sheetRes.sheetUrl;
+    setStep('Sheet created. Writing to CONFIG_TAB…');
+
+    /* ── Step 2: Add row to CONFIG_TAB ── */
+    const configRes = await fetch(_WEBAPP, {
+      method: 'POST',
+      body: JSON.stringify({
+        action:      'addConfigRow',
+        sheetId:     CONFIG_SHEET_ID,
+        tabName:     'CONFIG_TAB',
+        companyName: name,
+        companySheetUrl: newSheetUrl,
+        tabReg:      'Registered Students',
+        tabInt:      'Attended Students',
+        tabSel:      'Selected Students',
+        website:     g('ac-website').trim(),
+        interviewMode: g('ac-mode'),
+        regDate:     g('ac-regdate'),
+        driveDate:   g('ac-drivedate'),
+        roles,
+      })
+    }).then(r=>r.json());
+    if(!configRes.ok) throw new Error('CONFIG_TAB write failed: ' + (configRes.error||'unknown'));
+
+    /* ── Step 3: Generate circular PDF ── */
+    setStep('Generating circular PDF…');
+    let circularUrl = '';
+    try {
+      if(!window.jspdf) throw new Error('PDF library not loaded');
+      const { logoData, sigData } = await _loadCircularImages();
+      const circDoc = _buildCircularDoc({
+        dateVal:   today,
+        company:   name,
+        roles,
+        about,
+        position,
+        education,
+        location,
+        ctc,
+        selection,
+        benefits:  g('ac-benefits').trim(),
+        docs:      g('ac-docs').trim(),
+        culture:   g('ac-culture').trim(),
+        regLink:   g('ac-reglink').trim(),
+        lastDate:  g('ac-lastdate').trim(),
+      }, logoData, sigData);
+
+      /* Upload circular to Drive */
+      setStep('Uploading circular to Drive…');
+      const safe    = name.replace(/[^a-zA-Z0-9 ]/g,'').trim().replace(/\s+/g,'_');
+      const fileName= safe + '_Campus_Selection_2025-26.pdf';
+      const b64     = circDoc.output('datauristring').split(',')[1];
+      const upRes   = await fetch(_WEBAPP, {
+        method: 'POST',
+        body: JSON.stringify({ action:'uploadCircular', fileBase64:b64, filename:fileName, mimeType:'application/pdf' })
+      }).then(r=>r.json());
+      if(upRes.ok) circularUrl = upRes.url;
+
+      /* Save circular to browser too */
+      circDoc.save(fileName);
+    } catch(circErr) {
+      console.warn('[AddCompany] Circular generation failed (non-fatal):', circErr.message);
+    }
+
+    /* ── Step 4: Write row to CIRCULAR_DATA ── */
+    setStep('Writing circular data to sheet…');
+    await fetch(_WEBAPP, {
+      method: 'POST',
+      body: JSON.stringify({
+        action:      'addCircularDataRow',
+        sheetId:     CONFIG_SHEET_ID,
+        tabName:     'CIRCULAR_DATA',
+        companyName: name,
+        about,
+        position,
+        education,
+        location,
+        ctc,
+        selection,
+        benefits:    g('ac-benefits').trim(),
+        docs:        g('ac-docs').trim(),
+        culture:     g('ac-culture').trim(),
+        regLink:     g('ac-reglink').trim(),
+        lastDate:    g('ac-lastdate').trim(),
+        circularUrl,
+      })
+    }).then(r=>r.json());
+
+    /* ── Step 5: Reload dashboard ── */
+    setStep('All done! Reloading dashboard…');
+    if(prog) prog.innerHTML = `✅ <strong>${xe(name)}</strong> added successfully! Sheet created, circular generated.<br><small style="color:var(--text4)">Reloading in 2 seconds…</small>`;
+    if(btn)  { btn.textContent = '✅ Done'; btn.style.background='var(--green)'; }
+    toast(`${name} added to placement dashboard`, 'success', '🏢');
+
+    setTimeout(()=>{ closeModal(); init(); }, 2000);
+
+  } catch(err) {
+    console.error('[AddCompany]', err);
+    if(prog) prog.innerHTML = `❌ Error: ${err.message}`;
+    if(btn)  { btn.disabled=false; btn.textContent='➕ Add Company'; }
+    toast('Error: ' + err.message, 'error');
+  }
+}
+
 async function _reloadCircularDataAndGenerate(){
   toast('Reloading circular data…','info','↺');
   try{
