@@ -1567,10 +1567,11 @@ function renderAdminBar(){
   const r=document.getElementById('admin-bar');
   if(!adminMode){ r.innerHTML=''; }
   else {
-    r.innerHTML=`<div class="admin-bar"><span>🛡️ Admin Mode active</span><div class="admin-bar-actions"><button class="btn btn-admin-outline btn-sm" id="ab-circular">📄 Circular</button><button class="btn btn-admin-outline btn-sm" id="ab-repo">📁 Repository</button><button class="btn btn-admin btn-sm" id="ab-gen-all" style="background:linear-gradient(135deg,#6D0E6A,#3B1A8A);border-color:#6D0E6A;">🔄 Generate All Circulars</button><button class="btn btn-admin-outline btn-sm" id="ab-diag">🔍 Diagnostics</button><button class="btn btn-admin-outline btn-sm" id="ab-refresh">↺ Reload Config</button><button class="btn btn-admin-outline btn-sm" id="ab-exit">Exit Admin</button></div></div>`;
+    r.innerHTML=`<div class="admin-bar"><span>🛡️ Admin Mode active</span><div class="admin-bar-actions"><button class="btn btn-admin-outline btn-sm" id="ab-circular">📄 Circular</button><button class="btn btn-admin-outline btn-sm" id="ab-repo">📁 Repository</button><button class="btn btn-admin btn-sm" id="ab-gen-all" style="background:linear-gradient(135deg,#6D0E6A,#3B1A8A);border-color:#6D0E6A;">🔄 Generate All Circulars</button><button class="btn btn-admin btn-sm" id="ab-all-ol" style="background:linear-gradient(135deg,#0e4a6a,#0369a1);border-color:#0e4a6a;">📩 All Offer Letters</button><button class="btn btn-admin-outline btn-sm" id="ab-diag">🔍 Diagnostics</button><button class="btn btn-admin-outline btn-sm" id="ab-refresh">↺ Reload Config</button><button class="btn btn-admin-outline btn-sm" id="ab-exit">Exit Admin</button></div></div>`;
     document.getElementById('ab-circular').onclick=openCircularModal;
     document.getElementById('ab-repo').onclick=openCircularRepo;
     document.getElementById('ab-gen-all').onclick=generateAllCirculars;
+    document.getElementById('ab-all-ol').onclick=openAllOfferLettersModal;
     document.getElementById('ab-diag').onclick=showDiagnostics;
     document.getElementById('ab-refresh').onclick=()=>{ init(); toast('Reloading config…','info','↺'); };
     document.getElementById('ab-exit').onclick=()=>{ adminMode=false; document.body.classList.remove('admin-mode'); sessionStorage.removeItem('placementAdmin'); go(view,cId); toast('Admin Mode off','info','🔒'); };
@@ -1582,10 +1583,11 @@ function renderPCBar(){
   const r=document.getElementById('pc-bar');
   if(!r)return;
   if(!pcMode){ r.innerHTML=''; return; }
-  r.innerHTML=`<div class="pc-bar"><span>🔐 Placement Cell Mode active</span><span class="pc-bar-badge">CONFIDENTIAL</span><div class="pc-bar-actions"><button class="btn btn-admin-outline btn-sm" id="pc-circular">📄 Circular</button><button class="btn btn-admin-outline btn-sm" id="pc-repo">📁 Repository</button><button class="btn btn-admin-outline btn-sm" id="pc-gen-all" style="background:linear-gradient(135deg,rgba(109,14,106,0.7),rgba(59,26,138,0.7));border-color:rgba(109,14,106,0.8);">🔄 Generate All Circulars</button><button onclick="exitPCMode()">Exit</button></div></div>`;
+  r.innerHTML=`<div class="pc-bar"><span>🔐 Placement Cell Mode active</span><span class="pc-bar-badge">CONFIDENTIAL</span><div class="pc-bar-actions"><button class="btn btn-admin-outline btn-sm" id="pc-circular">📄 Circular</button><button class="btn btn-admin-outline btn-sm" id="pc-repo">📁 Repository</button><button class="btn btn-admin-outline btn-sm" id="pc-gen-all" style="background:linear-gradient(135deg,rgba(109,14,106,0.7),rgba(59,26,138,0.7));border-color:rgba(109,14,106,0.8);">🔄 Generate All Circulars</button><button class="btn btn-admin-outline btn-sm" id="pc-all-ol" style="background:linear-gradient(135deg,rgba(14,74,106,0.8),rgba(3,105,161,0.8));border-color:rgba(14,74,106,0.8);">📩 All Offer Letters</button><button onclick="exitPCMode()">Exit</button></div></div>`;
   document.getElementById('pc-circular').onclick=openCircularModal;
   document.getElementById('pc-repo').onclick=openCircularRepo;
   document.getElementById('pc-gen-all').onclick=generateAllCirculars;
+  document.getElementById('pc-all-ol').onclick=openAllOfferLettersModal;
 }
 
 /* ════════════════════════════════════════════════════
@@ -6070,6 +6072,148 @@ async function submitNewCompany(){
     if(prog) prog.innerHTML = `❌ Error: ${err.message}`;
     if(btn)  { btn.disabled=false; btn.textContent='➕ Add Company'; }
     toast('Error: ' + err.message, 'error');
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   ALL OFFER LETTERS MODAL
+   Shows every company that has selected students.
+   Per company: company logo + name header, then each
+   student row with offer letter status + upload button.
+════════════════════════════════════════════════════ */
+
+function openAllOfferLettersModal(){
+  const withSelected = COMPANIES.filter(c => c.studentsSelected && c.studentsSelected.length > 0);
+  if(!withSelected.length){
+    toast('No companies with selected students yet','info'); return;
+  }
+
+  const totalSel     = withSelected.reduce((s,c)=>s+c.studentsSelected.length, 0);
+  const totalWithOL  = withSelected.reduce((s,c)=>s+c.studentsSelected.filter(st=>st.offerLetter).length, 0);
+  const totalMissing = totalSel - totalWithOL;
+
+  const companySections = withSelected.map(co => {
+    const sel     = co.studentsSelected;
+    const hasOL   = sel.filter(s=>s.offerLetter).length;
+    const missing = sel.length - hasOL;
+    const allDone = missing === 0;
+
+    const rows = sel.map((s, i) => {
+      const hasLink = !!s.offerLetter;
+      const name    = xe(s.name||s.email||`Student ${i+1}`);
+      const emailOrName = (s.email||s.name||'').replace(/[^a-zA-Z0-9_@.-]/g,'_');
+      return `<tr style="border-bottom:1px solid var(--border);">
+        <td style="padding:8px 10px;font-size:12px;color:var(--text);font-weight:600;">${name}</td>
+        <td style="padding:8px 10px;font-size:11px;color:var(--text3);">${xe(s.email||'—')}</td>
+        <td style="padding:8px 10px;text-align:center;">
+          ${hasLink
+            ? `<a href="${xe(s.offerLetter)}" target="_blank" style="font-size:11px;font-weight:700;color:#0369a1;text-decoration:none;padding:3px 9px;border:1.5px solid #bae6fd;border-radius:6px;background:#f0f9ff;white-space:nowrap;">📄 View</a>`
+            : `<span style="font-size:11px;color:#94A3B8;">—</span>`}
+        </td>
+        <td style="padding:8px 10px;text-align:center;">
+          <label style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:7px;background:${hasLink?'var(--bg2)':'#ecfdf5'};color:${hasLink?'var(--text3)':'#065f46'};font-size:11px;font-weight:700;border:1.5px solid ${hasLink?'var(--border)':'#6ee7b7'};white-space:nowrap;" title="${hasLink?'Replace offer letter':'Upload offer letter'}">
+            <input type="file" accept=".pdf,image/*" style="display:none"
+              onchange="_olModalUpload(${co.id},${i},'${emailOrName}',this)">
+            ${hasLink ? '↑ Replace' : '📤 Upload'}
+          </label>
+        </td>
+      </tr>`;
+    }).join('');
+
+    const statusBadge = allDone
+      ? `<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:#d1fae5;color:#065f46;">✅ All uploaded</span>`
+      : `<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:#fee2e2;color:#991b1b;">⚠ ${missing} missing</span>`;
+
+    return `
+      <div style="border:1.5px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:14px;" id="ol-co-${co.id}">
+        <!-- Company header -->
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg2);border-bottom:1px solid var(--border);">
+          <div style="width:36px;height:36px;flex-shrink:0;">${companyLogoHtml(co,36)}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${xe(co.name)}</div>
+            <div style="font-size:10.5px;color:var(--text3);margin-top:1px;">${sel.length} selected · ${hasOL} offer letters uploaded</div>
+          </div>
+          <div>${statusBadge}</div>
+          <label style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:7px;background:linear-gradient(135deg,#0e4a6a,#0369a1);color:#fff;font-size:11px;font-weight:700;white-space:nowrap;border:none;" title="Upload multiple offer letters at once for this company">
+            <input type="file" accept=".pdf,image/*" multiple style="display:none"
+              onchange="openBulkOLModal(${co.id},this)">
+            📤 Bulk Upload
+          </label>
+        </div>
+        <!-- Student table -->
+        <div style="overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;">
+            <thead>
+              <tr style="background:var(--bg3,#f8fafc);border-bottom:2px solid var(--border);">
+                <th style="padding:7px 10px;text-align:left;font-size:10px;font-weight:800;color:var(--text4);letter-spacing:.06em;text-transform:uppercase;">Name</th>
+                <th style="padding:7px 10px;text-align:left;font-size:10px;font-weight:800;color:var(--text4);letter-spacing:.06em;text-transform:uppercase;">Email</th>
+                <th style="padding:7px 10px;text-align:center;font-size:10px;font-weight:800;color:var(--text4);letter-spacing:.06em;text-transform:uppercase;">Offer Letter</th>
+                <th style="padding:7px 10px;text-align:center;font-size:10px;font-weight:800;color:var(--text4);letter-spacing:.06em;text-transform:uppercase;">Action</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </div>`;
+  }).join('');
+
+  const summary = `
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:100px;padding:10px 14px;background:var(--bg2);border-radius:10px;border:1px solid var(--border);text-align:center;">
+        <div style="font-size:22px;font-weight:900;color:var(--text);">${totalSel}</div>
+        <div style="font-size:10px;color:var(--text4);font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Total Selected</div>
+      </div>
+      <div style="flex:1;min-width:100px;padding:10px 14px;background:#d1fae5;border-radius:10px;border:1px solid #6ee7b7;text-align:center;">
+        <div style="font-size:22px;font-weight:900;color:#065f46;">${totalWithOL}</div>
+        <div style="font-size:10px;color:#065f46;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Uploaded</div>
+      </div>
+      <div style="flex:1;min-width:100px;padding:10px 14px;background:${totalMissing?'#fee2e2':'#d1fae5'};border-radius:10px;border:1px solid ${totalMissing?'#fca5a5':'#6ee7b7'};text-align:center;">
+        <div style="font-size:22px;font-weight:900;color:${totalMissing?'#991b1b':'#065f46'};">${totalMissing}</div>
+        <div style="font-size:10px;color:${totalMissing?'#991b1b':'#065f46'};font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Missing</div>
+      </div>
+      <div style="flex:1;min-width:100px;padding:10px 14px;background:var(--bg2);border-radius:10px;border:1px solid var(--border);text-align:center;">
+        <div style="font-size:22px;font-weight:900;color:var(--text);">${withSelected.length}</div>
+        <div style="font-size:10px;color:var(--text4);font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Companies</div>
+      </div>
+    </div>`;
+
+  openModalWide('📩 All Offer Letters', summary + companySections,
+    `<button class="btn btn-outline btn-sm" onclick="closeModal()">Close</button>`);
+}
+
+/* ── Upload from inside the All Offer Letters modal ── */
+async function _olModalUpload(companyId, studentIdx, emailOrName, fileInput){
+  const file = fileInput.files[0];
+  if(!file) return;
+  const lbl = fileInput.closest('label');
+  if(lbl){ lbl.innerHTML = '⏳ Uploading…'; }
+
+  try {
+    await uploadOfferLetter(companyId, studentIdx, emailOrName, fileInput);
+    /* Refresh just this company section in the modal */
+    const co = COMPANIES.find(c=>c.id===companyId);
+    if(co){
+      const wrapper = document.getElementById(`ol-co-${companyId}`);
+      if(wrapper){
+        const tmp = document.createElement('div');
+        /* Re-render will happen on next openAllOfferLettersModal,
+           for now just update the button and status visually */
+        const s = co.studentsSelected[studentIdx];
+        if(s && s.offerLetter && lbl){
+          lbl.style.background='var(--bg2)';
+          lbl.style.color='var(--text3)';
+          lbl.style.borderColor='var(--border)';
+          lbl.innerHTML=`<input type="file" accept=".pdf,image/*" style="display:none" onchange="_olModalUpload(${companyId},${studentIdx},'${emailOrName}',this)">↑ Replace`;
+          /* Show view link in the adjacent cell */
+          const td = lbl.closest('tr')?.querySelector('td:nth-child(3)');
+          if(td && s.offerLetter){
+            td.innerHTML=`<a href="${xe(s.offerLetter)}" target="_blank" style="font-size:11px;font-weight:700;color:#0369a1;text-decoration:none;padding:3px 9px;border:1.5px solid #bae6fd;border-radius:6px;background:#f0f9ff;white-space:nowrap;">📄 View</a>`;
+          }
+        }
+      }
+    }
+  } catch(e) {
+    if(lbl){ lbl.innerHTML=`<input type="file" accept=".pdf,image/*" style="display:none" onchange="_olModalUpload(${companyId},${studentIdx},'${emailOrName}',this)">📤 Upload`; }
   }
 }
 
