@@ -6134,11 +6134,18 @@ function openAllOfferLettersModal(){
             <div style="font-size:10.5px;color:var(--text3);margin-top:1px;">${sel.length} selected · ${hasOL} offer letters uploaded</div>
           </div>
           <div>${statusBadge}</div>
-          <label style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:7px;background:linear-gradient(135deg,#0e4a6a,#0369a1);color:#fff;font-size:11px;font-weight:700;white-space:nowrap;border:none;" title="Upload multiple offer letters at once for this company">
-            <input type="file" accept=".pdf,image/*" multiple style="display:none"
-              onchange="openBulkOLModal(${co.id},this)">
-            📤 Bulk Upload
-          </label>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <label style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:7px;background:linear-gradient(135deg,#0e4a6a,#0369a1);color:#fff;font-size:11px;font-weight:700;white-space:nowrap;border:none;" title="Upload multiple offer letters at once (one file per student)">
+              <input type="file" accept=".pdf,image/*" multiple style="display:none"
+                onchange="openBulkOLModal(${co.id},this)">
+              📤 Multiple Files
+            </label>
+            <label style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:7px;background:linear-gradient(135deg,#065f46,#047857);color:#fff;font-size:11px;font-weight:700;white-space:nowrap;border:none;" title="Upload ONE file and apply it to all selected students of this company">
+              <input type="file" accept=".pdf,image/*" style="display:none"
+                onchange="_olUploadSameForAll(${co.id},this)">
+              🔁 Same for All
+            </label>
+          </div>
         </div>
         <!-- Student table -->
         <div style="overflow-x:auto;">
@@ -6215,6 +6222,77 @@ async function _olModalUpload(companyId, studentIdx, emailOrName, fileInput){
   } catch(e) {
     if(lbl){ lbl.innerHTML=`<input type="file" accept=".pdf,image/*" style="display:none" onchange="_olModalUpload(${companyId},${studentIdx},'${emailOrName}',this)">📤 Upload`; }
   }
+}
+
+/* ── Upload ONE file to every selected student in a company ── */
+async function _olUploadSameForAll(companyId, fileInput){
+  const file = fileInput.files[0];
+  if(!file) return;
+
+  const co = COMPANIES.find(c=>c.id===companyId);
+  if(!co||!co.studentsSelected.length) return;
+
+  if(!_checkWebapp()) return;
+
+  const MAX = 8*1024*1024;
+  if(file.size > MAX){ toast('File too large (max 8 MB)','error','⚠️'); return; }
+
+  const allStudents = co.studentsSelected;
+  const missing     = allStudents.filter(s=>!s.offerLetter);
+  const target      = missing.length > 0 ? missing : allStudents; // if all have OL, replace all
+
+  /* Confirm with the user */
+  const msg = missing.length > 0
+    ? `Upload this file as the offer letter for all ${target.length} student${target.length!==1?'s':''} who are missing one in ${co.name}?`
+    : `All ${allStudents.length} students already have offer letters. Replace all with this file?`;
+
+  if(!confirm(msg)) return;
+
+  /* Read file to base64 once */
+  const b64 = await new Promise(res=>{
+    const fr=new FileReader(); fr.onload=()=>res(fr.result.split(',')[1]); fr.readAsDataURL(file);
+  });
+  const ext    = file.name.split('.').pop()||'pdf';
+  const safeCo = co.name.replace(/[^a-zA-Z0-9]/g,'_');
+
+  toast(`Uploading to ${target.length} students…`,'info','⏳');
+
+  let done=0, failed=0;
+  for(const s of target){
+    const emailOrName = (s.email||s.name||'').replace(/[^a-zA-Z0-9_@.-]/g,'_');
+    const filename    = `OfferLetter_${safeCo}_${emailOrName}_${Date.now()}.${ext}`;
+    try{
+      const payload = {
+        action:       'uploadOfferLetter',
+        sheetId:      co.sheetId,
+        tabName:      co.tabSel,
+        studentEmail: s.email||'',
+        studentName:  s.name||'',
+        emailOrName:  emailOrName,
+        fileBase64:   b64,
+        filename,
+        mimeType:     file.type||'application/octet-stream'
+      };
+      const res  = await fetch(_WEBAPP, {method:'POST', body:JSON.stringify(payload)});
+      const data = await res.json();
+      if(!data.ok) throw new Error(data.error||'Unknown');
+      s.offerLetter = data.url;
+      done++;
+    } catch(e){
+      console.warn('[SameForAll] Failed for', s.name, e.message);
+      failed++;
+    }
+    /* Small yield so browser stays responsive */
+    await new Promise(r=>setTimeout(r,0));
+  }
+
+  const msg2 = failed
+    ? `✅ ${done} uploaded, ❌ ${failed} failed`
+    : `✅ Offer letter uploaded for all ${done} students`;
+  toast(msg2, failed?'error':'success','📎');
+
+  /* Refresh the modal to show updated state */
+  openAllOfferLettersModal();
 }
 
 async function _reloadCircularDataAndGenerate(){
