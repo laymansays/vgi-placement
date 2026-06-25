@@ -6147,6 +6147,21 @@ function openAllOfferLettersModal(){
             </label>
           </div>
         </div>
+        <!-- Compact row (shown in Companies filter) -->
+        <div class="ol-compact-row" style="display:none;align-items:center;gap:10px;padding:10px 14px;background:var(--bg);border-top:1px solid var(--border);flex-wrap:wrap;">
+          <div style="font-size:11px;color:${missing>0?'#991b1b':'#065f46'};font-weight:700;padding:3px 10px;border-radius:20px;background:${missing>0?'#fee2e2':'#d1fae5'};border:1px solid ${missing>0?'#fca5a5':'#6ee7b7'};white-space:nowrap;">
+            ${missing>0 ? `⚠ ${missing} missing` : '✅ All uploaded'}
+          </div>
+          <div style="flex:1;"></div>
+          <label style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:7px;background:linear-gradient(135deg,#0e4a6a,#0369a1);color:#fff;font-size:11px;font-weight:700;white-space:nowrap;border:none;">
+            <input type="file" accept=".pdf,image/*" multiple style="display:none" onchange="openBulkOLModal(${co.id},this)">
+            📤 Multiple Files
+          </label>
+          <label style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:7px;background:linear-gradient(135deg,#065f46,#047857);color:#fff;font-size:11px;font-weight:700;white-space:nowrap;border:none;">
+            <input type="file" accept=".pdf,image/*" style="display:none" onchange="_olUploadSameForAll(${co.id},this)">
+            🔁 Same for All
+          </label>
+        </div>
         <!-- Student table -->
         <div style="overflow-x:auto;">
           <table style="width:100%;border-collapse:collapse;">
@@ -6200,53 +6215,63 @@ function openAllOfferLettersModal(){
 
 /* ── Filter logic for All Offer Letters modal ── */
 function _olSetFilter(filter){
-  /* Update tab styles */
+  /* Update tab active styles */
   document.querySelectorAll('.ol-filter-tab').forEach(tab=>{
     const isActive = tab.dataset.filter === filter;
-    tab.style.border = isActive ? '2px solid #3B1A8A' : '2px solid transparent';
-    tab.querySelector('div').style.color = isActive
-      ? '#3B1A8A'
-      : (tab.dataset.filter==='uploaded' ? '#065f46'
-        : tab.dataset.filter==='missing' ? (tab.querySelector('div').textContent.trim()==='0'?'#065f46':'#991b1b')
-        : 'var(--text)');
+    tab.style.border    = isActive ? '2px solid #3B1A8A' : '2px solid transparent';
+    tab.style.background= isActive ? '#ede9fe' : (
+      tab.dataset.filter==='uploaded' ? '#f0fdf4' :
+      tab.dataset.filter==='missing'  ? (document.querySelector('[data-filter="missing"] div').textContent.trim()==='0'?'#f0fdf4':'#fff5f5') :
+      'var(--bg2)'
+    );
   });
 
   const label = document.getElementById('ol-filter-label');
   const list  = document.getElementById('ol-companies-list');
   if(!list) return;
 
-  const companies = list.querySelectorAll('[id^="ol-co-"]');
-
+  const coDivs = list.querySelectorAll('[id^="ol-co-"]');
   let shown = 0;
-  companies.forEach(coDiv=>{
-    const rows   = coDiv.querySelectorAll('tbody tr');
-    let coVisible = false;
 
-    rows.forEach(row=>{
-      const hasLink = row.querySelector('a[href]') !== null;
-      let show = true;
-      if(filter === 'uploaded') show = hasLink;
-      if(filter === 'missing')  show = !hasLink;
-      row.style.display = show ? '' : 'none';
-      if(show) coVisible = true;
-    });
+  coDivs.forEach(coDiv=>{
+    const tbody      = coDiv.querySelector('tbody');
+    const tableWrap  = coDiv.querySelector('[style*="overflow-x"]');
+    const thead      = coDiv.querySelector('thead');
+    const compactRow = coDiv.querySelector('.ol-compact-row');
 
-    /* For "companies" filter, show company block with all students */
     if(filter === 'companies'){
-      rows.forEach(r=>r.style.display='');
-      coVisible = true;
-    }
+      /* Hide student table, show compact row */
+      if(tableWrap) tableWrap.style.display = 'none';
+      if(compactRow) compactRow.style.display = 'flex';
+      coDiv.style.display = '';
+      shown++;
+    } else {
+      /* Show student table, hide compact row */
+      if(tableWrap) tableWrap.style.display = '';
+      if(compactRow) compactRow.style.display = 'none';
 
-    coDiv.style.display = coVisible ? '' : 'none';
-    if(coVisible) shown++;
+      const rows = tbody ? tbody.querySelectorAll('tr') : [];
+      let coVisible = false;
+      rows.forEach(row=>{
+        const hasLink = row.querySelector('a[href]') !== null;
+        let show = true;
+        if(filter === 'uploaded') show = hasLink;
+        if(filter === 'missing')  show = !hasLink;
+        row.style.display = show ? '' : 'none';
+        if(show) coVisible = true;
+      });
+      if(filter === 'all') coVisible = true;
+      coDiv.style.display = coVisible ? '' : 'none';
+      if(coVisible) shown++;
+    }
   });
 
   if(label){
     const msgs = {
       all:       'Showing all students',
-      uploaded:  `Showing students with offer letters uploaded`,
-      missing:   `Showing students with missing offer letters`,
-      companies: `Showing all ${shown} companies`,
+      uploaded:  'Showing students with offer letters uploaded',
+      missing:   'Showing students with missing offer letters',
+      companies: `${shown} companies — click a company to expand`,
     };
     label.textContent = msgs[filter] || '';
   }
@@ -6391,25 +6416,137 @@ async function generateAllCirculars(){
     return circ.about && circ.position && circ.ctc && circ.selection;
   });
 
+  const notReady = COMPANIES.filter(c => {
+    const circ = CIRCULAR_DATA[c.name.toLowerCase()] || {};
+    return !circ.about || !circ.position || !circ.ctc || !circ.selection;
+  });
+  const hasExisting = eligible.filter(c => {
+    const circ = CIRCULAR_DATA[c.name.toLowerCase()] || {};
+    return !!circ.circularUrl;
+  });
+
+  /* Always show pre-flight modal so user can see what's ready / missing */
+  const readyRows = eligible.map(c => {
+    const circ = CIRCULAR_DATA[c.name.toLowerCase()] || {};
+    return `<div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;background:#f0fdf4;border:1px solid #bbf7d0;margin-bottom:6px;">
+      <span style="font-size:14px;">✅</span>
+      <div style="flex:1;font-size:12px;font-weight:700;color:#065f46;">${xe(c.name)}</div>
+      ${circ.circularUrl ? '<span style="font-size:10px;padding:2px 7px;background:#dcfce7;color:#166534;border-radius:10px;font-weight:700;">Has circular</span>' : '<span style="font-size:10px;padding:2px 7px;background:#e0e7ff;color:#3730a3;border-radius:10px;font-weight:700;">New</span>'}
+    </div>`;
+  }).join('');
+
+  const missingRows = notReady.map(c => {
+    const circ = CIRCULAR_DATA[c.name.toLowerCase()] || {};
+    const missing = ['about','position','ctc','selection'].filter(k => !circ[k]);
+    return `<div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;background:#fff7ed;border:1px solid #fed7aa;margin-bottom:6px;">
+      <span style="font-size:14px;">⚠️</span>
+      <div style="flex:1;">
+        <div style="font-size:12px;font-weight:700;color:#9a3412;">${xe(c.name)}</div>
+        <div style="font-size:10px;color:#c2410c;margin-top:2px;">Missing: ${missing.join(', ')}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  openModalWide('🔄 Generate All Circulars — Pre-flight Check',
+    `<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:16px;">
+      <div style="text-align:center;padding:10px;background:#f0fdf4;border-radius:10px;border:1px solid #bbf7d0;">
+        <div style="font-size:22px;font-weight:900;color:#065f46;">${eligible.length}</div>
+        <div style="font-size:10px;color:#065f46;font-weight:800;text-transform:uppercase;">Ready</div>
+      </div>
+      <div style="text-align:center;padding:10px;background:#fff7ed;border-radius:10px;border:1px solid #fed7aa;">
+        <div style="font-size:22px;font-weight:900;color:#9a3412;">${notReady.length}</div>
+        <div style="font-size:10px;color:#9a3412;font-weight:800;text-transform:uppercase;">Missing Data</div>
+      </div>
+      <div style="text-align:center;padding:10px;background:#ede9fe;border-radius:10px;border:1px solid #c4b5fd;">
+        <div style="font-size:22px;font-weight:900;color:#5b21b6;">${hasExisting.length}</div>
+        <div style="font-size:10px;color:#5b21b6;font-weight:800;text-transform:uppercase;">Have Circular</div>
+      </div>
+      <div style="text-align:center;padding:10px;background:var(--bg2);border-radius:10px;border:1px solid var(--border);">
+        <div style="font-size:22px;font-weight:900;color:var(--text);">${COMPANIES.length}</div>
+        <div style="font-size:10px;color:var(--text4);font-weight:800;text-transform:uppercase;">Total</div>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div style="font-size:11px;font-weight:800;color:var(--text);text-transform:uppercase;letter-spacing:.05em;">✅ ${eligible.length} Ready to Generate</div>
+    </div>
+    <div style="max-height:160px;overflow-y:auto;margin-bottom:14px;padding-right:4px;">
+      ${readyRows || '<div style="font-size:12px;color:var(--text3);padding:8px;">No companies ready — fill CIRCULAR_DATA sheet first.</div>'}
+    </div>
+
+    ${notReady.length ? `
+    <div style="font-size:11px;font-weight:800;color:#9a3412;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">⚠️ ${notReady.length} Missing Data in CIRCULAR_DATA Sheet</div>
+    <div style="max-height:160px;overflow-y:auto;margin-bottom:14px;padding-right:4px;">
+      ${missingRows}
+    </div>` : ''}
+
+    ${hasExisting.length ? `
+    <div style="padding:10px 14px;background:#fff7ed;border-radius:8px;border:1px solid #fed7aa;font-size:12px;color:#92400e;margin-bottom:14px;">
+      ⚠️ <strong>${hasExisting.length} companies</strong> already have circulars saved. Use <strong>Reset existing URLs</strong> below to clear them before regenerating, or proceed to regenerate and overwrite.
+    </div>` : ''}
+
+    <div id="circ-preflight-status" style="display:none;padding:10px 12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border);font-size:12px;color:var(--text3);"></div>`,
+
+    `<button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button>
+     <button class="btn btn-outline btn-sm" style="color:#9a3412;border-color:#fca5a5;" onclick="_resetCircularUrls()" ${eligible.length?'':'disabled'}>🗑 Reset Existing URLs</button>
+     <button class="btn btn-admin btn-sm" id="circ-go-btn" onclick="_startGenerateAll()" ${eligible.length?'':'disabled'} style="${eligible.length?'':'opacity:.5;cursor:not-allowed;'}">▶ Generate ${eligible.length} Circulars</button>`
+  );
+  return; /* Pre-flight shown — actual generation starts from _startGenerateAll() */
+}
+
+async function _resetCircularUrls(){
+  if(!_checkWebapp()) return;
+  if(!confirm(`This will clear all Circular URLs from column M of the CIRCULAR_DATA sheet. The PDF files on Drive will NOT be deleted. Continue?`)) return;
+
+  const statusEl = document.getElementById('circ-preflight-status');
+  if(statusEl){ statusEl.style.display='block'; statusEl.textContent='Clearing Circular URLs from sheet…'; }
+
+  try{
+    const res = await fetch(_WEBAPP, {
+      method:'POST',
+      body: JSON.stringify({
+        action:  'clearCircularUrls',
+        sheetId: CONFIG_SHEET_ID,
+        tabName: 'CIRCULAR_DATA',
+      })
+    }).then(r=>r.json());
+
+    if(!res.ok) throw new Error(res.error||'Unknown error');
+
+    /* Clear in-memory CIRCULAR_DATA too */
+    Object.keys(CIRCULAR_DATA).forEach(k=>{ CIRCULAR_DATA[k].circularUrl=''; });
+
+    if(statusEl){ statusEl.innerHTML='✅ All Circular URLs cleared. Click <strong>Generate</strong> to start fresh.'; }
+    toast('Circular URLs cleared — ready for fresh generation','success','✅');
+
+    /* Update the button */
+    const btn = document.getElementById('circ-go-btn');
+    if(btn) btn.textContent='▶ Generate Fresh';
+  }catch(e){
+    if(statusEl){ statusEl.innerHTML='❌ Error: '+xe(e.message); }
+    toast('Reset failed: '+e.message,'error');
+  }
+}
+
+async function _startGenerateAll(){
+  closeModal();
+  await new Promise(r=>setTimeout(r,100)); /* Let modal close */
+
+  /* Now run the actual generation loop — re-entry after pre-flight */
+  if(!window.jspdf){ toast('PDF library not loaded yet — please wait a moment','error'); return; }
+  if(!_checkWebapp()) return;
+
+  const today = new Date().toISOString().split('T')[0];
+  const eligible = COMPANIES.filter(c => {
+    const circ = CIRCULAR_DATA[c.name.toLowerCase()] || {};
+    return circ.about && circ.position && circ.ctc && circ.selection;
+  });
+
   if(!eligible.length){
-    openModal('🔄 Generate All Circulars',
-      `<div style="padding:24px;text-align:center;">
-        <div style="font-size:32px;margin-bottom:12px;">📋</div>
-        <div style="font-weight:700;color:var(--text);margin-bottom:8px;">No companies ready</div>
-        <div style="font-size:13px;color:var(--text3);line-height:1.6;">
-          Fill the circular details in your <strong>CIRCULAR_DATA</strong> sheet tab first.<br>
-          Required columns per company: <strong>Company Name, About, Position, CTC, Selection Process</strong>
-        </div>
-        <div style="margin-top:16px;font-size:12px;color:var(--text4);">
-          Already filled the sheet? Click below to reload the data and try again.
-        </div>
-       </div>`,
-      `<button class="btn btn-outline btn-sm" onclick="closeModal()">Close</button>
-       <button class="btn btn-admin btn-sm" onclick="closeModal();_reloadCircularDataAndGenerate()">↺ Reload & Generate</button>`);
-    return;
+    toast('No companies ready — fill CIRCULAR_DATA sheet first','error'); return;
   }
 
-  /* Progress modal */
+  /* ── Progress modal ── */
   openModal('🔄 Generating All Circulars',
     `<div id="gen-all-body" style="padding:8px 0;">
        <div style="font-size:13px;color:var(--text3);margin-bottom:16px;">
