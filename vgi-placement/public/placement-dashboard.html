@@ -6643,16 +6643,12 @@ async function _generateReportsPreview(){
 
     /* Key fields — full detail from ADMIN_DATA */
     const fields = [
-      ['Company Name',               co.name],
-      ['Website',                    ad.website || co.website || '—'],
-      ['Mode of Drive',              ad.interviewMode || co.interviewMode || '—'],
-      ['Job Role',                   roles],
-      ['Registration Date',          ad.registrationDate || '—'],
-      ['Date of Drive',              driveDate],
-      ['Number of Students Registered', String(co.studentsRegistered.length)],
-      ['Number of Students Attended',   String(att)],
+      ['Company Name',                  co.name],
+      ['Mode of Drive',                 ad.interviewMode || co.interviewMode || '—'],
+      ['Job Role',                      roles],
+      ['Date of Drive',                 driveDate],
       ['Number of Students Selected',   String(sel)],
-    ].filter(([,v])=>v&&v!=='—'||['Number of Students Selected'].includes(''));
+    ];
 
     const kW=70;
     fields.forEach(([label,val])=>{
