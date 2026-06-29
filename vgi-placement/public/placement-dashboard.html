@@ -6547,14 +6547,6 @@ function openGenerateAllReportsModal(){
       📂 Each report downloads as a separate PDF. <strong>${withSel.length} files</strong> will be saved to your downloads folder one after another.
     </div>
 
-    <div style="margin-bottom:8px;">
-      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text);font-weight:600;">
-        <input type="checkbox" id="rpt-include-grid" checked style="width:14px;height:14px;accent-color:#1e40af;">
-        Include photo placeholder grid in each report
-      </label>
-      <div style="font-size:11px;color:var(--text3);margin-top:3px;margin-left:22px;">A blank 3×2 grid will be printed so you can paste photos manually</div>
-    </div>
-
     <div style="font-size:11px;font-weight:800;color:#1e3a8a;text-transform:uppercase;letter-spacing:.05em;margin:12px 0 7px;">✅ Companies with selected students (${withSel.length})</div>
     <div style="max-height:180px;overflow-y:auto;padding-right:4px;margin-bottom:10px;">${readyRows||'<div style="font-size:12px;color:var(--text3);padding:8px;">No companies have selected students yet.</div>'}</div>
 
@@ -6576,7 +6568,6 @@ function openGenerateAllReportsModal(){
 async function _runGenerateAllReports(){
   const btn       = document.getElementById('rpt-gen-btn');
   const statusEl  = document.getElementById('rpt-gen-status');
-  const withGrid  = document.getElementById('rpt-include-grid')?.checked ?? true;
 
   if(btn){ btn.disabled=true; btn.textContent='Generating…'; }
   if(statusEl){ statusEl.style.display='block'; }
@@ -6588,7 +6579,7 @@ async function _runGenerateAllReports(){
   for(const co of withSel){
     if(statusEl) statusEl.innerHTML = `⏳ Generating <strong>${xe(co.name)}</strong>… (${done+1} of ${withSel.length})`;
     try{
-      const doc  = await _buildPlacementReportDoc(co, banner, withGrid);
+      const doc  = await _buildPlacementReportDoc(co, banner, false);
       const safe = co.name.replace(/[^a-zA-Z0-9 ]/g,'').trim().replace(/\s+/g,'_');
       doc.save(safe+'_Placement_Report.pdf');
       done++;
@@ -6793,7 +6784,6 @@ function _runGenerateAllExcel(){
 
 /* ── Helpers ── */
 function _xlHeaderRow(coName, listType){
-  /* Merged company name row + type label */
   return [coName + ' — ' + listType];
 }
 
@@ -6811,7 +6801,11 @@ function _xlStudentRow(s, idx){
   ];
 }
 
+/* Apply full formatting: bold/center headers + all borders on every cell */
 function _xlApplyStyles(ws, coName, listType, studentCount){
+  const COLS = 5;
+  const totalRows = 2 + studentCount; /* header row + col-header row + data rows */
+
   ws['!cols'] = [
     {wch:6},   /* Sl No */
     {wch:28},  /* Name */
@@ -6819,14 +6813,68 @@ function _xlApplyStyles(ws, coName, listType, studentCount){
     {wch:14},  /* Phone */
     {wch:20},  /* Course */
   ];
-  ws['!merges'] = [{s:{r:0,c:0}, e:{r:0,c:4}}];
+
+  /* Merge company name + list type across all columns (row 1) */
+  ws['!merges'] = [{s:{r:0,c:0}, e:{r:0,c:COLS-1}}];
+
+  const allBorder = {
+    top:    {style:'thin',color:{rgb:'000000'}},
+    bottom: {style:'thin',color:{rgb:'000000'}},
+    left:   {style:'thin',color:{rgb:'000000'}},
+    right:  {style:'thin',color:{rgb:'000000'}},
+  };
+  const purple = '570B54';
+
+  /* Helper: encode cell address */
+  const addr = (r,c) => XLSX.utils.encode_cell({r,c});
+
+  for(let r=0; r<totalRows; r++){
+    for(let c=0; c<COLS; c++){
+      const cell = ws[addr(r,c)];
+      if(!cell) continue;
+
+      cell.s = { border: allBorder };
+
+      if(r === 0){
+        /* Company name row — bold, centered, purple text, light purple fill */
+        Object.assign(cell.s, {
+          font:      { bold:true, sz:13, color:{rgb:purple} },
+          alignment: { horizontal:'center', vertical:'center', wrapText:true },
+          fill:      { fgColor:{rgb:'F5EAF5'}, patternType:'solid' },
+        });
+      } else if(r === 1){
+        /* Column header row — bold, centered, white text on purple background */
+        Object.assign(cell.s, {
+          font:      { bold:true, sz:11, color:{rgb:'FFFFFF'} },
+          alignment: { horizontal:'center', vertical:'center' },
+          fill:      { fgColor:{rgb:purple}, patternType:'solid' },
+        });
+      } else {
+        /* Data rows — center Sl No, left-align rest, alternate fill */
+        Object.assign(cell.s, {
+          font:      { sz:10 },
+          alignment: { horizontal: c===0 ? 'center' : 'left', vertical:'center', wrapText:true },
+          fill:      r%2===0
+            ? { fgColor:{rgb:'FAF5FA'}, patternType:'solid' }
+            : { fgColor:{rgb:'FFFFFF'}, patternType:'solid' },
+        });
+      }
+    }
+  }
+
+  /* Row heights */
+  ws['!rows'] = [
+    {hpt:22},  /* Company name row */
+    {hpt:18},  /* Column header row */
+    ...Array(studentCount).fill({hpt:15}),
+  ];
 }
 
 function _xlBuildSheet(co, students, listType){
   const rows = [
-    _xlHeaderRow(co.name, listType),   /* Row 1: merged company + type */
-    _xlColHeaders(),                    /* Row 2: column headers */
-    ...students.map((s,i)=>_xlStudentRow(s,i)) /* Data rows */
+    _xlHeaderRow(co.name, listType),
+    _xlColHeaders(),
+    ...students.map((s,i)=>_xlStudentRow(s,i))
   ];
   const ws = XLSX.utils.aoa_to_sheet(rows);
   _xlApplyStyles(ws, co.name, listType, students.length);
@@ -6940,7 +6988,6 @@ async function _runMasterReportPDF(printMode){
   if(statusEl) statusEl.style.display='block';
 
   const withSel  = COMPANIES.filter(c=>c.studentsSelected&&c.studentsSelected.length>0);
-  const withGrid = document.getElementById('rpt-include-grid')?.checked??true;
   const banner   = await _loadDocBanner();
 
   if(statusEl) statusEl.innerHTML='⏳ Building master PDF…';
@@ -7013,33 +7060,17 @@ async function _runMasterReportPDF(printMode){
     });
     y+=6;
 
-    /* Photo grid */
-    if(withGrid){
-      const gridW=IW, gridH=88, cols=3, rows=2;
-      const cellW=gridW/cols, cellH=gridH/rows;
-      if(y+gridH+30>pBot){ doc.addPage(); y=_drawLetterhead(doc,banner)+8; }
-      doc.setDrawColor(...gray); doc.setLineWidth(0.4);
-      doc.rect(ML,y,gridW,gridH);
-      for(let c=1;c<cols;c++) doc.line(ML+c*cellW,y,ML+c*cellW,y+gridH);
-      for(let r=1;r<rows;r++) doc.line(ML,y+r*cellH,ML+gridW,y+r*cellH);
-      doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(180,180,180);
-      for(let r=0;r<rows;r++) for(let c=0;c<cols;c++)
-        doc.text('[ Photo ]',ML+c*cellW+cellW/2,y+r*cellH+cellH/2,{align:'center'});
-      doc.setTextColor(...black);
-      y+=gridH+12;
-    }
-
-    /* Signatures — always on same page as content if possible */
-    if(y+28>pBot){ doc.addPage(); y=_drawLetterhead(doc,banner)+14; }
+    /* Signatures — pinned to bottom of first page of this company's report */
+    const sigY = pBot - 30;  /* Fixed position near bottom of page */
     doc.setFont('times','normal'); doc.setFontSize(10); doc.setTextColor(...black);
-    doc.text('Placement Co-ordinator',ML,y+16);
-    doc.text('Vidyavahini First Grade & PG College',ML,y+21);
-    doc.text('Kuvempunagara, Tumkur',ML,y+26);
+    doc.text('Placement Co-ordinator',ML,sigY);
+    doc.text('Vidyavahini First Grade & PG College',ML,sigY+5);
+    doc.text('Kuvempunagara, Tumkur',ML,sigY+10);
     doc.setFont('times','bold');
-    doc.text('PRINCIPAL',W-MR,y+16,{align:'right'});
+    doc.text('PRINCIPAL',W-MR,sigY,{align:'right'});
     doc.setFont('times','normal');
-    doc.text('Vidyavahini First Grade College',W-MR,y+21,{align:'right'});
-    doc.text('Kuvempunagar, TUMKUR-572103',W-MR,y+26,{align:'right'});
+    doc.text('Vidyavahini First Grade College',W-MR,sigY+5,{align:'right'});
+    doc.text('Kuvempunagar, TUMKUR-572103',W-MR,sigY+10,{align:'right'});
 
     await new Promise(r=>setTimeout(r,0)); /* yield so UI repaints */
   }
