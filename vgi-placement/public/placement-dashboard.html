@@ -1567,11 +1567,12 @@ function renderAdminBar(){
   const r=document.getElementById('admin-bar');
   if(!adminMode){ r.innerHTML=''; }
   else {
-    r.innerHTML=`<div class="admin-bar"><span>🛡️ Admin Mode active</span><div class="admin-bar-actions"><button class="btn btn-admin-outline btn-sm" id="ab-circular">📄 Circular</button><button class="btn btn-admin-outline btn-sm" id="ab-repo">📁 Repository</button><button class="btn btn-admin btn-sm" id="ab-gen-all" style="background:linear-gradient(135deg,#6D0E6A,#3B1A8A);border-color:#6D0E6A;">🔄 Generate All Circulars</button><button class="btn btn-admin btn-sm" id="ab-gen-reports" style="background:linear-gradient(135deg,#1e3a5f,#1e40af);border-color:#1e3a5f;">📊 Generate All Reports</button><button class="btn btn-admin btn-sm" id="ab-all-ol" style="background:linear-gradient(135deg,#0e4a6a,#0369a1);border-color:#0e4a6a;">📩 All Offer Letters</button><button class="btn btn-admin-outline btn-sm" id="ab-diag">🔍 Diagnostics</button><button class="btn btn-admin-outline btn-sm" id="ab-refresh">↺ Reload Config</button><button class="btn btn-admin-outline btn-sm" id="ab-exit">Exit Admin</button></div></div>`;
+    r.innerHTML=`<div class="admin-bar"><span>🛡️ Admin Mode active</span><div class="admin-bar-actions"><button class="btn btn-admin-outline btn-sm" id="ab-circular">📄 Circular</button><button class="btn btn-admin-outline btn-sm" id="ab-repo">📁 Repository</button><button class="btn btn-admin btn-sm" id="ab-gen-all" style="background:linear-gradient(135deg,#6D0E6A,#3B1A8A);border-color:#6D0E6A;">🔄 Generate All Circulars</button><button class="btn btn-admin btn-sm" id="ab-gen-reports" style="background:linear-gradient(135deg,#1e3a5f,#1e40af);border-color:#1e3a5f;">📊 Generate All Reports</button><button class="btn btn-admin btn-sm" id="ab-gen-excel" style="background:linear-gradient(135deg,#14532d,#15803d);border-color:#14532d;">📋 Generate All Excel Lists</button><button class="btn btn-admin btn-sm" id="ab-all-ol" style="background:linear-gradient(135deg,#0e4a6a,#0369a1);border-color:#0e4a6a;">📩 All Offer Letters</button><button class="btn btn-admin-outline btn-sm" id="ab-diag">🔍 Diagnostics</button><button class="btn btn-admin-outline btn-sm" id="ab-refresh">↺ Reload Config</button><button class="btn btn-admin-outline btn-sm" id="ab-exit">Exit Admin</button></div></div>`;
     document.getElementById('ab-circular').onclick=openCircularModal;
     document.getElementById('ab-repo').onclick=openCircularRepo;
     document.getElementById('ab-gen-all').onclick=generateAllCirculars;
     document.getElementById('ab-gen-reports').onclick=openGenerateAllReportsModal;
+    document.getElementById('ab-gen-excel').onclick=openGenerateAllExcelModal;
     document.getElementById('ab-all-ol').onclick=openAllOfferLettersModal;
     document.getElementById('ab-diag').onclick=showDiagnostics;
     document.getElementById('ab-refresh').onclick=()=>{ init(); toast('Reloading config…','info','↺'); };
@@ -1584,11 +1585,12 @@ function renderPCBar(){
   const r=document.getElementById('pc-bar');
   if(!r)return;
   if(!pcMode){ r.innerHTML=''; return; }
-  r.innerHTML=`<div class="pc-bar"><span>🔐 Placement Cell Mode active</span><span class="pc-bar-badge">CONFIDENTIAL</span><div class="pc-bar-actions"><button class="btn btn-admin-outline btn-sm" id="pc-circular">📄 Circular</button><button class="btn btn-admin-outline btn-sm" id="pc-repo">📁 Repository</button><button class="btn btn-admin-outline btn-sm" id="pc-gen-all" style="background:linear-gradient(135deg,rgba(109,14,106,0.7),rgba(59,26,138,0.7));border-color:rgba(109,14,106,0.8);">🔄 Generate All Circulars</button><button class="btn btn-admin-outline btn-sm" id="pc-gen-reports" style="background:linear-gradient(135deg,rgba(30,58,95,0.8),rgba(30,64,175,0.8));border-color:rgba(30,58,95,0.8);">📊 Generate All Reports</button><button class="btn btn-admin-outline btn-sm" id="pc-all-ol" style="background:linear-gradient(135deg,rgba(14,74,106,0.8),rgba(3,105,161,0.8));border-color:rgba(14,74,106,0.8);">📩 All Offer Letters</button><button onclick="exitPCMode()">Exit</button></div></div>`;
+  r.innerHTML=`<div class="pc-bar"><span>🔐 Placement Cell Mode active</span><span class="pc-bar-badge">CONFIDENTIAL</span><div class="pc-bar-actions"><button class="btn btn-admin-outline btn-sm" id="pc-circular">📄 Circular</button><button class="btn btn-admin-outline btn-sm" id="pc-repo">📁 Repository</button><button class="btn btn-admin-outline btn-sm" id="pc-gen-all" style="background:linear-gradient(135deg,rgba(109,14,106,0.7),rgba(59,26,138,0.7));border-color:rgba(109,14,106,0.8);">🔄 Generate All Circulars</button><button class="btn btn-admin-outline btn-sm" id="pc-gen-reports" style="background:linear-gradient(135deg,rgba(30,58,95,0.8),rgba(30,64,175,0.8));border-color:rgba(30,58,95,0.8);">📊 Generate All Reports</button><button class="btn btn-admin-outline btn-sm" id="pc-gen-excel" style="background:linear-gradient(135deg,rgba(20,83,45,0.8),rgba(21,128,61,0.8));border-color:rgba(20,83,45,0.8);">📋 Generate All Excel Lists</button><button class="btn btn-admin-outline btn-sm" id="pc-all-ol" style="background:linear-gradient(135deg,rgba(14,74,106,0.8),rgba(3,105,161,0.8));border-color:rgba(14,74,106,0.8);">📩 All Offer Letters</button><button onclick="exitPCMode()">Exit</button></div></div>`;
   document.getElementById('pc-circular').onclick=openCircularModal;
   document.getElementById('pc-repo').onclick=openCircularRepo;
   document.getElementById('pc-gen-all').onclick=generateAllCirculars;
   document.getElementById('pc-gen-reports').onclick=openGenerateAllReportsModal;
+  document.getElementById('pc-gen-excel').onclick=openGenerateAllExcelModal;
   document.getElementById('pc-all-ol').onclick=openAllOfferLettersModal;
 }
 
@@ -6718,6 +6720,204 @@ async function _buildPlacementReportDoc(co, banner, includeGrid){
   doc.text('Kuvempunagar, TUMKUR-572103', W-MR, y+26, {align:'right'});
 
   return doc;
+}
+
+/* ════════════════════════════════════════════════════
+   GENERATE ALL EXCEL LISTS — BULK
+   Two workbooks per company:
+     1. Registered Students list
+     2. Selected Students list
+   Each sheet has: Company name header row, column
+   headers, then student data rows.
+════════════════════════════════════════════════════ */
+
+function openGenerateAllExcelModal(){
+  if(typeof XLSX === 'undefined'){ toast('Excel library not loaded','error'); return; }
+
+  const allCo   = COMPANIES;
+  const withReg = allCo.filter(c => c.studentsRegistered.length > 0);
+  const withSel = allCo.filter(c => c.studentsSelected.length  > 0);
+  const totalReg = allCo.reduce((s,c)=>s+c.studentsRegistered.length, 0);
+  const totalSel = allCo.reduce((s,c)=>s+c.studentsSelected.length,  0);
+
+  /* Option: one file per company (2 tabs) OR two separate files */
+  openModal('📋 Generate All Excel Lists',
+    `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+      <div style="text-align:center;padding:12px;background:#f0fdf4;border-radius:10px;border:1px solid #bbf7d0;">
+        <div style="font-size:24px;font-weight:900;color:#065f46;">${totalReg.toLocaleString()}</div>
+        <div style="font-size:10px;color:#065f46;font-weight:800;text-transform:uppercase;">Total Registered</div>
+        <div style="font-size:11px;color:#6b7280;margin-top:3px;">${withReg.length} companies</div>
+      </div>
+      <div style="text-align:center;padding:12px;background:#eff6ff;border-radius:10px;border:1px solid #bfdbfe;">
+        <div style="font-size:24px;font-weight:900;color:#1e40af;">${totalSel.toLocaleString()}</div>
+        <div style="font-size:10px;color:#1e40af;font-weight:800;text-transform:uppercase;">Total Selected</div>
+        <div style="font-size:11px;color:#6b7280;margin-top:3px;">${withSel.length} companies</div>
+      </div>
+    </div>
+
+    <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px;">Download format:</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+      <label style="display:flex;align-items:flex-start;gap:10px;padding:11px 14px;border:1.5px solid #bbf7d0;border-radius:10px;cursor:pointer;background:#f0fdf4;">
+        <input type="radio" name="xl-fmt" value="combined" checked style="margin-top:2px;accent-color:#065f46;">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#065f46;">One file per company <span style="font-size:10px;font-weight:600;padding:2px 7px;background:#dcfce7;border-radius:8px;">Recommended</span></div>
+          <div style="font-size:11px;color:#6b7280;margin-top:2px;">Each company gets one .xlsx with two sheets: <strong>Registered</strong> and <strong>Selected</strong></div>
+        </div>
+      </label>
+      <label style="display:flex;align-items:flex-start;gap:10px;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;">
+        <input type="radio" name="xl-fmt" value="separate" style="margin-top:2px;accent-color:#1e40af;">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--text);">Two separate files per company</div>
+          <div style="font-size:11px;color:#6b7280;margin-top:2px;">Registered list and Selected list as separate .xlsx files</div>
+        </div>
+      </label>
+      <label style="display:flex;align-items:flex-start;gap:10px;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;">
+        <input type="radio" name="xl-fmt" value="master" style="margin-top:2px;accent-color:#1e40af;">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--text);">Single master file — all companies</div>
+          <div style="font-size:11px;color:#6b7280;margin-top:2px;">One .xlsx with one tab per company (Registered + Selected rows together)</div>
+        </div>
+      </label>
+    </div>
+
+    <div id="xl-gen-status" style="display:none;padding:10px 14px;background:var(--bg2);border-radius:8px;border:1px solid var(--border);font-size:12px;color:var(--text3);"></div>`,
+
+    `<button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button>
+     <button class="btn btn-admin btn-sm" style="background:linear-gradient(135deg,#14532d,#15803d);border-color:#14532d;" onclick="_runGenerateAllExcel()">📋 Generate & Download</button>`
+  );
+}
+
+function _runGenerateAllExcel(){
+  const fmt = document.querySelector('input[name="xl-fmt"]:checked')?.value || 'combined';
+  const statusEl = document.getElementById('xl-gen-status');
+  if(statusEl) statusEl.style.display='block';
+
+  try{
+    if(fmt === 'master'){
+      _xlMasterFile(statusEl);
+    } else {
+      _xlPerCompany(fmt === 'separate', statusEl);
+    }
+  }catch(e){
+    if(statusEl) statusEl.innerHTML='❌ Error: '+xe(e.message);
+    toast('Excel generation failed: '+e.message,'error');
+    console.error('[GenerateAllExcel]',e);
+  }
+}
+
+/* ── Helpers ── */
+function _xlHeaderRow(coName, listType){
+  /* Merged company name row + type label */
+  return [coName + ' — ' + listType];
+}
+
+function _xlColHeaders(){
+  return ['Sl No','Name','Email','Phone','Course / Branch'];
+}
+
+function _xlStudentRow(s, idx){
+  return [
+    idx+1,
+    s.name  || '—',
+    s.email || '—',
+    s.phone || '—',
+    s.class || '—',
+  ];
+}
+
+function _xlApplyStyles(ws, coName, listType, studentCount){
+  ws['!cols'] = [
+    {wch:6},   /* Sl No */
+    {wch:28},  /* Name */
+    {wch:32},  /* Email */
+    {wch:14},  /* Phone */
+    {wch:20},  /* Course */
+  ];
+  ws['!merges'] = [{s:{r:0,c:0}, e:{r:0,c:4}}];
+}
+
+function _xlBuildSheet(co, students, listType){
+  const rows = [
+    _xlHeaderRow(co.name, listType),   /* Row 1: merged company + type */
+    _xlColHeaders(),                    /* Row 2: column headers */
+    ...students.map((s,i)=>_xlStudentRow(s,i)) /* Data rows */
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  _xlApplyStyles(ws, co.name, listType, students.length);
+  return ws;
+}
+
+/* Format 1: One file per company, two sheets */
+function _xlPerCompany(separate, statusEl){
+  const companies = COMPANIES.filter(c=>c.studentsRegistered.length||c.studentsSelected.length);
+  let done=0;
+
+  companies.forEach((co, idx)=>{
+    const safe = co.name.replace(/[^a-zA-Z0-9 ]/g,'').trim().replace(/\s+/g,'_');
+
+    if(!separate){
+      /* Combined: one workbook, two sheets */
+      const wb = XLSX.utils.book_new();
+      const wsReg = _xlBuildSheet(co, co.studentsRegistered, 'Registered Students');
+      const wsSel = _xlBuildSheet(co, co.studentsSelected,   'Selected Students');
+      XLSX.utils.book_append_sheet(wb, wsReg, 'Registered Students');
+      XLSX.utils.book_append_sheet(wb, wsSel, 'Selected Students');
+      _xlsSave(wb, safe+'_Student_Lists');
+    } else {
+      /* Separate: two workbooks */
+      if(co.studentsRegistered.length){
+        const wb1 = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb1, _xlBuildSheet(co, co.studentsRegistered,'Registered Students'), 'Registered Students');
+        _xlsSave(wb1, safe+'_Registered');
+      }
+      if(co.studentsSelected.length){
+        const wb2 = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb2, _xlBuildSheet(co, co.studentsSelected,'Selected Students'), 'Selected Students');
+        _xlsSave(wb2, safe+'_Selected');
+      }
+    }
+    done++;
+    if(statusEl) statusEl.innerHTML=`⏳ Generated <strong>${done}</strong> of <strong>${companies.length}</strong> companies…`;
+  });
+
+  if(statusEl) statusEl.innerHTML=`✅ Done — <strong>${done}</strong> ${separate?'pairs of files':'files'} downloaded.`;
+  toast(`Excel lists generated for ${done} companies`,'success','📋');
+  closeModal();
+}
+
+/* Format 3: Single master file — all companies, one tab each */
+function _xlMasterFile(statusEl){
+  const wb = XLSX.utils.book_new();
+  let tabsDone=0;
+
+  COMPANIES.forEach(co=>{
+    if(!co.studentsRegistered.length && !co.studentsSelected.length) return;
+    const safe = co.name.replace(/[^a-zA-Z0-9 ]/g,'').trim().replace(/\s+/g,'_').slice(0,28);
+
+    /* Build combined sheet: registered first, then blank row, then selected */
+    const rows = [
+      [co.name],                    /* Company name header */
+      [],                            /* blank */
+      ['REGISTERED STUDENTS'],
+      _xlColHeaders(),
+      ...co.studentsRegistered.map((s,i)=>_xlStudentRow(s,i)),
+      [],                            /* blank */
+      ['SELECTED STUDENTS'],
+      _xlColHeaders(),
+      ...co.studentsSelected.map((s,i)=>_xlStudentRow(s,i)),
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols']=[{wch:6},{wch:28},{wch:32},{wch:14},{wch:20}];
+    ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:4}}];
+    XLSX.utils.book_append_sheet(wb, ws, safe||`Co${tabsDone+1}`);
+    tabsDone++;
+  });
+
+  _xlsSave(wb,'VGI_All_Companies_Student_Lists');
+  if(statusEl) statusEl.innerHTML=`✅ Master file downloaded — <strong>${tabsDone}</strong> company tabs.`;
+  toast(`Master Excel file created with ${tabsDone} company tabs`,'success','📋');
+  closeModal();
 }
 
 async function _resetCircularUrls(){
