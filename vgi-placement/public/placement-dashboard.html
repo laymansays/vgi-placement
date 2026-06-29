@@ -7089,34 +7089,115 @@ async function _runMasterReportPDF(printMode){
 }
 
 /* ── Master Excel: two tabs per company ── */
-function _runMasterExcel(){
+/* ExcelJS lazy loader */
+let _excelJSLoaded = false;
+async function _loadExcelJS(){
+  if(_excelJSLoaded) return;
+  await new Promise((res,rej)=>{
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js';
+    s.onload=()=>{ _excelJSLoaded=true; res(); };
+    s.onerror=()=>rej(new Error('Could not load ExcelJS'));
+    document.head.appendChild(s);
+  });
+}
+
+const _VGI_LOGO_B64 = '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';
+
+async function _excelBuildSheet(wb, co, students, listType){
+  const short   = co.name.replace(/[^a-zA-Z0-9 &]/g,'').trim();
+  const tabName = (short.slice(0,22)+'_'+(listType==='Registered Students'?'Reg':'Sel')).slice(0,31);
+  const ws      = wb.addWorksheet(tabName);
+  const PURPLE  = '570B54', PURPLE_LT='F5EAF5', WHITE='FFFFFF';
+  const COLS    = 5;
+  const thin    = {style:'thin',color:{argb:'000000'}};
+  const allBord = {top:thin,bottom:thin,left:thin,right:thin};
+
+  ws.columns = [{width:7},{width:28},{width:34},{width:15},{width:22}];
+
+  /* Row 1+2: Logo | Institution name */
+  const logoId = wb.addImage({base64:_VGI_LOGO_B64, extension:'jpeg'});
+  ws.addImage(logoId,{tl:{col:0,row:0},br:{col:1,row:2}});
+
+  ws.mergeCells(1,2,1,COLS);
+  const r1c2 = ws.getCell(1,2);
+  r1c2.value     = 'Vidyavahini Group of Institutions, Tumakuru';
+  r1c2.font      = {bold:true,size:13,color:{argb:PURPLE}};
+  r1c2.alignment = {horizontal:'center',vertical:'middle'};
+  ws.getRow(1).height = 26;
+
+  ws.mergeCells(2,2,2,COLS);
+  const r2c2 = ws.getCell(2,2);
+  r2c2.value     = 'Career Development Center';
+  r2c2.font      = {bold:true,size:10,color:{argb:PURPLE}};
+  r2c2.alignment = {horizontal:'center',vertical:'middle'};
+  ws.getRow(2).height = 18;
+
+  /* Row 3: Company + list type */
+  ws.mergeCells(3,1,3,COLS);
+  const r3 = ws.getCell(3,1);
+  r3.value     = co.name + '  —  ' + listType;
+  r3.font      = {bold:true,size:13,color:{argb:PURPLE}};
+  r3.alignment = {horizontal:'center',vertical:'middle'};
+  r3.fill      = {type:'pattern',pattern:'solid',fgColor:{argb:PURPLE_LT}};
+  r3.border    = allBord;
+  ws.getRow(3).height = 22;
+
+  /* Row 4: Column headers */
+  const hdrs = ['Sl No','Name','Email','Phone','Course / Branch'];
+  ws.getRow(4).height = 18;
+  hdrs.forEach((h,ci)=>{
+    const cell     = ws.getCell(4,ci+1);
+    cell.value     = h;
+    cell.font      = {bold:true,size:11,color:{argb:WHITE}};
+    cell.alignment = {horizontal:'center',vertical:'middle'};
+    cell.fill      = {type:'pattern',pattern:'solid',fgColor:{argb:PURPLE}};
+    cell.border    = allBord;
+  });
+
+  /* Data rows from row 5 */
+  students.forEach((s,idx)=>{
+    const rn   = 5+idx;
+    const vals = [idx+1, s.name||'—', s.email||'—', s.phone||'—', s.class||'—'];
+    ws.getRow(rn).height = 15;
+    vals.forEach((v,ci)=>{
+      const cell     = ws.getCell(rn,ci+1);
+      cell.value     = v;
+      cell.font      = {size:10};
+      cell.alignment = {horizontal:ci===0?'center':'left',vertical:'middle'};
+      cell.fill      = {type:'pattern',pattern:'solid',fgColor:{argb:idx%2===0?'FAF5FA':WHITE}};
+      cell.border    = allBord;
+    });
+  });
+}
+
+async function _runMasterExcel(){
   const statusEl = document.getElementById('xl-gen-status');
   if(statusEl) statusEl.style.display='block';
-
   try{
-    const wb = XLSX.utils.book_new();
-    let tabCount = 0;
-
-    COMPANIES.forEach(co=>{
-      if(!co.studentsRegistered.length && !co.studentsSelected.length) return;
-
-      /* Shorten name to fit Excel 31-char tab limit */
-      const short = co.name.replace(/[^a-zA-Z0-9 &]/g,'').trim().slice(0,24);
-
-      /* Tab 1: Registered Students */
-      const wsReg = _xlBuildSheet(co, co.studentsRegistered, 'Registered Students');
-      XLSX.utils.book_append_sheet(wb, wsReg, (short+'_Reg').slice(0,31));
+    if(statusEl) statusEl.innerHTML='Loading Excel engine…';
+    await _loadExcelJS();
+    const wb = new ExcelJS.Workbook();
+    wb.creator='VGI CDC'; wb.created=new Date(); wb.modified=new Date();
+    let tabCount=0;
+    const companies=COMPANIES.filter(c=>c.studentsRegistered.length||c.studentsSelected.length);
+    for(const co of companies){
+      if(statusEl) statusEl.innerHTML=`Building <strong>${xe(co.name)}</strong>…`;
+      await _excelBuildSheet(wb, co, co.studentsRegistered, 'Registered Students');
       tabCount++;
-
-      /* Tab 2: Selected Students */
-      const wsSel = _xlBuildSheet(co, co.studentsSelected, 'Selected Students');
-      XLSX.utils.book_append_sheet(wb, wsSel, (short+'_Sel').slice(0,31));
+      await _excelBuildSheet(wb, co, co.studentsSelected, 'Selected Students');
       tabCount++;
-    });
-
-    _xlsSave(wb, 'VGI_All_Companies_Student_Lists');
-    if(statusEl) statusEl.innerHTML=`✅ Master Excel downloaded — <strong>${tabCount}</strong> tabs (${tabCount/2} companies).`;
-    toast(`Master Excel: ${tabCount} tabs across ${tabCount/2} companies`,'success','📋');
+      await new Promise(r=>setTimeout(r,0));
+    }
+    if(statusEl) statusEl.innerHTML='Writing file…';
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob   = new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const url    = URL.createObjectURL(blob);
+    const a      = document.createElement('a');
+    a.href=url; a.download='VGI_All_Companies_Student_Lists.xlsx'; a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),5000);
+    if(statusEl) statusEl.innerHTML=`Done — <strong>${tabCount}</strong> tabs (${companies.length} companies).`;
+    toast('Master Excel: '+tabCount+' tabs across '+companies.length+' companies','success','📋');
     closeModal();
   }catch(e){
     if(statusEl) statusEl.innerHTML='❌ Error: '+xe(e.message);
