@@ -1254,8 +1254,10 @@ function parseAdminData(csv){
   rows.slice(1).forEach(r => {
     const name = (r[iComp]||'').trim();
     if(!name) return;
+    const key = name.toLowerCase();
     const roles = (r[iRoles]||'').split(',').map(s=>s.trim()).filter(Boolean);
-    data[name.toLowerCase()] = {
+
+    const newEntry = {
       website:         r[iWeb]||'',
       interviewMode:   r[iMode]||'',
       registrationDate:r[iRegDate]||'',
@@ -1271,6 +1273,31 @@ function parseAdminData(csv){
       notes: r[iNotes]||'',
       jdUrl: iJdUrl!==-1?(r[iJdUrl]||'').trim():''
     };
+
+    if(data[key]){
+      /* Duplicate company row found — merge, preferring non-empty values.
+         Prevents a blank/older row from wiping out a filled-in row. */
+      const existing = data[key];
+      data[key] = {
+        website:          newEntry.website          || existing.website,
+        interviewMode:    newEntry.interviewMode     || existing.interviewMode,
+        registrationDate: newEntry.registrationDate  || existing.registrationDate,
+        driveDate:        newEntry.driveDate         || existing.driveDate,
+        poc: {
+          name:        newEntry.poc.name        || existing.poc.name,
+          designation: newEntry.poc.designation || existing.poc.designation,
+          email:       newEntry.poc.email       || existing.poc.email,
+          phone:       newEntry.poc.phone       || existing.poc.phone,
+        },
+        roles: newEntry.roles.length ? newEntry.roles : existing.roles,
+        jds:   newEntry.roles.length ? newEntry.jds   : existing.jds,
+        notes: newEntry.notes || existing.notes,
+        jdUrl: newEntry.jdUrl || existing.jdUrl,
+      };
+      console.warn('[parseAdminData] Duplicate row for "'+name+'" — merged, preferring non-empty fields.');
+    } else {
+      data[key] = newEntry;
+    }
   });
   return data;
 }
@@ -6449,11 +6476,12 @@ async function generateAllCirculars(){
   /* Always show pre-flight modal so user can see what's ready / missing */
   const readyRows = eligible.map(c => {
     const circ = CIRCULAR_DATA[c.name.toLowerCase()] || {};
-    return `<div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;background:#f0fdf4;border:1px solid #bbf7d0;margin-bottom:6px;">
+    return `<label style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;background:#f0fdf4;border:1px solid #bbf7d0;margin-bottom:6px;cursor:pointer;">
+      <input type="checkbox" class="circ-co-chk" value="${c.id}" checked style="width:15px;height:15px;accent-color:#065f46;flex-shrink:0;">
       <span style="font-size:14px;">✅</span>
       <div style="flex:1;font-size:12px;font-weight:700;color:#065f46;">${xe(c.name)}</div>
       ${circ.circularUrl ? '<span style="font-size:10px;padding:2px 7px;background:#dcfce7;color:#166534;border-radius:10px;font-weight:700;">Has circular</span>' : '<span style="font-size:10px;padding:2px 7px;background:#e0e7ff;color:#3730a3;border-radius:10px;font-weight:700;">New</span>'}
-    </div>`;
+    </label>`;
   }).join('');
 
   const missingRows = notReady.map(c => {
@@ -6490,8 +6518,12 @@ async function generateAllCirculars(){
 
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
       <div style="font-size:11px;font-weight:800;color:var(--text);text-transform:uppercase;letter-spacing:.05em;">✅ ${eligible.length} Ready to Generate</div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-outline btn-sm" onclick="_circSelectAll(true)" style="padding:3px 9px;font-size:10.5px;">☑ All</button>
+        <button class="btn btn-outline btn-sm" onclick="_circSelectAll(false)" style="padding:3px 9px;font-size:10.5px;">☐ None</button>
+      </div>
     </div>
-    <div style="max-height:160px;overflow-y:auto;margin-bottom:14px;padding-right:4px;">
+    <div style="max-height:160px;overflow-y:auto;margin-bottom:14px;padding-right:4px;" id="circ-ready-list">
       ${readyRows || '<div style="font-size:12px;color:var(--text3);padding:8px;">No companies ready — fill CIRCULAR_DATA sheet first.</div>'}
     </div>
 
@@ -6510,9 +6542,13 @@ async function generateAllCirculars(){
 
     `<button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button>
      <button class="btn btn-outline btn-sm" style="color:#9a3412;border-color:#fca5a5;" onclick="_resetCircularUrls()" ${eligible.length?'':'disabled'}>🗑 Reset Existing URLs</button>
-     <button class="btn btn-admin btn-sm" id="circ-go-btn" onclick="_startGenerateAll()" ${eligible.length?'':'disabled'} style="${eligible.length?'':'opacity:.5;cursor:not-allowed;'}">▶ Generate ${eligible.length} Circulars</button>`
+     <button class="btn btn-admin btn-sm" id="circ-go-btn" onclick="_startGenerateAll()" ${eligible.length?'':'disabled'} style="${eligible.length?'':'opacity:.5;cursor:not-allowed;'}">▶ Generate Selected</button>`
   );
   return; /* Pre-flight shown — actual generation starts from _startGenerateAll() */
+}
+
+function _circSelectAll(checked){
+  document.querySelectorAll('.circ-co-chk').forEach(cb=>cb.checked=checked);
 }
 
 /* ════════════════════════════════════════════════════
@@ -6940,32 +6976,44 @@ function openGenerateAllExcelModal(){
   if(typeof XLSX === 'undefined'){ toast('Excel library not loaded','error'); return; }
 
   const allCo   = COMPANIES;
-  const withReg = allCo.filter(c => c.studentsRegistered.length > 0);
-  const withSel = allCo.filter(c => c.studentsSelected.length  > 0);
-  const totalReg = allCo.reduce((s,c)=>s+c.studentsRegistered.length, 0);
-  const totalSel = allCo.reduce((s,c)=>s+c.studentsSelected.length,  0);
+  const withData= allCo.filter(c => c.studentsRegistered.length>0 || c.studentsSelected.length>0);
+
+  const checkRows = allCo.map(c=>{
+    const reg = c.studentsRegistered.length, sel = c.studentsSelected.length;
+    const has = reg>0 || sel>0;
+    return `<label style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;border:1.5px solid var(--border);background:var(--bg);cursor:pointer;margin-bottom:6px;"
+      onmouseenter="this.style.borderColor='#14532d'" onmouseleave="this.style.borderColor='var(--border)'">
+      <input type="checkbox" class="xl-co-chk" value="${c.id}" ${has?'checked':''} style="width:15px;height:15px;accent-color:#14532d;flex-shrink:0;">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12.5px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${xe(c.name)}</div>
+        <div style="font-size:10.5px;color:var(--text3);margin-top:1px;">
+          ${reg} registered &nbsp;·&nbsp; <span style="color:${sel?'#1e3a8a':'var(--text4)'};">${sel} selected</span>
+        </div>
+      </div>
+      ${has?`<span style="font-size:10px;padding:2px 8px;background:#dcfce7;color:#14532d;border-radius:10px;font-weight:700;">2 tabs</span>`:'<span style="font-size:10px;color:var(--text4);">No data</span>'}
+    </label>`;
+  }).join('');
 
   openModal('📋 Generate Master Excel Lists',
-    `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
-      <div style="text-align:center;padding:12px;background:#f0fdf4;border-radius:10px;border:1px solid #bbf7d0;">
-        <div style="font-size:24px;font-weight:900;color:#065f46;">${totalReg.toLocaleString()}</div>
-        <div style="font-size:10px;color:#065f46;font-weight:800;text-transform:uppercase;">Total Registered</div>
-        <div style="font-size:11px;color:#6b7280;margin-top:3px;">${withReg.length} companies</div>
-      </div>
-      <div style="text-align:center;padding:12px;background:#eff6ff;border-radius:10px;border:1px solid #bfdbfe;">
-        <div style="font-size:24px;font-weight:900;color:#1e40af;">${totalSel.toLocaleString()}</div>
-        <div style="font-size:10px;color:#1e40af;font-weight:800;text-transform:uppercase;">Total Selected</div>
-        <div style="font-size:11px;color:#6b7280;margin-top:3px;">${withSel.length} companies</div>
-      </div>
+    `<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+      <span style="font-size:12px;font-weight:700;color:var(--text);">Select companies to include:</span>
+      <button class="btn btn-outline btn-sm" onclick="_xlSelectAll(true)"  style="padding:4px 10px;font-size:11px;">☑ Select All</button>
+      <button class="btn btn-outline btn-sm" onclick="_xlSelectAll(false)" style="padding:4px 10px;font-size:11px;">☐ Deselect All</button>
+      <button class="btn btn-outline btn-sm" onclick="_xlSelectOnlyData()" style="padding:4px 10px;font-size:11px;">✅ Only with Data</button>
+      <span id="xl-sel-count" style="font-size:11px;color:var(--text3);margin-left:auto;">${withData.length} selected</span>
     </div>
 
-    <div style="padding:12px 14px;background:#f0fdf4;border-radius:10px;border:1.5px solid #bbf7d0;margin-bottom:14px;">
-      <div style="font-size:13px;font-weight:700;color:#065f46;margin-bottom:4px;">📗 One master Excel file</div>
-      <div style="font-size:11.5px;color:#374151;line-height:1.6;">
-        Two tabs per company — <strong>${allCo.filter(c=>c.studentsRegistered.length||c.studentsSelected.length).length * 2} total tabs</strong>:<br>
-        <span style="font-family:monospace;background:#dcfce7;padding:1px 6px;border-radius:4px;">CompanyName_Registered</span> &nbsp; and &nbsp; <span style="font-family:monospace;background:#dcfce7;padding:1px 6px;border-radius:4px;">CompanyName_Selected</span><br>
-        Each tab: company name header row + column headers + student data.
-      </div>
+    <div style="margin-bottom:10px;">
+      <input id="xl-co-search" placeholder="Search company…" oninput="_xlFilterSearch(this.value)"
+        style="width:100%;padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--text);">
+    </div>
+
+    <div id="xl-co-list" style="max-height:300px;overflow-y:auto;padding-right:4px;margin-bottom:14px;">
+      ${checkRows}
+    </div>
+
+    <div style="padding:10px 14px;background:#f0fdf4;border-radius:10px;border:1.5px solid #bbf7d0;font-size:11.5px;color:#374151;line-height:1.6;margin-bottom:10px;">
+      📗 One master Excel file — two tabs per selected company (<span style="font-family:monospace;background:#dcfce7;padding:1px 6px;border-radius:4px;">Name_Reg</span> &amp; <span style="font-family:monospace;background:#dcfce7;padding:1px 6px;border-radius:4px;">Name_Sel</span>), each with logo header, company name, and student data.
     </div>
 
     <div id="xl-gen-status" style="display:none;padding:10px 14px;background:var(--bg2);border-radius:8px;border:1px solid var(--border);font-size:12px;color:var(--text3);"></div>`,
@@ -6973,6 +7021,35 @@ function openGenerateAllExcelModal(){
     `<button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button>
      <button class="btn btn-admin btn-sm" style="background:linear-gradient(135deg,#14532d,#15803d);border-color:#14532d;" onclick="_runMasterExcel()">📋 Download Master Excel</button>`
   );
+
+  setTimeout(()=>{
+    document.querySelectorAll('.xl-co-chk').forEach(cb=>cb.addEventListener('change', _xlUpdateCount));
+    _xlUpdateCount();
+  },50);
+}
+
+function _xlSelectAll(checked){
+  document.querySelectorAll('.xl-co-chk').forEach(cb=>cb.checked=checked);
+  _xlUpdateCount();
+}
+function _xlSelectOnlyData(){
+  document.querySelectorAll('.xl-co-chk').forEach(cb=>{
+    const co = COMPANIES.find(c=>c.id===parseInt(cb.value));
+    cb.checked = !!(co && (co.studentsRegistered.length>0 || co.studentsSelected.length>0));
+  });
+  _xlUpdateCount();
+}
+function _xlUpdateCount(){
+  const n = document.querySelectorAll('.xl-co-chk:checked').length;
+  const el = document.getElementById('xl-sel-count');
+  if(el) el.textContent = `${n} selected`;
+}
+function _xlFilterSearch(q){
+  const lq = q.toLowerCase();
+  document.querySelectorAll('#xl-co-list label').forEach(lbl=>{
+    const name = lbl.querySelector('div div')?.textContent||'';
+    lbl.style.display = name.toLowerCase().includes(lq) ? '' : 'none';
+  });
 }
 
 function _runGenerateAllExcel(){
@@ -7383,6 +7460,9 @@ async function _excelBuildSheet(wb, co, students, listType){
 }
 
 async function _runMasterExcel(){
+  const checkedIds = [...document.querySelectorAll('.xl-co-chk:checked')].map(cb=>parseInt(cb.value));
+  if(!checkedIds.length){ toast('Select at least one company','info'); return; }
+
   const statusEl = document.getElementById('xl-gen-status');
   if(statusEl) statusEl.style.display='block';
   try{
@@ -7391,7 +7471,7 @@ async function _runMasterExcel(){
     const wb = new ExcelJS.Workbook();
     wb.creator='VGI CDC'; wb.created=new Date(); wb.modified=new Date();
     let tabCount=0;
-    const companies=COMPANIES.filter(c=>c.studentsRegistered.length||c.studentsSelected.length);
+    const companies=COMPANIES.filter(c=>checkedIds.includes(c.id) && (c.studentsRegistered.length||c.studentsSelected.length));
     for(const co of companies){
       if(statusEl) statusEl.innerHTML=`Building <strong>${xe(co.name)}</strong>…`;
       await _excelBuildSheet(wb, co, co.studentsRegistered, 'Registered Students');
@@ -7454,6 +7534,9 @@ async function _resetCircularUrls(){
 }
 
 async function _startGenerateAll(){
+  /* Capture selected company IDs BEFORE closing the modal (checkboxes get wiped on close) */
+  const checkedIds = [...document.querySelectorAll('.circ-co-chk:checked')].map(cb=>parseInt(cb.value));
+
   closeModal();
   await new Promise(r=>setTimeout(r,100)); /* Let modal close */
 
@@ -7463,12 +7546,13 @@ async function _startGenerateAll(){
 
   const today = new Date().toISOString().split('T')[0];
   const eligible = COMPANIES.filter(c => {
+    if(!checkedIds.includes(c.id)) return false;
     const circ = CIRCULAR_DATA[c.name.toLowerCase()] || {};
     return circ.about && circ.position && circ.ctc && circ.selection;
   });
 
   if(!eligible.length){
-    toast('No companies ready — fill CIRCULAR_DATA sheet first','error'); return;
+    toast('No companies selected — check at least one company to generate','error'); return;
   }
 
   /* ── Progress modal ── */
