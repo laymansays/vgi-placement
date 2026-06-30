@@ -927,6 +927,23 @@ function _checkWebapp(){
 let COMPANIES     = [];   // Built from config sheet
 let ADMIN_DATA    = {};   // Keyed by company name, from Admin Data tab
 let CIRCULAR_DATA = {};   // Keyed by company name, from CIRCULAR_DATA tab
+
+/* Fuzzy lookup — exact match first, then normalised (strips spaces, dashes, punctuation, roman numeral suffixes) */
+function _normCoKey(n){
+  return String(n||'')
+    .toLowerCase()
+    .replace(/[-–—]\s*(ii|iii|iv|v|2|3|4|5)\b/g, '') /* strip " - II", " - 2" etc suffixes */
+    .replace(/[^a-z0-9]/g, '');                       /* strip all remaining punctuation/spaces */
+}
+function getAdminData(companyName){
+  const exact = ADMIN_DATA[companyName.toLowerCase()];
+  if(exact) return exact;
+  const target = _normCoKey(companyName);
+  for(const key in ADMIN_DATA){
+    if(_normCoKey(key) === target) return ADMIN_DATA[key];
+  }
+  return {};
+}
 let JOB_SEEKERS  = [];   // Students looking for jobs — from JOB_SEEKERS tab
 let STUDENT_DB   = {};   // Phone lookup map: normEmail→phone, normName→phone
 let view        = 'home';
@@ -6621,8 +6638,10 @@ async function _generateReportsPreview(){
     isFirst = false;
 
     /* Pull all details from ADMIN_DATA */
-    const ad    = ADMIN_DATA[co.name.toLowerCase()]||{};
-    const roles = (co.roles&&co.roles.length)?co.roles.join(', '):'—';
+    const ad    = getAdminData(co.name);
+    const roles = (co.roles&&co.roles.length) ? co.roles.join(', ')
+                : (ad.roles&&ad.roles.length) ? ad.roles.join(', ')
+                : '—';
     const sel   = co.studentsSelected.length;
     const att   = co.studentsInterviewed.length;
     const DATE  = new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
@@ -6800,7 +6819,7 @@ async function _buildPlacementReportDoc(co, banner, includeGrid){
   const roles = (co.roles&&co.roles.length) ? co.roles.join(', ') : '—';
   const sel   = co.studentsSelected.length;
   const att   = co.studentsInterviewed.length;
-  const ad    = ADMIN_DATA[co.name.toLowerCase()]||{};
+  const ad    = getAdminData(co.name);
 
   /* ── PAGE 1 ── */
   let y = _drawLetterhead(doc, banner); /* reuse existing letterhead drawer */
@@ -7201,7 +7220,7 @@ async function _runMasterReportPDF(printMode){
     const roles  = (co.roles&&co.roles.length)?co.roles.join(', '):'—';
     const sel    = co.studentsSelected.length;
     const att    = co.studentsInterviewed.length;
-    const ad     = ADMIN_DATA[co.name.toLowerCase()]||{};
+    const ad     = getAdminData(co.name);
     const purple =[87,11,84], black=[0,0,0], gray=[100,100,100];
     const DATE   = new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
 
