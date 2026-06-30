@@ -1084,15 +1084,34 @@ async function fetchConfigHTMLLinks(sheetId){
 ════════════════════════════════════════════════════ */
 function parseCSV(csv){
   const rows=[];
-  let cur='',inQ=false,row=[];
+  let cur='', inQ=false, row=[], atFieldStart=true;
   for(let i=0;i<csv.length;i++){
     const ch=csv[i];
-    if(ch==='"'){if(inQ&&csv[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
-    else if(ch===','&&!inQ){row.push(cur.trim());cur='';}
-    else if((ch==='\n'||ch==='\r')&&!inQ){if(ch==='\r'&&csv[i+1]==='\n')i++;row.push(cur.trim());rows.push(row);row=[];cur='';}
-    else cur+=ch;
+    if(inQ){
+      /* Inside a quoted field: only a quote character is special */
+      if(ch==='"'){
+        if(csv[i+1]==='"'){ cur+='"'; i++; }      /* escaped quote */
+        else { inQ=false; }                        /* closing quote */
+      } else {
+        cur+=ch;
+      }
+    } else if(ch==='"' && atFieldStart){
+      /* Quote only opens a quoted field if it's the FIRST char of this field —
+         prevents a stray mid-field " (e.g. inside a bullet list) from
+         corrupting quote-tracking for the rest of the file. */
+      inQ=true;
+      atFieldStart=false;
+    } else if(ch===','){
+      row.push(cur.trim()); cur=''; atFieldStart=true;
+    } else if(ch==='\n'||ch==='\r'){
+      if(ch==='\r'&&csv[i+1]==='\n') i++;
+      row.push(cur.trim()); rows.push(row); row=[]; cur=''; atFieldStart=true;
+    } else {
+      cur+=ch;
+      atFieldStart=false;
+    }
   }
-  if(cur||row.length) {row.push(cur.trim());rows.push(row);}
+  if(cur||row.length){ row.push(cur.trim()); rows.push(row); }
   return rows.filter(r=>r.some(c=>c));
 }
 
