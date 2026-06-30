@@ -1630,7 +1630,8 @@ function renderAdminBar(){
   const r=document.getElementById('admin-bar');
   if(!adminMode){ r.innerHTML=''; }
   else {
-    r.innerHTML=`<div class="admin-bar"><span>🛡️ Admin Mode active</span><div class="admin-bar-actions"><button class="btn btn-admin-outline btn-sm" id="ab-circular">📄 Circular</button><button class="btn btn-admin-outline btn-sm" id="ab-repo">📁 Repository</button><button class="btn btn-admin btn-sm" id="ab-gen-all" style="background:linear-gradient(135deg,#6D0E6A,#3B1A8A);border-color:#6D0E6A;">🔄 Generate All Circulars</button><button class="btn btn-admin btn-sm" id="ab-gen-reports" style="background:linear-gradient(135deg,#1e3a5f,#1e40af);border-color:#1e3a5f;">📊 Generate All Reports</button><button class="btn btn-admin btn-sm" id="ab-gen-excel" style="background:linear-gradient(135deg,#14532d,#15803d);border-color:#14532d;">📋 Generate All Excel Lists</button><button class="btn btn-admin btn-sm" id="ab-all-ol" style="background:linear-gradient(135deg,#0e4a6a,#0369a1);border-color:#0e4a6a;">📩 All Offer Letters</button><button class="btn btn-admin-outline btn-sm" id="ab-diag">🔍 Diagnostics</button><button class="btn btn-admin-outline btn-sm" id="ab-refresh">↺ Reload Config</button><button class="btn btn-admin-outline btn-sm" id="ab-exit">Exit Admin</button></div></div>`;
+    r.innerHTML=`<div class="admin-bar"><span>🛡️ Admin Mode active</span><div class="admin-bar-actions"><button class="btn btn-admin-outline btn-sm" id="ab-circular">📄 Circular</button><button class="btn btn-admin-outline btn-sm" id="ab-repo">📁 Repository</button><button class="btn btn-admin btn-sm" id="ab-master" style="background:linear-gradient(135deg,#7c2d12,#9a3412);border-color:#7c2d12;">🗂️ Master Placement Report</button><button class="btn btn-admin btn-sm" id="ab-gen-all" style="background:linear-gradient(135deg,#6D0E6A,#3B1A8A);border-color:#6D0E6A;">🔄 Generate All Circulars</button><button class="btn btn-admin btn-sm" id="ab-gen-reports" style="background:linear-gradient(135deg,#1e3a5f,#1e40af);border-color:#1e3a5f;">📊 Generate All Reports</button><button class="btn btn-admin btn-sm" id="ab-gen-excel" style="background:linear-gradient(135deg,#14532d,#15803d);border-color:#14532d;">📋 Generate All Excel Lists</button><button class="btn btn-admin btn-sm" id="ab-all-ol" style="background:linear-gradient(135deg,#0e4a6a,#0369a1);border-color:#0e4a6a;">📩 All Offer Letters</button><button class="btn btn-admin-outline btn-sm" id="ab-diag">🔍 Diagnostics</button><button class="btn btn-admin-outline btn-sm" id="ab-refresh">↺ Reload Config</button><button class="btn btn-admin-outline btn-sm" id="ab-exit">Exit Admin</button></div></div>`;
+    document.getElementById('ab-master').onclick=openMasterReportModal;
     document.getElementById('ab-circular').onclick=openCircularModal;
     document.getElementById('ab-repo').onclick=openCircularRepo;
     document.getElementById('ab-gen-all').onclick=generateAllCirculars;
@@ -1648,7 +1649,8 @@ function renderPCBar(){
   const r=document.getElementById('pc-bar');
   if(!r)return;
   if(!pcMode){ r.innerHTML=''; return; }
-  r.innerHTML=`<div class="pc-bar"><span>🔐 Placement Cell Mode active</span><span class="pc-bar-badge">CONFIDENTIAL</span><div class="pc-bar-actions"><button class="btn btn-admin-outline btn-sm" id="pc-circular">📄 Circular</button><button class="btn btn-admin-outline btn-sm" id="pc-repo">📁 Repository</button><button class="btn btn-admin-outline btn-sm" id="pc-gen-all" style="background:linear-gradient(135deg,rgba(109,14,106,0.7),rgba(59,26,138,0.7));border-color:rgba(109,14,106,0.8);">🔄 Generate All Circulars</button><button class="btn btn-admin-outline btn-sm" id="pc-gen-reports" style="background:linear-gradient(135deg,rgba(30,58,95,0.8),rgba(30,64,175,0.8));border-color:rgba(30,58,95,0.8);">📊 Generate All Reports</button><button class="btn btn-admin-outline btn-sm" id="pc-gen-excel" style="background:linear-gradient(135deg,rgba(20,83,45,0.8),rgba(21,128,61,0.8));border-color:rgba(20,83,45,0.8);">📋 Generate All Excel Lists</button><button class="btn btn-admin-outline btn-sm" id="pc-all-ol" style="background:linear-gradient(135deg,rgba(14,74,106,0.8),rgba(3,105,161,0.8));border-color:rgba(14,74,106,0.8);">📩 All Offer Letters</button><button onclick="exitPCMode()">Exit</button></div></div>`;
+  r.innerHTML=`<div class="pc-bar"><span>🔐 Placement Cell Mode active</span><span class="pc-bar-badge">CONFIDENTIAL</span><div class="pc-bar-actions"><button class="btn btn-admin-outline btn-sm" id="pc-circular">📄 Circular</button><button class="btn btn-admin-outline btn-sm" id="pc-repo">📁 Repository</button><button class="btn btn-admin-outline btn-sm" id="pc-master" style="background:linear-gradient(135deg,rgba(124,45,18,0.8),rgba(154,52,18,0.8));border-color:rgba(124,45,18,0.8);">🗂️ Master Placement Report</button><button class="btn btn-admin-outline btn-sm" id="pc-gen-all" style="background:linear-gradient(135deg,rgba(109,14,106,0.7),rgba(59,26,138,0.7));border-color:rgba(109,14,106,0.8);">🔄 Generate All Circulars</button><button class="btn btn-admin-outline btn-sm" id="pc-gen-reports" style="background:linear-gradient(135deg,rgba(30,58,95,0.8),rgba(30,64,175,0.8));border-color:rgba(30,58,95,0.8);">📊 Generate All Reports</button><button class="btn btn-admin-outline btn-sm" id="pc-gen-excel" style="background:linear-gradient(135deg,rgba(20,83,45,0.8),rgba(21,128,61,0.8));border-color:rgba(20,83,45,0.8);">📋 Generate All Excel Lists</button><button class="btn btn-admin-outline btn-sm" id="pc-all-ol" style="background:linear-gradient(135deg,rgba(14,74,106,0.8),rgba(3,105,161,0.8));border-color:rgba(14,74,106,0.8);">📩 All Offer Letters</button><button onclick="exitPCMode()">Exit</button></div></div>`;
+  document.getElementById('pc-master').onclick=openMasterReportModal;
   document.getElementById('pc-circular').onclick=openCircularModal;
   document.getElementById('pc-repo').onclick=openCircularRepo;
   document.getElementById('pc-gen-all').onclick=generateAllCirculars;
@@ -6577,6 +6579,396 @@ function _circSelectAll(checked){
    Banner header · Title · Key fields · Paragraphs ·
    Photo grid placeholder · Dual signatures
 ════════════════════════════════════════════════════ */
+
+/* ════════════════════════════════════════════════════
+   MASTER PLACEMENT REPORT
+   One table, four document-type checkboxes per company:
+   Circular · Registered List · Selected List · Report
+   "All" column ticks all four for that row in one click.
+   Generates 3 combined master documents in one run.
+════════════════════════════════════════════════════ */
+
+function openMasterReportModal(){
+  const rows = COMPANIES.map(co=>{
+    const circ    = CIRCULAR_DATA[co.name.toLowerCase()] || {};
+    const hasCirc = !!(circ.about && circ.position && circ.ctc && circ.selection);
+    const hasReg  = co.studentsRegistered.length > 0;
+    const hasSel  = co.studentsSelected.length > 0;
+    const hasRep  = hasSel; /* Report needs selected students */
+
+    return `<tr data-co="${co.id}" style="border-bottom:1px solid var(--border);">
+      <td style="padding:8px 10px;font-size:12.5px;font-weight:700;color:var(--text);white-space:nowrap;">${xe(co.name)}</td>
+      <td style="text-align:center;padding:8px 6px;">
+        <input type="checkbox" class="mr-chk mr-circ" data-id="${co.id}" ${hasCirc?'checked':''} ${!hasCirc?'disabled title="No circular data in CIRCULAR_DATA sheet"':''} style="width:16px;height:16px;accent-color:#9a3412;cursor:pointer;">
+      </td>
+      <td style="text-align:center;padding:8px 6px;">
+        <input type="checkbox" class="mr-chk mr-reg" data-id="${co.id}" ${hasReg?'checked':''} ${!hasReg?'disabled title="No registered students"':''} style="width:16px;height:16px;accent-color:#14532d;cursor:pointer;">
+      </td>
+      <td style="text-align:center;padding:8px 6px;">
+        <input type="checkbox" class="mr-chk mr-sel" data-id="${co.id}" ${hasSel?'checked':''} ${!hasSel?'disabled title="No selected students"':''} style="width:16px;height:16px;accent-color:#1e40af;cursor:pointer;">
+      </td>
+      <td style="text-align:center;padding:8px 6px;">
+        <input type="checkbox" class="mr-chk mr-rep" data-id="${co.id}" ${hasRep?'checked':''} ${!hasRep?'disabled title="No selected students for report"':''} style="width:16px;height:16px;accent-color:#7c2d12;cursor:pointer;">
+      </td>
+      <td style="text-align:center;padding:8px 6px;background:var(--bg2);">
+        <input type="checkbox" class="mr-all-row" data-id="${co.id}" ${hasCirc&&hasReg&&hasSel&&hasRep?'checked':''} onclick="_mrToggleRow(${co.id},this.checked)" style="width:17px;height:17px;accent-color:#7c2d12;cursor:pointer;">
+      </td>
+    </tr>`;
+  }).join('');
+
+  openModalWide('🗂️ Master Placement Report',
+    `<div style="font-size:12px;color:var(--text3);margin-bottom:12px;">
+      Select which documents to include per company. Disabled checkboxes mean that company is missing the required data for that document type.
+      Use the header checkboxes to select/deselect an entire column, or the <strong>All</strong> column to toggle a whole row at once.
+    </div>
+    <div style="max-height:420px;overflow:auto;border:1.5px solid var(--border);border-radius:10px;">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead style="position:sticky;top:0;background:var(--bg2);z-index:1;">
+          <tr style="border-bottom:2px solid var(--border);">
+            <th style="padding:9px 10px;text-align:left;font-size:10px;font-weight:800;color:var(--text4);letter-spacing:.05em;text-transform:uppercase;">Company Name</th>
+            <th style="padding:9px 6px;text-align:center;font-size:10px;font-weight:800;color:#9a3412;letter-spacing:.04em;text-transform:uppercase;">
+              📄 Circular<br><input type="checkbox" onclick="_mrToggleCol('mr-circ',this.checked)" checked style="width:14px;height:14px;accent-color:#9a3412;cursor:pointer;margin-top:4px;">
+            </th>
+            <th style="padding:9px 6px;text-align:center;font-size:10px;font-weight:800;color:#14532d;letter-spacing:.04em;text-transform:uppercase;">
+              👥 Reg. List<br><input type="checkbox" onclick="_mrToggleCol('mr-reg',this.checked)" checked style="width:14px;height:14px;accent-color:#14532d;cursor:pointer;margin-top:4px;">
+            </th>
+            <th style="padding:9px 6px;text-align:center;font-size:10px;font-weight:800;color:#1e40af;letter-spacing:.04em;text-transform:uppercase;">
+              ✅ Sel. List<br><input type="checkbox" onclick="_mrToggleCol('mr-sel',this.checked)" checked style="width:14px;height:14px;accent-color:#1e40af;cursor:pointer;margin-top:4px;">
+            </th>
+            <th style="padding:9px 6px;text-align:center;font-size:10px;font-weight:800;color:#7c2d12;letter-spacing:.04em;text-transform:uppercase;">
+              📊 Report<br><input type="checkbox" onclick="_mrToggleCol('mr-rep',this.checked)" checked style="width:14px;height:14px;accent-color:#7c2d12;cursor:pointer;margin-top:4px;">
+            </th>
+            <th style="padding:9px 6px;text-align:center;font-size:10px;font-weight:800;color:var(--text);letter-spacing:.04em;text-transform:uppercase;background:var(--bg3,#f1f5f9);">
+              🗂️ All<br><input type="checkbox" onclick="_mrToggleAllColumn(this.checked)" checked style="width:15px;height:15px;accent-color:#7c2d12;cursor:pointer;margin-top:4px;">
+            </th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+
+    <div id="mr-gen-status" style="display:none;margin-top:14px;padding:10px 14px;background:var(--bg2);border-radius:8px;border:1px solid var(--border);font-size:12px;color:var(--text3);"></div>`,
+
+    `<button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button>
+     <button class="btn btn-admin btn-sm" id="mr-gen-btn" onclick="_runMasterPlacementReport()" style="background:linear-gradient(135deg,#7c2d12,#9a3412);border-color:#7c2d12;">
+       🗂️ Generate Master Documents
+     </button>`
+  );
+}
+
+/* ── Toggle helpers ── */
+function _mrToggleCol(cls, checked){
+  document.querySelectorAll('.'+cls+':not(:disabled)').forEach(cb=>cb.checked=checked);
+  _mrSyncRowAllStates();
+}
+function _mrToggleRow(coId, checked){
+  document.querySelectorAll(`[data-co="${coId}"] .mr-chk:not(:disabled)`).forEach(cb=>cb.checked=checked);
+}
+function _mrToggleAllColumn(checked){
+  ['mr-circ','mr-reg','mr-sel','mr-rep'].forEach(cls=>_mrToggleCol(cls,checked));
+  document.querySelectorAll('.mr-all-row').forEach(cb=>cb.checked=checked);
+}
+function _mrSyncRowAllStates(){
+  document.querySelectorAll('tr[data-co]').forEach(tr=>{
+    const chks = [...tr.querySelectorAll('.mr-chk:not(:disabled)')];
+    const allRow = tr.querySelector('.mr-all-row');
+    if(allRow && chks.length) allRow.checked = chks.every(c=>c.checked);
+  });
+}
+
+/* ── Master generation: produces 3 combined documents ── */
+async function _runMasterPlacementReport(){
+  const btn = document.getElementById('mr-gen-btn');
+  const statusEl = document.getElementById('mr-gen-status');
+  if(btn){ btn.disabled=true; btn.textContent='Generating…'; }
+  if(statusEl) statusEl.style.display='block';
+
+  const circIds = [...document.querySelectorAll('.mr-circ:checked')].map(cb=>parseInt(cb.dataset.id));
+  const regIds  = [...document.querySelectorAll('.mr-reg:checked')].map(cb=>parseInt(cb.dataset.id));
+  const selIds  = [...document.querySelectorAll('.mr-sel:checked')].map(cb=>parseInt(cb.dataset.id));
+  const repIds  = [...document.querySelectorAll('.mr-rep:checked')].map(cb=>parseInt(cb.dataset.id));
+
+  if(!circIds.length && !regIds.length && !selIds.length && !repIds.length){
+    toast('Nothing selected — check at least one box','info');
+    if(btn){ btn.disabled=false; btn.textContent='🗂️ Generate Master Documents'; }
+    return;
+  }
+
+  const setStatus = msg => { if(statusEl) statusEl.innerHTML = msg; };
+  const results = [];
+
+  try{
+    /* ── 1. Master Circulars PDF ── */
+    if(circIds.length){
+      setStatus(`⏳ Building master circulars PDF (${circIds.length} companies)…`);
+      if(!window.jspdf) throw new Error('jsPDF not loaded');
+      const { logoData, sigData } = await _loadCircularImages();
+      const today = new Date().toISOString().split('T')[0];
+      const { jsPDF } = window.jspdf;
+      const sharedDoc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+      let firstPage = true;
+      for(const id of circIds){
+        const co = COMPANIES.find(c=>c.id===id); if(!co) continue;
+        const circ = CIRCULAR_DATA[co.name.toLowerCase()] || {};
+        const data = {
+          dateVal:today, company:co.name, roles:(co.roles||[]).join(', '),
+          about:circ.about||'', position:circ.position||'', education:circ.education||'',
+          location:circ.location||'', ctc:circ.ctc||'', selection:circ.selection||'',
+          benefits:circ.benefits||'', docs:circ.docs||'', culture:circ.culture||'',
+          regLink:circ.regLink||co.formUrl||'', lastDate:circ.lastDate||'',
+        };
+        if(!firstPage) sharedDoc.addPage();
+        firstPage = false;
+        _drawCircularOnto(sharedDoc, data, logoData, sigData);
+        await new Promise(r=>setTimeout(r,0));
+      }
+      results.push({label:'Master Circulars', doc:sharedDoc, filename:'VGI_Master_Circulars.pdf'});
+    }
+
+    /* ── 2. Master Excel (Reg + Sel tabs, only where checked) ── */
+    if(regIds.length || selIds.length){
+      setStatus(`⏳ Building master Excel (Reg: ${regIds.length}, Sel: ${selIds.length})…`);
+      await _loadExcelJS();
+      const wb = new ExcelJS.Workbook();
+      wb.creator='VGI CDC'; wb.created=new Date();
+      const allIds = [...new Set([...regIds, ...selIds])];
+      for(const id of allIds){
+        const co = COMPANIES.find(c=>c.id===id); if(!co) continue;
+        if(regIds.includes(id)) await _excelBuildSheet(wb, co, co.studentsRegistered, 'Registered Students');
+        if(selIds.includes(id)) await _excelBuildSheet(wb, co, co.studentsSelected, 'Selected Students');
+        await new Promise(r=>setTimeout(r,0));
+      }
+      const buffer = await wb.xlsx.writeBuffer();
+      const blob   = new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+      results.push({label:'Master Excel', blob, filename:'VGI_Master_Student_Lists.xlsx'});
+    }
+
+    /* ── 3. Master Placement Report PDF ── */
+    if(repIds.length){
+      setStatus(`⏳ Building master placement report (${repIds.length} companies)…`);
+      if(!window.jspdf) throw new Error('jsPDF not loaded');
+      const banner = await _loadDocBanner();
+      const { jsPDF } = window.jspdf;
+      const repDoc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+      const W=210, ML=18, MR=18, IW=174, pBot=278;
+      const black=[0,0,0], gray=[100,100,100];
+      let firstPage=true;
+      for(const id of repIds){
+        const co = COMPANIES.find(c=>c.id===id); if(!co) continue;
+        if(!firstPage) repDoc.addPage();
+        firstPage=false;
+
+        const ad    = getAdminData(co.name);
+        const roles = (co.roles&&co.roles.length) ? co.roles.join(', ')
+                    : (ad.roles&&ad.roles.length) ? ad.roles.join(', ') : '—';
+        const sel   = co.studentsSelected.length;
+        const att   = co.studentsInterviewed.length;
+        const DATE  = new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+        const driveDate = ad.driveDate ? new Date(ad.driveDate).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}) : DATE;
+
+        let y = _drawLetterhead(repDoc, banner);
+        y += 8;
+        repDoc.setFont('times','bold'); repDoc.setFontSize(15); repDoc.setTextColor(...black);
+        repDoc.text('PLACEMENT REPORT', W/2, y, {align:'center'});
+        const tw = repDoc.getTextWidth('PLACEMENT REPORT');
+        repDoc.setDrawColor(...black); repDoc.setLineWidth(0.5);
+        repDoc.line(W/2-tw/2, y+1.5, W/2+tw/2, y+1.5);
+        y += 12;
+
+        const fields = [
+          ['Company Name', co.name],
+          ['Mode of Drive', ad.interviewMode || co.interviewMode || '—'],
+          ['Job Role', roles],
+          ['Date of Drive', driveDate],
+          ['Number of Students Selected', String(sel)],
+        ];
+        const kW=70;
+        fields.forEach(([label,val])=>{
+          repDoc.setFont('times','bold'); repDoc.setFontSize(11); repDoc.setTextColor(...black);
+          repDoc.text(label+':', ML, y);
+          repDoc.setFont('times','normal');
+          const vLines = repDoc.splitTextToSize(val, IW-kW);
+          repDoc.text(vLines, ML+kW, y);
+          y += vLines.length*6+1;
+        });
+        y+=7;
+        repDoc.setDrawColor(...gray); repDoc.setLineWidth(0.3);
+        repDoc.line(ML,y-4,ML+IW,y-4);
+
+        const paras=[
+          `We are pleased to announce the successful completion of a campus recruitment drive conducted by "Company ${co.name}", a program aimed at providing structured internship opportunities for students to gain practical industry exposure.`,
+          `As part of this initiative, a total of ${sel} student${sel!==1?'s':''} were selected after a systematic selection process${att>0?`, which included screening of applications among ${att} attendees`:''}. The selection was carried out to identify students with strong learning skill, communication skills, and readiness for industry-oriented training.`,
+          `We congratulate the selected students on their achievement and thank Company ${co.name} for offering our students a valuable opportunity to enhance their professional skills and workplace experience. We also acknowledge the dedicated efforts of the Training and Placement Cell in facilitating and coordinating this internship drive successfully.`,
+        ];
+        repDoc.setFont('times','normal'); repDoc.setFontSize(11); repDoc.setTextColor(...black);
+        paras.forEach(para=>{
+          const lines = repDoc.splitTextToSize(para, IW);
+          if(y+lines.length*6.5+8>pBot){ repDoc.addPage(); y=_drawLetterhead(repDoc,banner)+8; }
+          repDoc.text(lines, ML, y, {align:'justify', maxWidth:IW});
+          y += lines.length*6.5+5;
+        });
+
+        const sigY = pBot - 30;
+        repDoc.setFont('times','normal'); repDoc.setFontSize(10); repDoc.setTextColor(...black);
+        repDoc.text('Placement Co-ordinator', ML, sigY);
+        repDoc.text('Vidyavahini First Grade & PG College', ML, sigY+5);
+        repDoc.text('Kuvempunagara, Tumkur', ML, sigY+10);
+        repDoc.setFont('times','bold');
+        repDoc.text('PRINCIPAL', W-MR, sigY, {align:'right'});
+        repDoc.setFont('times','normal');
+        repDoc.text('Vidyavahini First Grade College', W-MR, sigY+5, {align:'right'});
+        repDoc.text('Kuvempunagar, TUMKUR-572103', W-MR, sigY+10, {align:'right'});
+
+        await new Promise(r=>setTimeout(r,0));
+      }
+      results.push({label:'Master Report', doc:repDoc, filename:'VGI_Master_Placement_Report.pdf'});
+    }
+
+    /* ── Download all generated documents ── */
+    setStatus('⏳ Downloading files…');
+    for(const r of results){
+      if(r.doc){
+        r.doc.save(r.filename);
+      } else if(r.blob){
+        const url = URL.createObjectURL(r.blob);
+        const a = document.createElement('a');
+        a.href=url; a.download=r.filename; a.click();
+        setTimeout(()=>URL.revokeObjectURL(url),5000);
+      }
+      await new Promise(res=>setTimeout(res,400)); /* stagger downloads */
+    }
+
+    const summary = results.map(r=>`✅ ${r.label}`).join(' &nbsp; ');
+    setStatus(`<strong>Done!</strong> &nbsp; ${summary} &nbsp; — check your downloads folder.`);
+    toast(`${results.length} master document${results.length!==1?'s':''} downloaded`,'success','🗂️');
+    if(btn){ btn.textContent='✅ Done'; btn.style.background='var(--green)'; }
+
+  }catch(e){
+    setStatus('❌ Error: '+xe(e.message));
+    toast('Master report generation failed: '+e.message,'error');
+    console.error('[MasterPlacementReport]',e);
+    if(btn){ btn.disabled=false; btn.textContent='🗂️ Generate Master Documents'; }
+  }
+}
+
+/* ── Draw one circular directly onto a shared doc (no separate jsPDF instance) ── */
+function _drawCircularOnto(doc, data, logoData, sigData){
+  /* Reuse _buildCircularDoc's logic but draw onto the passed-in doc's current page
+     by temporarily building a standalone doc and re-running the same draw calls.
+     Simplest reliable approach: call _buildCircularDoc, then import its single page
+     by re-executing the same content drawing functions directly on `doc`. */
+  const { dateVal='', company='', roles='', about='', position='',
+          education='', location='', ctc='', selection='', benefits='',
+          docs='', culture='', regLink='', lastDate='' } = data;
+
+  let fmtD='';
+  try{ fmtD=new Date((dateVal||new Date().toISOString().split('T')[0])+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}); }catch(e){ fmtD=dateVal; }
+
+  const W=210,H=297,mL=13,mR=13,innerW=W-mL-mR;
+  const nR=0,nG=31,nB=95,rR=192,rG=0,rB=0;
+  const cPad=3,col1=46,col2=innerW-8-col1,tX=mL+4,pBot=H-mL-5;
+
+  function drawFrame(d){
+    d.setDrawColor(nR,nG,nB); d.setLineWidth(0.8);
+    d.rect(mL, mL, innerW, H-2*mL);
+    d.setLineWidth(0.6);
+    d.rect(mL, mL, innerW, 24);
+    d.setLineWidth(0.4);
+    d.rect(mL+1.5, mL+1.5, 21, 21);
+    if(logoData){ try{ d.addImage(logoData, 'JPEG', mL+2, mL+2, 20, 20); }catch(e){} }
+    const textAreaLeft = mL + 24;
+    const textCenterX = (textAreaLeft + mL + innerW) / 2;
+    d.setFont('times','bold'); d.setFontSize(13); d.setTextColor(nR,nG,nB);
+    d.text('Vidyavahini Group of Institutions, Tumakuru', textCenterX, mL+9, {align:'center'});
+    d.setFontSize(12);
+    d.text('Career Development Center', textCenterX, mL+17, {align:'center'});
+  }
+
+  function clean(v){ return (v||'').split('\n').map(l=>l.replace(/\s{2,}/g,' ').trim()).filter(l=>l).join('\n'); }
+  function countLines(txt, maxW){ doc.setFontSize(10); return clean(txt).split('\n').reduce((sum,seg)=>sum+doc.splitTextToSize(seg||' ',maxW).length,0); }
+  function cellH(txt,w){ return Math.max(countLines(txt,w-cPad*2)*5+cPad*2,10); }
+
+  function drawJustifiedLine(d,line,x,y,maxW){
+    const words=line.split(' ').filter(Boolean);
+    if(words.length<=1){ d.text(line,x,y); return; }
+    const totalWordW=words.reduce((s,w)=>s+d.getTextWidth(w),0);
+    const gap=(maxW-totalWordW)/(words.length-1);
+    let cx=x; words.forEach(w=>{ d.text(w,cx,y); cx+=d.getTextWidth(w)+gap; });
+  }
+  function drawJustifiedBlock(d,txt,x,y,maxW,lineH){
+    d.setFontSize(10);
+    const lines=d.splitTextToSize(clean(txt),maxW);
+    lines.forEach((line,i)=>{ const isLast=i===lines.length-1; if(isLast) d.text(line,x,y+i*lineH); else drawJustifiedLine(d,line,x,y+i*lineH,maxW); });
+  }
+
+  function drawRow(d,x,y,w1,w2,lbl,val,justify){
+    const cleanedVal=clean(val);
+    const rh=Math.max(cellH(lbl,w1),cellH(cleanedVal,w2));
+    d.setDrawColor(nR,nG,nB); d.setLineWidth(0.3);
+    d.rect(x,y,w1,rh); d.rect(x+w1,y,w2,rh);
+    d.setFont('times','bold'); d.setFontSize(10); d.setTextColor(rR,rG,rB);
+    d.text(d.splitTextToSize(lbl,w1-cPad*2),x+cPad,y+cPad+3.5);
+    d.setFont('times','normal'); d.setTextColor(0,0,0);
+    if(justify&&cleanedVal){ drawJustifiedBlock(d,cleanedVal,x+w1+cPad,y+cPad+3.5,w2-cPad*2,5); }
+    else { const segs=cleanedVal.split('\n'); let ly=y+cPad+3.5; segs.forEach(seg=>{ const wrapped=d.splitTextToSize(seg||' ',w2-cPad*2); d.text(wrapped,x+w1+cPad,ly); ly+=wrapped.length*5; }); }
+    return rh;
+  }
+
+  drawFrame(doc); let y=mL+24+7;
+  doc.setFont('times','normal'); doc.setFontSize(10); doc.setTextColor(0,0,0);
+  doc.text('Ref: CDC / VGI / 2025',mL+4,y);
+  doc.text(fmtD,W-mR-4,y,{align:'right'}); y+=8;
+  doc.setFont('times','bold'); doc.setFontSize(14); doc.setTextColor(nR,nG,nB);
+  doc.text('CIRCULAR',W/2,y,{align:'center'}); y+=12;
+  doc.setFont('times','bold'); doc.setFontSize(20); doc.setTextColor(rR,rG,rB);
+  const cL=doc.splitTextToSize(company,innerW-8);
+  doc.text(cL,W/2,y,{align:'center'}); y+=cL.length*8;
+  doc.setFont('times','bold'); doc.setFontSize(11); doc.setTextColor(nR,nG,nB);
+  const roL=doc.splitTextToSize(roles,innerW-8);
+  doc.text(roL,W/2,y,{align:'center'}); y+=roL.length*5+2;
+  doc.setDrawColor(nR,nG,nB); doc.setLineWidth(0.6);
+  doc.line(mL+4,y,mL+innerW-4,y); y+=4;
+
+  const isEmpty=v=>!v||/^\s*[-–]\s*$|^n\/?a$/i.test(v.trim());
+  const allRows=[
+    ['About the company',about,true],['Position',position,false],
+    ['Education',education,false],['Working Location',location,false],
+    ['CTC Details',ctc,false],['Selection Process',selection,false],
+    ['Benefits',benefits,false],['Documents Required',docs,false],
+    ['Work Culture',culture,false],
+  ].filter(([,vl])=>!isEmpty(vl));
+
+  for(const [lb,vl,justify] of allRows){
+    const rh=Math.max(cellH(lb,col1),cellH(clean(vl),col2));
+    if(y+rh>pBot){ doc.addPage(); drawFrame(doc); y=mL+24+7; }
+    y+=drawRow(doc,tX,y,col1,col2,lb,vl,justify);
+  }
+
+  y+=6;
+  const showLink=!isEmpty(regLink), showLDate=!isEmpty(lastDate);
+  if(y + (showLink?7:0) + (showLDate?7:0) + 40 > pBot){ doc.addPage(); drawFrame(doc); y=mL+24+7; }
+  if(showLink){
+    doc.setFont('times','bold'); doc.setFontSize(10.5); doc.setTextColor(0,0,0);
+    const lw=doc.getTextWidth('Registration Link: ');
+    doc.text('Registration Link: ',tX,y);
+    doc.setFont('times','normal'); doc.setTextColor(30,73,125);
+    doc.text(regLink,tX+lw,y); doc.setTextColor(0,0,0); y+=7;
+  }
+  if(showLDate){
+    doc.setFont('times','bold'); doc.setFontSize(10.5); doc.setTextColor(0,0,0);
+    const lw2=doc.getTextWidth('Last date to register: ');
+    doc.text('Last date to register: ',tX,y);
+    doc.setFont('times','normal'); doc.text(lastDate,tX+lw2,y); y+=10;
+  }
+
+  const sX=W-mR-56, sY=y+4;
+  if(sigData){ try{ doc.addImage(sigData,'JPEG',sX,sY,40,16); }catch(e){} }
+  doc.setFont('times','bold'); doc.setFontSize(10.5); doc.setTextColor(0,0,0);
+  doc.text('Dr. Prasanna Kumar T M',sX,sY+19);
+  doc.setFont('times','normal'); doc.setFontSize(10);
+  doc.text('Head – CDC',sX,sY+24);
+  doc.text('Vidyavahini Samsthe, Tumakuru',sX,sY+29);
+}
 
 function openGenerateAllReportsModal(){
   if(!window.jspdf){ toast('PDF library not loaded — please wait','error'); return; }
