@@ -7095,7 +7095,7 @@ function _xlHeaderRow(coName, listType){
 }
 
 function _xlColHeaders(){
-  return ['Sl No','Name','Email','Phone','Course / Branch'];
+  return ['Sl No','Name','Email','Phone'];
 }
 
 function _xlStudentRow(s, idx){
@@ -7104,21 +7104,19 @@ function _xlStudentRow(s, idx){
     s.name  || '—',
     s.email || '—',
     s.phone || '—',
-    s.class || '—',
   ];
 }
 
 /* Apply full formatting: bold/center headers + all borders on every cell */
 function _xlApplyStyles(ws, coName, listType, studentCount){
-  const COLS = 5;
+  const COLS = 4;
   const totalRows = 2 + studentCount; /* header row + col-header row + data rows */
 
   ws['!cols'] = [
     {wch:6},   /* Sl No */
-    {wch:28},  /* Name */
-    {wch:32},  /* Email */
-    {wch:14},  /* Phone */
-    {wch:20},  /* Course */
+    {wch:30},  /* Name */
+    {wch:34},  /* Email */
+    {wch:16},  /* Phone */
   ];
 
   /* Merge company name + list type across all columns (row 1) */
@@ -7416,11 +7414,11 @@ async function _excelBuildSheet(wb, co, students, listType){
   const tabName = (short.slice(0,22)+'_'+(listType==='Registered Students'?'Reg':'Sel')).slice(0,31);
   const ws      = wb.addWorksheet(tabName);
   const PURPLE  = '570B54', PURPLE_LT='F5EAF5', WHITE='FFFFFF';
-  const COLS    = 5;
+  const COLS    = 4;
   const thin    = {style:'thin',color:{argb:'000000'}};
   const allBord = {top:thin,bottom:thin,left:thin,right:thin};
 
-  ws.columns = [{width:7},{width:28},{width:34},{width:15},{width:22}];
+  ws.columns = [{width:7},{width:30},{width:36},{width:16}];
 
   /* Row 1+2: Logo | Institution name */
   const logoId = wb.addImage({base64:_VGI_LOGO_B64, extension:'jpeg'});
@@ -7451,7 +7449,7 @@ async function _excelBuildSheet(wb, co, students, listType){
   ws.getRow(3).height = 22;
 
   /* Row 4: Column headers */
-  const hdrs = ['Sl No','Name','Email','Phone','Course / Branch'];
+  const hdrs = ['Sl No','Name','Email','Phone'];
   ws.getRow(4).height = 18;
   hdrs.forEach((h,ci)=>{
     const cell     = ws.getCell(4,ci+1);
@@ -7465,7 +7463,7 @@ async function _excelBuildSheet(wb, co, students, listType){
   /* Data rows from row 5 */
   students.forEach((s,idx)=>{
     const rn   = 5+idx;
-    const vals = [idx+1, s.name||'—', s.email||'—', s.phone||'—', s.class||'—'];
+    const vals = [idx+1, s.name||'—', s.email||'—', s.phone||'—'];
     ws.getRow(rn).height = 15;
     vals.forEach((v,ci)=>{
       const cell     = ws.getCell(rn,ci+1);
