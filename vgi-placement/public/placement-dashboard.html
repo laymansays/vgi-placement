@@ -6911,11 +6911,17 @@ function _drawCoverPage(doc){
   doc.setFontSize(26);
   doc.text('2025-26', W/2, 145, {align:'center'});
 
-  /* VG monogram — draw as styled text since we don't have a separate logo asset for this exact mark */
-  doc.setFont('times','bold'); doc.setFontSize(70); doc.setTextColor(...gray);
-  doc.text('V', W/2-14, 230, {align:'center'});
-  doc.setFontSize(58);
-  doc.text('G', W/2+16, 215, {align:'center'});
+  /* VG monogram — actual institution logo image, centered */
+  if(typeof _CIRC_LOGO !== 'undefined' && _CIRC_LOGO){
+    try{
+      const logoW = 50, logoH = 50;
+      doc.addImage(_CIRC_LOGO, 'PNG', W/2 - logoW/2, 190, logoW, logoH);
+    }catch(e){
+      /* Fallback to text if image fails */
+      doc.setFont('times','bold'); doc.setFontSize(60); doc.setTextColor(...gray);
+      doc.text('VG', W/2, 230, {align:'center'});
+    }
+  }
 }
 
 /* ── Page 1: full letterhead + "Placement Cell 2025-26" title ── */
