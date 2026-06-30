@@ -6617,7 +6617,38 @@ function openMasterReportModal(){
   }).join('');
 
   openModalWide('🗂️ Master Placement Report',
-    `<div style="font-size:12px;color:var(--text3);margin-bottom:12px;">
+    `<div style="padding:12px 14px;background:#f9f5f9;border-radius:10px;border:1.5px solid #d3b6d2;margin-bottom:14px;">
+      <div style="font-size:11px;font-weight:800;color:#570B54;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">📑 Front Matter — prepended to Master Report PDF</div>
+      <div style="display:flex;gap:18px;flex-wrap:wrap;">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12.5px;color:var(--text);font-weight:600;">
+          <input type="checkbox" id="mr-cover-chk" checked style="width:16px;height:16px;accent-color:#570B54;cursor:pointer;">
+          Cover Page <span style="font-size:10.5px;color:var(--text3);font-weight:400;">("PLACEMENT CELL 2025-26" + VGI logo)</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12.5px;color:var(--text);font-weight:600;">
+          <input type="checkbox" id="mr-page1-chk" checked style="width:16px;height:16px;accent-color:#570B54;cursor:pointer;">
+          Title Page <span style="font-size:10.5px;color:var(--text3);font-weight:400;">(VGI letterhead + "Placement Cell 2025-26")</span>
+        </label>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+      <label style="display:flex;align-items:center;gap:9px;padding:10px 14px;border:1.5px solid #fde68a;border-radius:10px;background:#fffbeb;cursor:pointer;flex:1;min-width:220px;">
+        <input type="checkbox" id="mr-cover" checked style="width:16px;height:16px;accent-color:#92400e;cursor:pointer;">
+        <div>
+          <div style="font-size:12.5px;font-weight:700;color:#92400e;">📘 Include Cover Page</div>
+          <div style="font-size:10.5px;color:#a16207;">"PLACEMENT CELL 2025-26" bordered title page</div>
+        </div>
+      </label>
+      <label style="display:flex;align-items:center;gap:9px;padding:10px 14px;border:1.5px solid #fde68a;border-radius:10px;background:#fffbeb;cursor:pointer;flex:1;min-width:220px;">
+        <input type="checkbox" id="mr-page1" checked style="width:16px;height:16px;accent-color:#92400e;cursor:pointer;">
+        <div>
+          <div style="font-size:12.5px;font-weight:700;color:#92400e;">📄 Include Page 1 (Title Page)</div>
+          <div style="font-size:10.5px;color:#a16207;">Institution letterhead + "Placement Cell 2025-26"</div>
+        </div>
+      </label>
+    </div>
+
+    <div style="font-size:12px;color:var(--text3);margin-bottom:12px;">
       Select which documents to include per company. Disabled checkboxes mean that company is missing the required data for that document type.
       Use the header checkboxes to select/deselect an entire column, or the <strong>All</strong> column to toggle a whole row at once.
     </div>
@@ -6687,8 +6718,10 @@ async function _runMasterPlacementReport(){
   const regIds  = [...document.querySelectorAll('.mr-reg:checked')].map(cb=>parseInt(cb.dataset.id));
   const selIds  = [...document.querySelectorAll('.mr-sel:checked')].map(cb=>parseInt(cb.dataset.id));
   const repIds  = [...document.querySelectorAll('.mr-rep:checked')].map(cb=>parseInt(cb.dataset.id));
+  const wantCoverChk = document.getElementById('mr-cover')?.checked;
+  const wantPage1Chk = document.getElementById('mr-page1')?.checked;
 
-  if(!circIds.length && !regIds.length && !selIds.length && !repIds.length){
+  if(!circIds.length && !regIds.length && !selIds.length && !repIds.length && !wantCoverChk && !wantPage1Chk){
     toast('Nothing selected — check at least one box','info');
     if(btn){ btn.disabled=false; btn.textContent='🗂️ Generate Master Documents'; }
     return;
@@ -6744,8 +6777,12 @@ async function _runMasterPlacementReport(){
     }
 
     /* ── 3. Master Placement Report PDF ── */
-    if(repIds.length){
-      setStatus(`⏳ Building master placement report (${repIds.length} companies)…`);
+    /* ── 3. Master Placement Report PDF (with optional Cover + Page 1) ── */
+    const wantCover = document.getElementById('mr-cover')?.checked;
+    const wantPage1 = document.getElementById('mr-page1')?.checked;
+
+    if(repIds.length || wantCover || wantPage1){
+      setStatus(`⏳ Building master placement report${wantCover||wantPage1?' (with cover/title pages)':''} (${repIds.length} companies)…`);
       if(!window.jspdf) throw new Error('jsPDF not loaded');
       const banner = await _loadDocBanner();
       const { jsPDF } = window.jspdf;
@@ -6753,6 +6790,10 @@ async function _runMasterPlacementReport(){
       const W=210, ML=18, MR=18, IW=174, pBot=278;
       const black=[0,0,0], gray=[100,100,100];
       let firstPage=true;
+
+      if(wantCover){ _drawCoverPage(repDoc); firstPage=false; }
+      if(wantPage1){ if(!firstPage) repDoc.addPage(); _drawTitlePage(repDoc, banner); firstPage=false; }
+
       for(const id of repIds){
         const co = COMPANIES.find(c=>c.id===id); if(!co) continue;
         if(!firstPage) repDoc.addPage();
@@ -6852,6 +6893,42 @@ async function _runMasterPlacementReport(){
 }
 
 /* ── Draw one circular directly onto a shared doc (no separate jsPDF instance) ── */
+/* ── Cover Page: bordered "PLACEMENT CELL 2025-26" with VG monogram ── */
+function _drawCoverPage(doc){
+  const W=210, H=297;
+  const marginOuter = 18;
+  const black=[60,60,60], gray=[90,90,90];
+
+  /* Outer border frame */
+  doc.setDrawColor(...gray); doc.setLineWidth(0.8);
+  doc.rect(marginOuter, marginOuter+10, W-marginOuter*2, H-marginOuter*2-20);
+
+  /* Title */
+  doc.setFont('helvetica','bold'); doc.setFontSize(34); doc.setTextColor(...black);
+  doc.text('PLACEMENT CELL', W/2, 115, {align:'center'});
+
+  /* Year */
+  doc.setFontSize(26);
+  doc.text('2025-26', W/2, 145, {align:'center'});
+
+  /* VG monogram — draw as styled text since we don't have a separate logo asset for this exact mark */
+  doc.setFont('times','bold'); doc.setFontSize(70); doc.setTextColor(...gray);
+  doc.text('V', W/2-14, 230, {align:'center'});
+  doc.setFontSize(58);
+  doc.text('G', W/2+16, 215, {align:'center'});
+}
+
+/* ── Page 1: full letterhead + "Placement Cell 2025-26" title ── */
+function _drawTitlePage(doc, banner){
+  const W=210;
+  _drawLetterhead(doc, banner);
+
+  doc.setFont('helvetica','normal'); doc.setFontSize(26); doc.setTextColor(60,60,60);
+  doc.text('Placement Cell', W/2, 140, {align:'center'});
+  doc.setFontSize(20);
+  doc.text('2025- 26', W/2, 158, {align:'center'});
+}
+
 function _drawCircularOnto(doc, data, logoData, sigData){
   /* Reuse _buildCircularDoc's logic but draw onto the passed-in doc's current page
      by temporarily building a standalone doc and re-running the same draw calls.
