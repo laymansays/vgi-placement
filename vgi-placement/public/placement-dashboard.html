@@ -1428,10 +1428,13 @@ async function loadStudents(company, force=false){
     company._loading = false;
     company._lastFetched = Date.now();
 
-    // Enrich phone from STUDENT DB for this company's students
+    // Enrich phone AND email from STUDENT DB for this company's students
     if(Object.keys(STUDENT_DB).length){
       ['studentsRegistered','studentsInterviewed','studentsSelected'].forEach(key=>{
-        (company[key]||[]).forEach(s=>{ if(!s.phone) s.phone = dbPhone(s); });
+        (company[key]||[]).forEach(s=>{
+          if(!s.phone) s.phone = dbPhone(s);
+          if(!s.email) s.email = dbEmail(s);
+        });
       });
     }
   } catch(err) {
@@ -4893,11 +4896,18 @@ function parseStudentDB(csv){
   const map = {};
   rows.slice(1).forEach(r => {
     const phone = (r[iPhone]||'').toString().trim();
-    if(!phone) return;
     const name  = (r[iName] ||'').trim();
     const email = (r[iEmail]||'').trim();
-    if(email) map[_normKey(email)] = phone;
-    if(name)  map[_normKey(name)]  = phone;
+    /* phone lookup: normEmail/normName → phone (existing) */
+    if(phone){
+      if(email) map[_normKey(email)] = phone;
+      if(name)  map[_normKey(name)]  = phone;
+    }
+    /* email lookup: normName/normPhone → email (new) */
+    if(email){
+      if(name)  map['_em_'+_normKey(name)]  = email;
+      if(phone) map['_em_'+_normKey(phone)] = email;
+    }
   });
   return map;
 }
@@ -4905,6 +4915,22 @@ function parseStudentDB(csv){
 /** Normalise a string to a lookup key (email-safe) */
 function _normKey(s){
   return (s||'').toLowerCase().replace(/[^a-z0-9@.]/g,' ').replace(/\s+/g,' ').trim();
+}
+
+/** Look up a student's email from STUDENT_DB */
+function dbEmail(s){
+  if(!Object.keys(STUDENT_DB).length) return '';
+  /* Try by name */
+  if(s.name){
+    const e = STUDENT_DB['_em_'+_normKey(s.name)];
+    if(e) return e;
+  }
+  /* Try by phone */
+  if(s.phone){
+    const e = STUDENT_DB['_em_'+_normKey(s.phone)];
+    if(e) return e;
+  }
+  return '';
 }
 
 /* ── Name normalisation for robust matching ────────────────────────
@@ -7520,7 +7546,8 @@ function openGenerateAllExcelModal(){
     <div id="xl-gen-status" style="display:none;padding:10px 14px;background:var(--bg2);border-radius:8px;border:1px solid var(--border);font-size:12px;color:var(--text3);"></div>`,
 
     `<button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button>
-     <button class="btn btn-admin btn-sm" style="background:linear-gradient(135deg,#14532d,#15803d);border-color:#14532d;" onclick="_runMasterExcel()">📋 Download Master Excel</button>`
+     <button class="btn btn-outline btn-sm" style="color:#1e40af;border-color:#bfdbfe;" onclick="_syncEmailsThenExcel()" title="Reload all student lists from Google Sheets to pick up latest emails, then generate Excel">🔄 Sync &amp; Generate</button>
+     <button class="btn btn-admin btn-sm" style="background:linear-gradient(135deg,#14532d,#15803d);border-color:#14532d;" onclick="_runMasterExcel()">📋 Generate Excel</button>`
   );
 
   setTimeout(()=>{
@@ -7956,6 +7983,41 @@ async function _excelBuildSheet(wb, co, students, listType){
       cell.border    = allBord;
     });
   });
+}
+
+async function _syncEmailsThenExcel(){
+  const statusEl = document.getElementById('xl-gen-status');
+  if(statusEl){ statusEl.style.display='block'; statusEl.innerHTML='🔄 Syncing student data from Google Sheets…'; }
+
+  const checkedIds = [...document.querySelectorAll('.xl-co-chk:checked')].map(cb=>parseInt(cb.value));
+  if(!checkedIds.length){ toast('Select at least one company','info'); return; }
+
+  const targets = COMPANIES.filter(c => checkedIds.includes(c.id));
+  let done = 0;
+  for(const co of targets){
+    if(statusEl) statusEl.innerHTML = `🔄 Refreshing <strong>${xe(co.name)}</strong>… (${done+1}/${targets.length})`;
+    await loadStudents(co, true /* force */);
+    done++;
+    await new Promise(r=>setTimeout(r,0));
+  }
+
+  /* Second pass: enrich any still-missing emails using STUDENT_DB */
+  if(Object.keys(STUDENT_DB).length){
+    targets.forEach(co=>{
+      ['studentsRegistered','studentsInterviewed','studentsSelected'].forEach(key=>{
+        (co[key]||[]).forEach(s=>{ if(!s.email) s.email = dbEmail(s); });
+      });
+    });
+  }
+
+  const totalWithEmail = targets.reduce((sum,co)=>{
+    return sum + (co.studentsRegistered||[]).filter(s=>s.email).length
+                + (co.studentsSelected||[]).filter(s=>s.email).length;
+  }, 0);
+
+  if(statusEl) statusEl.innerHTML = `✅ Sync complete — <strong>${totalWithEmail}</strong> students now have emails. Generating Excel…`;
+  await new Promise(r=>setTimeout(r,400));
+  await _runMasterExcel();
 }
 
 async function _runMasterExcel(){
