@@ -6677,32 +6677,70 @@ function _xldbPropagate(name, email){
   return count;
 }
 
+/* ── Persist one student's email to all their company sheet tabs ── */
+async function _persistStudentEmail(name, phone, email){
+  if(!_checkWebapp()) return;
+  /* Find every company list this student appears in and write back */
+  const tasks = [];
+  COMPANIES.forEach(co=>{
+    ['studentsRegistered','studentsInterviewed','studentsSelected'].forEach(key=>{
+      const tabMap = {
+        studentsRegistered:'tabReg', studentsInterviewed:'tabAtt', studentsSelected:'tabSel'
+      };
+      const tabKey = tabMap[key];
+      const tabName = co[tabKey];
+      if(!tabName || !co.sheetId) return;
+      const found = (co[key]||[]).some(s=>
+        _xldbNorm(s.name)===_xldbNorm(name) || _xldbNorm(s.phone)===_xldbNorm(phone));
+      if(found){
+        tasks.push(fetch(_WEBAPP,{method:'POST',body:JSON.stringify({
+          action:'updateStudentEmail',
+          sheetId: co.sheetId,
+          tabName,
+          studentName: name,
+          studentPhone: phone,
+          email
+        })}).then(r=>r.json()).catch(e=>({ok:false,error:e.message})));
+      }
+    });
+  });
+  if(tasks.length) await Promise.all(tasks);
+}
+
 /* ── Sync missing emails for all companies (reg or sel lists) ── */
 async function _mrSyncEmailsAll(listType){
   _xldbInit();
   const key = listType === 'reg' ? 'studentsRegistered' : 'studentsSelected';
   const label = listType === 'reg' ? 'Registered' : 'Selected';
 
-  /* Run lookup across all companies */
-  let synced=0, stillMissing=[];
+  let synced=0, stillMissing=[], persistTasks=[];
   COMPANIES.forEach(co=>{
     (co[key]||[]).forEach((s,idx)=>{
       if(s.email) return;
       const found = _xldbLookup(s);
       if(found){
         s.email = found;
-        /* Propagate to other lists too */
         _xldbPropagate(s.name, found);
         synced++;
+        /* Queue persist to Google Sheet */
+        persistTasks.push({name:s.name, phone:s.phone, email:found});
       } else {
         stillMissing.push({co, s, idx, key});
       }
     });
   });
 
+  /* Write found emails back to Google Sheets in background */
+  if(persistTasks.length && _checkWebapp()){
+    toast(`Synced ${synced} emails — saving to sheet…`,'info','💾');
+    for(const t of persistTasks){
+      await _persistStudentEmail(t.name, t.phone, t.email);
+    }
+  }
+
   /* Show result modal */
   const missingRows = stillMissing.map(({co, s, idx})=>`
-    <tr data-name="${xe(s.name)}" data-co="${co.id}" data-idx="${idx}" data-key="${key}">
+    <tr data-name="${xe(s.name)}" data-phone="${xe(s.phone||'')}" data-co="${co.id}" data-idx="${idx}" data-key="${key}">
       <td style="padding:7px 10px;font-size:12px;color:var(--text3);">${xe(co.name)}</td>
       <td style="padding:7px 10px;font-size:12px;font-weight:600;color:var(--text);">${xe(s.name||'—')}</td>
       <td style="padding:7px 10px;font-size:11px;color:var(--text3);">${xe(s.phone||'—')}</td>
@@ -6755,28 +6793,31 @@ async function _mrSyncEmailsAll(listType){
   );
 }
 
-/* ── Manually add email for a student and propagate across all companies ── */
-function _mrAddEmail(input){
+/* ── Manually add email for a student and persist to Google Sheets ── */
+async function _mrAddEmail(input){
   const email = (input.value||'').trim();
   if(!email || !email.includes('@')){ toast('Enter a valid email address','info'); input.focus(); return; }
 
-  const row  = input.closest('tr');
-  const name = row?.dataset.name || '';
+  const row   = input.closest('tr');
+  const name  = row?.dataset.name  || '';
+  const phone = row?.dataset.phone || '';
 
   if(!name){ toast('Student name not found','error'); return; }
 
-  /* Update all matching student records */
+  /* Update in-memory records */
   const updated = _xldbPropagate(name, email);
 
-  /* Remove this row from the missing table */
-  const tbody = document.getElementById('mr-missing-tbody');
-  row.style.background='#f0fdf4';
-  row.cells[3].innerHTML = `<span style="font-size:11px;color:#065f46;font-weight:700;">✅ ${xe(email)}</span>`;
+  /* Persist to Google Sheets */
+  const saveBtn = input.nextElementSibling;
+  if(saveBtn) saveBtn.textContent = '⏳';
+  await _persistStudentEmail(name, phone, email);
+  if(saveBtn) saveBtn.textContent = '✓ Add';
 
-  /* Update the "Still Missing" counter */
-  const remaining = tbody?.querySelectorAll('tr:not([data-done])').length || 0;
-  toast(`Email added for "${name}" — updated ${updated+1} record(s) across all lists`, 'success', '✅');
+  /* Update this row visually */
+  row.cells[3].innerHTML = `<span style="font-size:11px;color:#065f46;font-weight:700;">✅ ${xe(email)}</span>`;
   row.dataset.done = '1';
+
+  toast(`Email saved for "${name}" — updated ${updated+1} record(s) and written to sheet`, 'success', '✅');
 }
 
 
