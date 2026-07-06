@@ -6984,15 +6984,6 @@ function openPresentationModal(){
       <div style="font-size:10.5px;color:var(--text3);margin-top:4px;">These will appear on a dedicated slide with their company logos fetched automatically.</div>
     </div>
 
-    <div style="margin-bottom:14px;">
-      <label style="font-size:12px;font-weight:700;color:var(--text);display:block;margin-bottom:6px;">
-        Total Student Database Size:
-      </label>
-      <input type="number" id="pres-dbsize" value="${_XLDB.length}" min="1"
-        style="padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--text);width:120px;">
-      <span style="font-size:11px;color:var(--text3);margin-left:8px;">students in VGI database (shown on each company slide)</span>
-    </div>
-
     <div style="padding:10px 14px;background:#fef3c7;border-radius:8px;border:1px solid #fde68a;font-size:12px;color:#92400e;margin-bottom:10px;">
       📎 Will generate <strong>${conducted.length + 7} slides</strong>: Title · Overview · Section headers · ${conducted.length} company slides · Pipeline · Dashboard journey · Thank You
     </div>
@@ -7020,7 +7011,6 @@ async function _runGeneratePresentation(){
 
     const pipelineRaw = (document.getElementById('pres-pipeline')?.value||'').trim();
     const pipeline    = pipelineRaw ? pipelineRaw.split('\n').map(s=>s.trim()).filter(Boolean) : [];
-    const dbSize      = parseInt(document.getElementById('pres-dbsize')?.value||_XLDB.length);
     const conducted   = COMPANIES.filter(c=>c.studentsSelected&&c.studentsSelected.length>0);
     const totalSel    = conducted.reduce((s,c)=>s+c.studentsSelected.length,0);
     const totalReg    = COMPANIES.reduce((s,c)=>s+c.studentsRegistered.length,0);
@@ -7164,17 +7154,20 @@ async function _runGeneratePresentation(){
         ],{x:0.35,y:2.25+i*0.45,w:4.0,h:0.4,fontFace:'Calibri',valign:'middle',margin:0});
       });
 
-      /* Right panel: 4 stat boxes */
-      const stats=[
-        {n:dbSize,                      l:'DATABASE',    f:LT,       c:P},
-        {n:co.studentsRegistered.length,l:'REGISTERED',  f:'EFF6FF', c:BL},
-        {n:co.studentsInterviewed.length,l:'ATTENDED',   f:'F0FDF4', c:'065F46'},
-        {n:co.studentsSelected.length,  l:'SELECTED',    f:'FDF2FF', c:P},
-      ];
-      const bx=[4.7,6.95], by=[1.05,3.05], bw=2.0, bh=1.75;
-      stats.forEach((s,i)=>{
-        const x=bx[i%2], y=by[Math.floor(i/2)];
-        statBox(sl, x, y, bw, bh, s.n, s.l, s.f, s.c);
+      /* Right panel: stat boxes — only show non-zero counts, never Database */
+      const allStats=[
+        {n:co.studentsRegistered.length,  l:'REGISTERED',  f:'EFF6FF', c:BL},
+        {n:co.studentsInterviewed.length, l:'ATTENDED',     f:'F0FDF4', c:'065F46'},
+        {n:co.studentsSelected.length,    l:'SELECTED',     f:'FDF2FF', c:P},
+      ].filter(s=>s.n>0);
+
+      /* Dynamic layout: spread boxes evenly in the right panel (x: 4.7–9.0) */
+      const panelX=4.7, panelW=4.5;
+      const boxH=2.3, boxY=1.4+(5.625-1.4-boxH)/2;   /* vertically centred */
+      const gap=0.18;
+      const boxW=(panelW - gap*(allStats.length-1)) / allStats.length;
+      allStats.forEach((s,i)=>{
+        statBox(sl, panelX+i*(boxW+gap), boxY, boxW, boxH, s.n, s.l, s.f, s.c);
       });
 
       /* Bottom tag */
