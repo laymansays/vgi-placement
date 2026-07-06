@@ -1635,8 +1635,9 @@ function renderAdminBar(){
   const r=document.getElementById('admin-bar');
   if(!adminMode){ r.innerHTML=''; }
   else {
-    r.innerHTML=`<div class="admin-bar"><span>🛡️ Admin Mode active</span><div class="admin-bar-actions"><button class="btn btn-admin-outline btn-sm" id="ab-circular">📄 Circular</button><button class="btn btn-admin-outline btn-sm" id="ab-repo">📁 Repository</button><button class="btn btn-admin btn-sm" id="ab-master" style="background:linear-gradient(135deg,#7c2d12,#9a3412);border-color:#7c2d12;">🗂️ Master Placement Report</button><button class="btn btn-admin btn-sm" id="ab-gen-all" style="background:linear-gradient(135deg,#6D0E6A,#3B1A8A);border-color:#6D0E6A;">🔄 Generate All Circulars</button><button class="btn btn-admin btn-sm" id="ab-gen-reports" style="background:linear-gradient(135deg,#1e3a5f,#1e40af);border-color:#1e3a5f;">📊 Generate All Reports</button><button class="btn btn-admin btn-sm" id="ab-gen-excel" style="background:linear-gradient(135deg,#14532d,#15803d);border-color:#14532d;">📋 Generate All Excel Lists</button><button class="btn btn-admin btn-sm" id="ab-all-ol" style="background:linear-gradient(135deg,#0e4a6a,#0369a1);border-color:#0e4a6a;">📩 All Offer Letters</button><button class="btn btn-admin-outline btn-sm" id="ab-diag">🔍 Diagnostics</button><button class="btn btn-admin-outline btn-sm" id="ab-refresh">↺ Reload Config</button><button class="btn btn-admin-outline btn-sm" id="ab-exit">Exit Admin</button></div></div>`;
+    r.innerHTML=`<div class="admin-bar"><span>🛡️ Admin Mode active</span><div class="admin-bar-actions"><button class="btn btn-admin-outline btn-sm" id="ab-circular">📄 Circular</button><button class="btn btn-admin-outline btn-sm" id="ab-repo">📁 Repository</button><button class="btn btn-admin btn-sm" id="ab-master" style="background:linear-gradient(135deg,#7c2d12,#9a3412);border-color:#7c2d12;">🗂️ Master Placement Report</button><button class="btn btn-admin btn-sm" id="ab-pres" style="background:linear-gradient(135deg,#1a0618,#570B54);border-color:#1a0618;">🎯 Generate Presentation</button><button class="btn btn-admin btn-sm" id="ab-gen-all" style="background:linear-gradient(135deg,#6D0E6A,#3B1A8A);border-color:#6D0E6A;">🔄 Generate All Circulars</button><button class="btn btn-admin btn-sm" id="ab-gen-reports" style="background:linear-gradient(135deg,#1e3a5f,#1e40af);border-color:#1e3a5f;">📊 Generate All Reports</button><button class="btn btn-admin btn-sm" id="ab-gen-excel" style="background:linear-gradient(135deg,#14532d,#15803d);border-color:#14532d;">📋 Generate All Excel Lists</button><button class="btn btn-admin btn-sm" id="ab-all-ol" style="background:linear-gradient(135deg,#0e4a6a,#0369a1);border-color:#0e4a6a;">📩 All Offer Letters</button><button class="btn btn-admin-outline btn-sm" id="ab-diag">🔍 Diagnostics</button><button class="btn btn-admin-outline btn-sm" id="ab-refresh">↺ Reload Config</button><button class="btn btn-admin-outline btn-sm" id="ab-exit">Exit Admin</button></div></div>`;
     document.getElementById('ab-master').onclick=openMasterReportModal;
+    document.getElementById('ab-pres').onclick=openPresentationModal;
     document.getElementById('ab-circular').onclick=openCircularModal;
     document.getElementById('ab-repo').onclick=openCircularRepo;
     document.getElementById('ab-gen-all').onclick=generateAllCirculars;
@@ -1654,8 +1655,9 @@ function renderPCBar(){
   const r=document.getElementById('pc-bar');
   if(!r)return;
   if(!pcMode){ r.innerHTML=''; return; }
-  r.innerHTML=`<div class="pc-bar"><span>🔐 Placement Cell Mode active</span><span class="pc-bar-badge">CONFIDENTIAL</span><div class="pc-bar-actions"><button class="btn btn-admin-outline btn-sm" id="pc-circular">📄 Circular</button><button class="btn btn-admin-outline btn-sm" id="pc-repo">📁 Repository</button><button class="btn btn-admin-outline btn-sm" id="pc-master" style="background:linear-gradient(135deg,rgba(124,45,18,0.8),rgba(154,52,18,0.8));border-color:rgba(124,45,18,0.8);">🗂️ Master Placement Report</button><button class="btn btn-admin-outline btn-sm" id="pc-gen-all" style="background:linear-gradient(135deg,rgba(109,14,106,0.7),rgba(59,26,138,0.7));border-color:rgba(109,14,106,0.8);">🔄 Generate All Circulars</button><button class="btn btn-admin-outline btn-sm" id="pc-gen-reports" style="background:linear-gradient(135deg,rgba(30,58,95,0.8),rgba(30,64,175,0.8));border-color:rgba(30,58,95,0.8);">📊 Generate All Reports</button><button class="btn btn-admin-outline btn-sm" id="pc-gen-excel" style="background:linear-gradient(135deg,rgba(20,83,45,0.8),rgba(21,128,61,0.8));border-color:rgba(20,83,45,0.8);">📋 Generate All Excel Lists</button><button class="btn btn-admin-outline btn-sm" id="pc-all-ol" style="background:linear-gradient(135deg,rgba(14,74,106,0.8),rgba(3,105,161,0.8));border-color:rgba(14,74,106,0.8);">📩 All Offer Letters</button><button onclick="exitPCMode()">Exit</button></div></div>`;
+  r.innerHTML=`<div class="pc-bar"><span>🔐 Placement Cell Mode active</span><span class="pc-bar-badge">CONFIDENTIAL</span><div class="pc-bar-actions"><button class="btn btn-admin-outline btn-sm" id="pc-circular">📄 Circular</button><button class="btn btn-admin-outline btn-sm" id="pc-repo">📁 Repository</button><button class="btn btn-admin-outline btn-sm" id="pc-master" style="background:linear-gradient(135deg,rgba(124,45,18,0.8),rgba(154,52,18,0.8));border-color:rgba(124,45,18,0.8);">🗂️ Master Placement Report</button><button class="btn btn-admin-outline btn-sm" id="pc-pres" style="background:linear-gradient(135deg,rgba(26,6,24,0.9),rgba(87,11,84,0.9));border-color:rgba(87,11,84,0.8);">🎯 Generate Presentation</button><button class="btn btn-admin-outline btn-sm" id="pc-gen-all" style="background:linear-gradient(135deg,rgba(109,14,106,0.7),rgba(59,26,138,0.7));border-color:rgba(109,14,106,0.8);">🔄 Generate All Circulars</button><button class="btn btn-admin-outline btn-sm" id="pc-gen-reports" style="background:linear-gradient(135deg,rgba(30,58,95,0.8),rgba(30,64,175,0.8));border-color:rgba(30,58,95,0.8);">📊 Generate All Reports</button><button class="btn btn-admin-outline btn-sm" id="pc-gen-excel" style="background:linear-gradient(135deg,rgba(20,83,45,0.8),rgba(21,128,61,0.8));border-color:rgba(20,83,45,0.8);">📋 Generate All Excel Lists</button><button class="btn btn-admin-outline btn-sm" id="pc-all-ol" style="background:linear-gradient(135deg,rgba(14,74,106,0.8),rgba(3,105,161,0.8));border-color:rgba(14,74,106,0.8);">📩 All Offer Letters</button><button onclick="exitPCMode()">Exit</button></div></div>`;
   document.getElementById('pc-master').onclick=openMasterReportModal;
+  document.getElementById('pc-pres').onclick=openPresentationModal;
   document.getElementById('pc-circular').onclick=openCircularModal;
   document.getElementById('pc-repo').onclick=openCircularRepo;
   document.getElementById('pc-gen-all').onclick=generateAllCirculars;
@@ -6914,6 +6916,359 @@ function _mrCancelEdit(btn, currentEmail){
       <button onclick="_mrEditEmail(this)" style="padding:3px 8px;background:var(--bg2);color:var(--text3);border:1px solid var(--border);border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;">✏ Edit</button>
     </div>`;
   row.dataset.done = '1';
+}
+
+/* ════════════════════════════════════════════════════
+   CAMPUS PLACEMENTS PRESENTATION GENERATOR
+   Reads live in-memory data from COMPANIES / ADMIN_DATA /
+   CIRCULAR_DATA and produces a branded .pptx deck.
+════════════════════════════════════════════════════ */
+
+let _pptxLoaded = false;
+async function _loadPptxGen(){
+  if(_pptxLoaded) return;
+  await new Promise((res,rej)=>{
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/pptxgenjs/3.12.0/pptxgen.bundled.js';
+    s.onload=()=>{ _pptxLoaded=true; res(); };
+    s.onerror=()=>rej(new Error('Could not load PptxGenJS'));
+    document.head.appendChild(s);
+  });
+}
+
+function openPresentationModal(){
+  const conducted = COMPANIES.filter(c=>c.studentsSelected&&c.studentsSelected.length>0);
+  const totalSel  = conducted.reduce((s,c)=>s+c.studentsSelected.length,0);
+  const totalReg  = COMPANIES.reduce((s,c)=>s+c.studentsRegistered.length,0);
+  const totalAtt  = COMPANIES.reduce((s,c)=>s+c.studentsInterviewed.length,0);
+
+  openModalWide('🎯 Generate Placement Presentation',
+    `<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:16px;">
+      <div style="text-align:center;padding:10px;background:#f5eaf5;border-radius:10px;border:1px solid #d3b6d2;">
+        <div style="font-size:22px;font-weight:900;color:#570B54;">${COMPANIES.length}</div>
+        <div style="font-size:10px;color:#570B54;font-weight:800;text-transform:uppercase;">Companies Onboarded</div>
+      </div>
+      <div style="text-align:center;padding:10px;background:#eff6ff;border-radius:10px;border:1px solid #bfdbfe;">
+        <div style="font-size:22px;font-weight:900;color:#1e40af;">${conducted.length}</div>
+        <div style="font-size:10px;color:#1e40af;font-weight:800;text-transform:uppercase;">Drives Conducted</div>
+      </div>
+      <div style="text-align:center;padding:10px;background:#f0fdf4;border-radius:10px;border:1px solid #bbf7d0;">
+        <div style="font-size:22px;font-weight:900;color:#065f46;">${totalSel}</div>
+        <div style="font-size:10px;color:#065f46;font-weight:800;text-transform:uppercase;">Students Placed</div>
+      </div>
+      <div style="text-align:center;padding:10px;background:var(--bg2);border-radius:10px;border:1px solid var(--border);">
+        <div style="font-size:22px;font-weight:900;color:var(--text);">${conducted.length + 3}</div>
+        <div style="font-size:10px;color:var(--text4);font-weight:800;text-transform:uppercase;">Est. Slides</div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <label style="font-size:12px;font-weight:700;color:var(--text);display:block;margin-bottom:6px;">
+        Pipeline Companies — Companies considered for next year (one per line):
+      </label>
+      <textarea id="pres-pipeline" placeholder="e.g.&#10;Infosys&#10;Wipro&#10;Accenture&#10;Deloitte"
+        style="width:100%;height:90px;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-family:inherit;background:var(--bg);color:var(--text);resize:vertical;"></textarea>
+      <div style="font-size:10.5px;color:var(--text3);margin-top:4px;">These will appear on a dedicated slide with their company logos fetched automatically.</div>
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <label style="font-size:12px;font-weight:700;color:var(--text);display:block;margin-bottom:6px;">
+        Total Student Database Size:
+      </label>
+      <input type="number" id="pres-dbsize" value="${_XLDB.length}" min="1"
+        style="padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--text);width:120px;">
+      <span style="font-size:11px;color:var(--text3);margin-left:8px;">students in VGI database (shown on each company slide)</span>
+    </div>
+
+    <div style="padding:10px 14px;background:#fef3c7;border-radius:8px;border:1px solid #fde68a;font-size:12px;color:#92400e;margin-bottom:10px;">
+      📎 Will generate <strong>${conducted.length + 7} slides</strong>: Title · Overview · Section headers · ${conducted.length} company slides · Pipeline · Dashboard journey · Thank You
+    </div>
+
+    <div id="pres-status" style="display:none;padding:10px 14px;background:var(--bg2);border-radius:8px;border:1px solid var(--border);font-size:12px;color:var(--text3);"></div>`,
+
+    `<button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button>
+     <button class="btn btn-admin btn-sm" id="pres-gen-btn" onclick="_runGeneratePresentation()" style="background:linear-gradient(135deg,#1a0618,#570B54);border-color:#1a0618;">
+       🎯 Generate Presentation
+     </button>`
+  );
+}
+
+async function _runGeneratePresentation(){
+  const btn = document.getElementById('pres-gen-btn');
+  const statusEl = document.getElementById('pres-status');
+  const setS = msg => { if(statusEl){ statusEl.style.display='block'; statusEl.innerHTML=msg; } };
+
+  if(btn){ btn.disabled=true; btn.textContent='Loading…'; }
+  setS('Loading presentation engine…');
+
+  try{
+    await _loadPptxGen();
+    if(btn) btn.textContent='Building slides…';
+
+    const pipelineRaw = (document.getElementById('pres-pipeline')?.value||'').trim();
+    const pipeline    = pipelineRaw ? pipelineRaw.split('\n').map(s=>s.trim()).filter(Boolean) : [];
+    const dbSize      = parseInt(document.getElementById('pres-dbsize')?.value||_XLDB.length);
+    const conducted   = COMPANIES.filter(c=>c.studentsSelected&&c.studentsSelected.length>0);
+    const totalSel    = conducted.reduce((s,c)=>s+c.studentsSelected.length,0);
+    const totalReg    = COMPANIES.reduce((s,c)=>s+c.studentsRegistered.length,0);
+    const totalAtt    = COMPANIES.reduce((s,c)=>s+c.studentsInterviewed.length,0);
+
+    const pres = new PptxGenJS();
+    pres.layout  = 'LAYOUT_16x9';
+    pres.author  = 'VGI Career Development Center';
+    pres.title   = 'Campus Placements 2025-26 | VGI';
+
+    /* ── Brand palette ── */
+    const P  = '570B54';   /* VGI purple */
+    const DB = '1A0618';   /* deep dark */
+    const BL = '3B1A8A';   /* deep blue */
+    const WH = 'FFFFFF';
+    const LT = 'F9F5F9';   /* light purple bg */
+    const GR = '1E3A5F';   /* dark teal for stats */
+
+    /* ── Helper: section divider slide ── */
+    function sectionSlide(label, sub){
+      const sl = pres.addSlide();
+      sl.background = { color: P };
+      sl.addShape(pres.shapes.RECTANGLE,{x:0,y:0,w:10,h:5.625,fill:{color:DB},line:{color:DB}});
+      sl.addShape(pres.shapes.RECTANGLE,{x:0,y:2.3,w:10,h:1.5,fill:{color:P,transparency:30},line:{color:P,transparency:30}});
+      sl.addText(label,{x:0.5,y:2.4,w:9,h:0.9,fontSize:40,fontFace:'Cambria',color:WH,bold:true,align:'center',valign:'middle',margin:0});
+      if(sub) sl.addText(sub,{x:0.5,y:3.3,w:9,h:0.5,fontSize:16,fontFace:'Calibri',color:'E8C5E7',align:'center',valign:'middle',margin:0});
+      return sl;
+    }
+
+    /* ── Helper: stat box ── */
+    function statBox(sl, x, y, w, h, num, label, fillColor, numColor){
+      sl.addShape(pres.shapes.ROUNDED_RECTANGLE,{x,y,w,h,fill:{color:fillColor},rectRadius:0.08,shadow:{type:'outer',color:'000000',blur:4,offset:2,angle:45,opacity:0.1}});
+      sl.addText(String(num),{x,y:y+0.12,w,h:h*0.55,fontSize:30,fontFace:'Cambria',color:numColor,bold:true,align:'center',valign:'middle',margin:0});
+      sl.addText(label,{x,y:y+h*0.55,w,h:h*0.38,fontSize:9,fontFace:'Calibri',color:numColor,bold:true,align:'center',valign:'middle',margin:0,charSpacing:1});
+    }
+
+    /* ─────────────── SLIDE 1: TITLE ─────────────── */
+    setS('Building title slide…');
+    {
+      const sl = pres.addSlide();
+      sl.background = { color: DB };
+      sl.addShape(pres.shapes.RECTANGLE,{x:0,y:3.8,w:10,h:1.825,fill:{color:P},line:{color:P}});
+      sl.addImage({data:'image/jpeg;base64,'+_VGI_LOGO_B64,x:0.5,y:0.35,w:1.1,h:1.1,rounding:true});
+      sl.addText('VIDYAVAHINI GROUP OF INSTITUTIONS',{x:1.8,y:0.35,w:7.7,h:0.55,fontSize:13,fontFace:'Calibri',color:'D4A8D2',align:'left',valign:'middle',bold:true,charSpacing:2,margin:0});
+      sl.addText('Career Development Center',{x:1.8,y:0.9,w:7.7,h:0.45,fontSize:11,fontFace:'Calibri',color:'A885A6',align:'left',valign:'middle',margin:0});
+      sl.addText('Campus Placements',{x:0.5,y:1.6,w:9,h:1.1,fontSize:44,fontFace:'Cambria',color:WH,bold:true,align:'center',valign:'middle',margin:0});
+      sl.addText('2025 – 26',{x:0.5,y:2.65,w:9,h:0.8,fontSize:32,fontFace:'Calibri',color:'E8C5E7',align:'center',valign:'middle',margin:0});
+      sl.addText('Tumakuru, Karnataka',{x:0.5,y:4.1,w:9,h:0.45,fontSize:13,fontFace:'Calibri',color:'D4A8D2',align:'center',valign:'middle',margin:0});
+    }
+
+    /* ─────────────── SLIDE 2: OVERVIEW STATS ─────────────── */
+    setS('Building overview slide…');
+    {
+      const sl = pres.addSlide();
+      sl.background = { color: WH };
+      sl.addShape(pres.shapes.RECTANGLE,{x:0,y:0,w:10,h:1.1,fill:{color:P},line:{color:P}});
+      sl.addText('Placement Season at a Glance',{x:0.5,y:0,w:9,h:1.1,fontSize:26,fontFace:'Cambria',color:WH,bold:true,align:'center',valign:'middle',margin:0});
+      sl.addText('Academic Year 2025-26 · Vidyavahini Group of Institutions',{x:0.5,y:1.2,w:9,h:0.4,fontSize:12,fontFace:'Calibri',color:'6B7280',align:'center',margin:0});
+
+      const stats=[
+        {n:COMPANIES.length,  l:'COMPANIES\nONBOARDED',  f:LT,  c:P},
+        {n:conducted.length,  l:'DRIVES\nCONDUCTED',    f:'EFF6FF', c:BL},
+        {n:totalReg,          l:'STUDENTS\nREGISTERED', f:'F0FDF4', c:'065F46'},
+        {n:totalSel,          l:'STUDENTS\nPLACED',     f:'F5EAF5', c:P},
+      ];
+      stats.forEach((s,i)=>statBox(sl, 0.35+i*2.35, 1.8, 2.1, 2.8, s.n, s.l, s.f, s.c));
+
+      const rate = totalAtt>0 ? Math.round(totalSel/totalAtt*100) : 0;
+      sl.addShape(pres.shapes.ROUNDED_RECTANGLE,{x:0.35,y:4.9,w:9.3,h:0.55,fill:{color:P,transparency:90},rectRadius:0.06,line:{color:P,transparency:80}});
+      sl.addText(`Overall Placement Rate: ${rate}%  ·  Total Students Attended: ${totalAtt}  ·  AY 2025-26`,{x:0.35,y:4.9,w:9.3,h:0.55,fontSize:11,fontFace:'Calibri',color:P,bold:true,align:'center',valign:'middle',margin:0});
+    }
+
+    /* ─────────────── SECTION: COMPANY HIGHLIGHTS ─────────────── */
+    sectionSlide('Company Placement Highlights', `${conducted.length} companies successfully conducted drives`);
+
+    /* ─────────────── PER COMPANY SLIDES ─────────────── */
+    for(let ci=0; ci<conducted.length; ci++){
+      const co   = conducted[ci];
+      const ad   = getAdminData(co.name);
+      const circ = CIRCULAR_DATA[co.name.toLowerCase()]||{};
+      const roles= (co.roles&&co.roles.length)?co.roles.join(', '): ad.roles&&ad.roles.length?ad.roles.join(', '):'—';
+      const mode = ad.interviewMode||co.interviewMode||'—';
+      const date = ad.driveDate ? new Date(ad.driveDate).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '—';
+      const ctc  = circ.ctc||'—';
+      const about= circ.about||(circ.position?`Role: ${circ.position}`:'');
+
+      setS(`Building company slide ${ci+1}/${conducted.length}: <strong>${xe(co.name)}</strong>…`);
+
+      const sl = pres.addSlide();
+      sl.background = { color: WH };
+
+      /* Top bar */
+      sl.addShape(pres.shapes.RECTANGLE,{x:0,y:0,w:10,h:0.9,fill:{color:P},line:{color:P}});
+      sl.addText(co.name,{x:0.2,y:0,w:8,h:0.9,fontSize:22,fontFace:'Cambria',color:WH,bold:true,align:'left',valign:'middle',margin:0});
+      sl.addText(`${ci+1} / ${conducted.length}`,{x:8.2,y:0,w:1.6,h:0.9,fontSize:11,fontFace:'Calibri',color:'E8C5E7',align:'right',valign:'middle',margin:0});
+
+      /* Company logo from favicon */
+      const website = ad.website||co.website||'';
+      if(website){
+        try{
+          const domain = new URL(website.startsWith('http')?website:'https://'+website).hostname;
+          sl.addImage({path:`https://www.google.com/s2/favicons?domain=${domain}&sz=64`,x:8.7,y:0.05,w:0.7,h:0.7});
+        }catch(e){}
+      }
+
+      /* Left panel: company info */
+      const infoItems=[
+        ['🏢 Mode',   mode],
+        ['💼 Role',   roles.length>60?roles.slice(0,60)+'…':roles],
+        ['📅 Drive Date', date],
+        ['💰 CTC',    ctc],
+      ];
+      sl.addShape(pres.shapes.ROUNDED_RECTANGLE,{x:0.2,y:1.05,w:4.3,h:3.0,fill:{color:LT},rectRadius:0.08,line:{color:'E8D5E8'}});
+
+      /* About company */
+      const aboutText = about ? (about.length>200?about.slice(0,197)+'…':about) : 'Campus recruitment drive for final year students.';
+      sl.addText(aboutText,{x:0.35,y:1.15,w:4.0,h:0.95,fontSize:9.5,fontFace:'Calibri',color:'374151',valign:'top',margin:0});
+
+      sl.addShape(pres.shapes.LINE,{x:0.35,y:2.15,w:4.0,h:0,line:{color:'D3B6D2',width:0.5}});
+
+      infoItems.forEach(([lbl,val],i)=>{
+        sl.addText([
+          {text:lbl+'  ',options:{bold:true,color:P,fontSize:9.5}},
+          {text:val||'—',options:{color:'374151',fontSize:9.5}},
+        ],{x:0.35,y:2.25+i*0.45,w:4.0,h:0.4,fontFace:'Calibri',valign:'middle',margin:0});
+      });
+
+      /* Right panel: 4 stat boxes */
+      const stats=[
+        {n:dbSize,                      l:'DATABASE',    f:LT,       c:P},
+        {n:co.studentsRegistered.length,l:'REGISTERED',  f:'EFF6FF', c:BL},
+        {n:co.studentsInterviewed.length,l:'ATTENDED',   f:'F0FDF4', c:'065F46'},
+        {n:co.studentsSelected.length,  l:'SELECTED',    f:'FDF2FF', c:P},
+      ];
+      const bx=[4.7,6.95], by=[1.05,3.05], bw=2.0, bh=1.75;
+      stats.forEach((s,i)=>{
+        const x=bx[i%2], y=by[Math.floor(i/2)];
+        statBox(sl, x, y, bw, bh, s.n, s.l, s.f, s.c);
+      });
+
+      /* Bottom tag */
+      sl.addShape(pres.shapes.RECTANGLE,{x:0,y:5.175,w:10,h:0.45,fill:{color:P,transparency:92},line:{color:P,transparency:85}});
+      sl.addText('Vidyavahini Group of Institutions · Career Development Center · 2025-26',{x:0.3,y:5.175,w:9.4,h:0.45,fontSize:9,fontFace:'Calibri',color:P,align:'center',valign:'middle',margin:0});
+
+      await new Promise(r=>setTimeout(r,0));
+    }
+
+    /* ─────────────── SECTION: PIPELINE ─────────────── */
+    if(pipeline.length){
+      sectionSlide('Companies in Pipeline','Upcoming placements — Academic Year 2026-27');
+
+      setS('Building pipeline slide…');
+      const sl = pres.addSlide();
+      sl.background = { color: WH };
+      sl.addShape(pres.shapes.RECTANGLE,{x:0,y:0,w:10,h:0.9,fill:{color:BL},line:{color:BL}});
+      sl.addText('Companies Considered for Upcoming Placements',{x:0.3,y:0,w:9.4,h:0.9,fontSize:20,fontFace:'Cambria',color:WH,bold:true,align:'center',valign:'middle',margin:0});
+
+      /* Grid layout — up to 5 per row */
+      const cols=Math.min(5,pipeline.length), rows=Math.ceil(pipeline.length/cols);
+      const bw=9/cols, bh=Math.min(1.5,(4.2/rows));
+      pipeline.forEach((name,i)=>{
+        const col=i%cols, row=Math.floor(i/cols);
+        const x=0.5+col*bw, y=1.1+row*(bh+0.15);
+        sl.addShape(pres.shapes.ROUNDED_RECTANGLE,{x,y,w:bw-0.15,h:bh,fill:{color:LT},rectRadius:0.08,line:{color:'D3B6D2'}});
+        /* Try to add favicon */
+        try{
+          const guessedDomain = name.toLowerCase().replace(/[^a-z0-9]/g,'')+'.com';
+          sl.addImage({path:`https://www.google.com/s2/favicons?domain=${guessedDomain}&sz=64`,x:x+0.1,y:y+0.1,w:0.45,h:0.45});
+          sl.addText(name,{x:x+0.6,y,w:bw-0.8,h:bh,fontSize:11,fontFace:'Calibri',color:P,bold:true,valign:'middle',margin:0});
+        }catch(e){
+          sl.addText(name,{x,y,w:bw-0.15,h:bh,fontSize:11,fontFace:'Calibri',color:P,bold:true,align:'center',valign:'middle',margin:0});
+        }
+      });
+
+      sl.addShape(pres.shapes.RECTANGLE,{x:0,y:5.175,w:10,h:0.45,fill:{color:P,transparency:92},line:{color:P,transparency:85}});
+      sl.addText('Vidyavahini Group of Institutions · Career Development Center · 2025-26',{x:0.3,y:5.175,w:9.4,h:0.45,fontSize:9,fontFace:'Calibri',color:P,align:'center',valign:'middle',margin:0});
+    }
+
+    /* ─────────────── SECTION: DASHBOARD JOURNEY ─────────────── */
+    sectionSlide('Placement Dashboard', 'A digital initiative by the Career Development Center');
+
+    const dashSlides = [
+      {
+        title:'What is the Placement Dashboard?',
+        body:[
+          {h:'The Challenge',t:'Managing placements across 30+ companies, 500+ students, circulars, offer letters, and reports — all manually through spreadsheets and WhatsApp — was error-prone and time-consuming.'},
+          {h:'The Solution',t:'A custom-built, fully integrated campus placement management system developed in-house by the CDC team — digitising every step from circular generation to offer letter tracking.'},
+        ]
+      },
+      {
+        title:'Key Features',
+        body:[
+          {h:'📄 Circular Generator',t:'Auto-generates branded PDF circulars for each company from a single data entry, uploads to Drive, and shares links.'},
+          {h:'📋 Student Lists',t:'Registered & selected student Excel lists with logos, styling, and automated email sync from the college database.'},
+          {h:'📩 Offer Letter Tracking',t:'Per-student offer letter upload, status tracking (uploaded / missing), and bulk management across all companies.'},
+          {h:'📊 Placement Reports',t:'Auto-generated PDF placement reports with letterhead, company details, student stats, and co-ordinator signatures.'},
+        ]
+      },
+      {
+        title:'Current Status & Impact',
+        body:[
+          {h:'🚀 Live in Production',t:`Dashboard actively managing ${COMPANIES.length} companies, ${totalReg} student registrations, and ${totalSel} placements for AY 2025-26.`},
+          {h:'⏱ Time Saved',t:'Circular generation reduced from hours of manual effort to seconds. Excel lists, reports, and master documents generated in one click.'},
+          {h:'🔒 Data Integrity',t:'Centralised Google Sheet backend with real-time sync — no more duplicate entries or lost records across multiple spreadsheets.'},
+          {h:'📈 Next Steps',t:'Expanding to cover internship tracking, alumni placement data, and a student-facing portal for drive registration.'},
+        ]
+      },
+    ];
+
+    for(const ds of dashSlides){
+      setS(`Building dashboard slide: <strong>${ds.title}</strong>…`);
+      const sl = pres.addSlide();
+      sl.background = { color: WH };
+      sl.addShape(pres.shapes.RECTANGLE,{x:0,y:0,w:10,h:1.0,fill:{color:DB},line:{color:DB}});
+      sl.addText(ds.title,{x:0.3,y:0,w:9.4,h:1.0,fontSize:22,fontFace:'Cambria',color:WH,bold:true,align:'left',valign:'middle',margin:0});
+
+      const perRow = ds.body.length<=2 ? 1 : 2;
+      const cols   = Math.min(perRow, ds.body.length);
+      const bw2    = cols===1 ? 9 : 4.4;
+      const bh2    = ds.body.length<=2 ? 1.9 : 1.65;
+      const startY = ds.body.length<=2 ? 1.35 : 1.25;
+
+      ds.body.forEach((item,i)=>{
+        const col = i%cols, row = Math.floor(i/cols);
+        const x = 0.5 + col*(bw2+0.2);
+        const y = startY + row*(bh2+0.2);
+        sl.addShape(pres.shapes.ROUNDED_RECTANGLE,{x,y,w:bw2,h:bh2,fill:{color:LT},rectRadius:0.08,line:{color:'D3B6D2'},shadow:{type:'outer',color:'000000',blur:4,offset:2,angle:45,opacity:0.08}});
+        sl.addText(item.h,{x:x+0.15,y:y+0.1,w:bw2-0.3,h:0.4,fontSize:11,fontFace:'Calibri',color:P,bold:true,valign:'middle',margin:0});
+        sl.addShape(pres.shapes.LINE,{x:x+0.15,y:y+0.52,w:bw2-0.3,h:0,line:{color:'D3B6D2',width:0.5}});
+        sl.addText(item.t,{x:x+0.15,y:y+0.58,w:bw2-0.3,h:bh2-0.7,fontSize:9.5,fontFace:'Calibri',color:'374151',valign:'top',margin:0});
+      });
+
+      sl.addShape(pres.shapes.RECTANGLE,{x:0,y:5.175,w:10,h:0.45,fill:{color:P,transparency:92},line:{color:P,transparency:85}});
+      sl.addText('Vidyavahini Group of Institutions · Career Development Center · 2025-26',{x:0.3,y:5.175,w:9.4,h:0.45,fontSize:9,fontFace:'Calibri',color:P,align:'center',valign:'middle',margin:0});
+      await new Promise(r=>setTimeout(r,0));
+    }
+
+    /* ─────────────── SLIDE: THANK YOU ─────────────── */
+    {
+      const sl = pres.addSlide();
+      sl.background = { color: DB };
+      sl.addShape(pres.shapes.RECTANGLE,{x:0,y:2.0,w:10,h:1.625,fill:{color:P,transparency:20},line:{color:P,transparency:20}});
+      sl.addImage({data:'image/jpeg;base64,'+_VGI_LOGO_B64,x:4.45,y:0.2,w:1.1,h:1.1,rounding:true});
+      sl.addText('Thank You',{x:0.5,y:2.1,w:9,h:1.0,fontSize:44,fontFace:'Cambria',color:WH,bold:true,align:'center',valign:'middle',margin:0});
+      sl.addText('Vidyavahini Group of Institutions · Career Development Center',{x:0.5,y:3.7,w:9,h:0.5,fontSize:14,fontFace:'Calibri',color:'E8C5E7',align:'center',valign:'middle',margin:0});
+      sl.addText('Kuvempunagara, Tumakuru · placements.vvfgc@gmail.com',{x:0.5,y:4.2,w:9,h:0.4,fontSize:11,fontFace:'Calibri',color:'A885A6',align:'center',valign:'middle',margin:0});
+    }
+
+    /* ─────────────── SAVE ─────────────── */
+    setS('💾 Writing file…');
+    await pres.writeFile({fileName:'VGI_Campus_Placements_2025-26.pptx'});
+    setS(`✅ Done! <strong>VGI_Campus_Placements_2025-26.pptx</strong> downloaded — ${conducted.length + 7} slides.`);
+    toast('Presentation downloaded successfully','success','🎯');
+    if(btn){ btn.textContent='✅ Done'; btn.style.background='#065f46'; }
+
+  }catch(e){
+    setS('❌ Error: '+xe(e.message));
+    toast('Presentation generation failed: '+e.message,'error');
+    console.error('[Presentation]',e);
+    if(btn){ btn.disabled=false; btn.textContent='🎯 Generate Presentation'; }
+  }
 }
 
 function openMasterReportModal(){
