@@ -6849,8 +6849,12 @@ async function _mrAddEmail(input){
   await _persistStudentEmail(name, phone, email);
   if(saveBtn) saveBtn.textContent = '✓ Add';
 
-  /* Update this row visually */
-  row.cells[3].innerHTML = `<span style="font-size:11px;color:#065f46;font-weight:700;">✅ ${xe(email)}</span>`;
+  /* Show saved email with an Edit button */
+  row.cells[3].innerHTML = `
+    <div style="display:flex;gap:5px;align-items:center;">
+      <span class="mr-saved-email" style="font-size:11px;color:#065f46;font-weight:700;">✅ ${xe(email)}</span>
+      <button onclick="_mrEditEmail(this)" style="padding:3px 8px;background:var(--bg2);color:var(--text3);border:1px solid var(--border);border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;">✏ Edit</button>
+    </div>`;
   row.dataset.done = '1';
 
   toast(`Email saved for "${name}" — updated ${updated+1} record(s) and written to sheet`, 'success', '✅');
@@ -6867,6 +6871,50 @@ async function _mrAddEmail(input){
   _xldbByName  = null;
   _xldbByPhone = null;
 })();
+
+/* ── Switch a saved email row back to edit mode ── */
+function _mrEditEmail(btn){
+  const cell = btn.closest('div').parentElement;  /* the <td> */
+  const row  = btn.closest('tr');
+  const name  = row?.dataset.name  || '';
+  const phone = row?.dataset.phone || '';
+
+  /* Read current saved email */
+  const savedSpan = btn.closest('div').querySelector('.mr-saved-email');
+  const current   = (savedSpan?.textContent || '').replace('✅ ','').trim();
+
+  /* Replace cell content with editable input pre-filled with current email */
+  cell.innerHTML = `
+    <div style="display:flex;gap:5px;align-items:center;">
+      <input type="email" value="${xe(current)}"
+        style="flex:1;padding:5px 8px;border:1.5px solid #3B1A8A;border-radius:7px;font-size:12px;font-family:inherit;min-width:180px;"
+        onkeydown="if(event.key==='Enter') _mrAddEmail(this)">
+      <button onclick="_mrAddEmail(this.previousElementSibling)"
+        style="padding:5px 10px;background:#14532d;color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">
+        ✓ Save
+      </button>
+      <button onclick="_mrCancelEdit(this,'${xe(current)}')"
+        style="padding:5px 8px;background:var(--bg2);color:var(--text3);border:1px solid var(--border);border-radius:7px;font-size:11px;cursor:pointer;">
+        ✕
+      </button>
+    </div>`;
+
+  cell.querySelector('input').focus();
+  cell.querySelector('input').select();
+  delete row.dataset.done;  /* allow re-save */
+}
+
+/* ── Cancel edit, restore the saved email display ── */
+function _mrCancelEdit(btn, currentEmail){
+  const cell = btn.closest('div').parentElement;
+  const row  = btn.closest('tr');
+  cell.innerHTML = `
+    <div style="display:flex;gap:5px;align-items:center;">
+      <span class="mr-saved-email" style="font-size:11px;color:#065f46;font-weight:700;">✅ ${xe(currentEmail)}</span>
+      <button onclick="_mrEditEmail(this)" style="padding:3px 8px;background:var(--bg2);color:var(--text3);border:1px solid var(--border);border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;">✏ Edit</button>
+    </div>`;
+  row.dataset.done = '1';
+}
 
 function openMasterReportModal(){
   const rows = COMPANIES.map(co=>{
