@@ -1868,7 +1868,8 @@ function buildHome(){
         <button class="btn-primary-inv" onclick="go('dashboard')">View All Companies →</button>
         ${(adminMode||pcMode)?`<a href="placement-report.html" target="_blank" class="btn-primary-inv" style="display:inline-flex;align-items:center;gap:8px;margin-top:8px;background:linear-gradient(135deg,rgba(109,14,106,0.45),rgba(87,11,84,0.45));border-color:rgba(211,182,210,0.45);text-decoration:none;">📊 Visual Analytics Report ↗</a>`:''}
         ${(adminMode||pcMode)?`<button onclick="openCircularModal()" class="btn-primary-inv" style="display:inline-flex;align-items:center;gap:8px;margin-top:8px;background:linear-gradient(135deg,rgba(194,65,12,0.45),rgba(154,52,18,0.45));border-color:rgba(251,146,60,0.45);">📄 Create Circular</button>`:''}
-        ${(adminMode||pcMode)?`<button onclick="openAddCompanyModal()" class="btn-primary-inv" style="display:inline-flex;align-items:center;gap:8px;margin-top:8px;background:linear-gradient(135deg,rgba(20,83,45,0.6),rgba(21,128,61,0.6));border-color:rgba(74,222,128,0.4);">➕ Add Company</button>`:''}
+        ${(adminMode||pcMode)?`<button onclick="openAddCompanyModal()" class="btn-primary-inv" style="display:inline-flex;align-items:center;gap:8px;margin-top:8px;background:linear-gradient(135deg,rgba(20,83,45,0.6),rgba(21,128,61,0.6));border-color:rgba(74,222,128,0.4);">➕ Add Company</button>
+        <button onclick="openPresentationModal()" class="btn-primary-inv" style="display:inline-flex;align-items:center;gap:8px;margin-top:8px;margin-left:8px;background:linear-gradient(135deg,rgba(26,6,24,0.8),rgba(87,11,84,0.8));border-color:rgba(200,160,200,0.5);">🎯 Generate Presentation</button>`:''}
       </div>
       <div class="home-banner-right">
         <div class="stat-tile" onclick="showStatModal('companies')">
