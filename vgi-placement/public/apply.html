@@ -146,7 +146,7 @@
               fileBase64: base64
             };
 
-            const res = await fetch(__WEBAPP_URL__, {
+            const res = await fetch('__WEBAPP_URL__', {
               method: 'POST',
               body: JSON.stringify(payload)
             });
