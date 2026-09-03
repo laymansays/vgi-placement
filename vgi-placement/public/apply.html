@@ -1,293 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Job Application · Vidyavahini</title>
-<link rel="icon" type="image/jpeg" href="logo.jpg"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-<style>
-:root{--c1:#6D0E6A;--c2:#570B54;--pale:#D3B6D2;--bg:#F8FAFC;--gray:#F1F5F9;}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:#0F172A;line-height:1.5;}
-.header{background:var(--c2);color:#fff;padding:16px 24px;display:flex;align-items:center;gap:12px;}
-.header img{width:40px;height:40px;border-radius:8px;}
-.header h1{font-size:18px;font-weight:600;}
-.container{max-width:600px;margin:32px auto;background:#fff;border-radius:12px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);overflow:hidden;}
-
-/* Job Header */
-.job-header{background:var(--gray);padding:32px 24px;border-bottom:1px solid #E2E8F0;}
-.job-header h2{font-size:24px;color:var(--c2);margin-bottom:4px;font-weight:700;}
-.job-header .company{font-size:16px;color:#475569;font-weight:600;margin-bottom:12px;}
-.job-header .tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
-.tag{background:#fff;border:1px solid #CBD5E1;padding:4px 10px;border-radius:100px;font-size:13px;font-weight:600;color:#334155;}
-.tag.highlight{background:#FEF3C7;color:#D97706;border-color:#FDE68A;}
-.job-header .jd{font-size:14px;color:#475569;line-height:1.6;background:#fff;padding:12px;border-radius:6px;border:1px dashed #CBD5E1;}
-
-/* Form */
-.form-section{padding:32px 24px;}
-.form-group{margin-bottom:20px;}
-.form-label{display:block;font-size:14px;font-weight:600;margin-bottom:6px;color:#334155;}
-.form-control{width:100%;padding:10px 14px;border:1px solid #CBD5E1;border-radius:6px;font-family:inherit;font-size:15px;outline:none;transition:border-color .2s;}
-.form-control:focus{border-color:var(--c1);box-shadow:0 0 0 3px rgba(109,14,106,0.1);}
-
-.btn{background:var(--c2);color:#fff;border:none;padding:12px 24px;font-size:16px;font-weight:600;border-radius:6px;cursor:pointer;width:100%;transition:background .2s;}
-.btn:hover{background:var(--c1);}
-.btn:disabled{opacity:0.6;cursor:not-allowed;}
-
-/* States */
-#loading-state{padding:64px 24px;text-align:center;}
-#loading-state .spinner{width:40px;height:40px;border:3px solid #E2E8F0;border-top-color:var(--c1);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px;}
-@keyframes spin{to{transform:rotate(360deg);}}
-
-#error-state, #success-state {display:none; padding:64px 24px; text-align:center;}
-#error-state h2{color:#DC2626;font-size:20px;margin-bottom:8px;}
-#success-state h2{color:#16A34A;font-size:24px;margin-bottom:12px;}
-
-#app-container{display:none;}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Application | VGI</title>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f1f5f9; margin: 0; padding: 0; }
+    .navbar { background: #570B54; color: white; padding: 16px 24px; display: flex; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .navbar img { height: 32px; margin-right: 12px; background: white; padding: 4px; border-radius: 4px; }
+    .navbar h1 { margin: 0; font-size: 20px; font-weight: 600; }
+    
+    .container { max-width: 600px; margin: 40px auto; background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); overflow: hidden; }
+    
+    .job-header { text-align: center; padding: 30px 20px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+    .job-header h2 { color: #570B54; margin: 0 0 8px 0; font-size: 24px; text-transform: capitalize; }
+    .job-header .company { font-size: 18px; color: #334155; font-weight: 500; text-transform: capitalize; }
+    .job-header p { margin: 12px 0 0 0; font-size: 14px; color: #64748b; }
+    
+    .form-section { padding: 30px; }
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; font-size: 14px; font-weight: 600; color: #334155; margin-bottom: 8px; }
+    .form-control { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+    .form-control:focus { outline: none; border-color: #570B54; box-shadow: 0 0 0 3px rgba(87,11,84,0.1); }
+    
+    .btn { background: #570B54; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; transition: 0.2s; }
+    .btn:hover { background: #3c0639; }
+    .btn:disabled { background: #94a3b8; cursor: not-allowed; }
+    
+    #success-state { display: none; text-align: center; padding: 60px 20px; }
+    #success-state h2 { color: #16a34a; margin-top: 0; }
+    
+    .error-msg { display: none; background: #fef2f2; border: 1px solid #f87171; color: #b91c1c; padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 14px; }
+  </style>
 </head>
 <body>
-
-<div class="header">
-  <img src="logo.jpg" alt="VGI Logo">
-  <h1>Vidyavahini Placement Cell</h1>
-</div>
-
-<div class="container">
-  
-  <div id="loading-state">
-    <div class="spinner"></div>
-    <h3 style="color:#475569;">Loading job details...</h3>
+  <div class="navbar">
+    <img src="/logo.png" alt="VGI Logo" onerror="this.style.display='none'">
+    <h1>Vidyavahini Placement Cell</h1>
   </div>
 
-  <div id="error-state">
-    <h2>Job Not Found</h2>
-    <p style="color:#64748B;" id="error-msg">The job you are looking for does not exist or the link is invalid.</p>
-  </div>
+  <div class="container">
+    <div id="success-state">
+      <h2>Application Submitted! 🚀</h2>
+      <p style="color:#475569; line-height:1.5;">Your application has been received successfully.<br>The Placement Cell will contact you with further updates.</p>
+    </div>
 
-  <div id="success-state">
-    <h2>Application Submitted! 🎉</h2>
-    <p style="color:#475569;">Your application has been received successfully. The Placement Cell will contact you with further updates.</p>
-  </div>
-
-  <div id="app-container">
-    <div class="job-header">
-      <h2 id="job-role">Software Developer</h2>
-      <div class="company" id="job-company">Tata Consultancy Services</div>
-      <div class="tags">
-        <span class="tag highlight" id="job-ctc">5.0 LPA</span>
-        <span class="tag" id="job-location">Bangalore</span>
-          <span class="tag" id="job-education" style="display:none;background:#f3e8ff;color:#6b21a8;"></span>
-          <span class="tag" id="job-date" style="display:none;background:#e0f2fe;color:#0369a1;"></span>
+    <div id="app-container">
+      <div class="job-header">
+        <h2 id="job-role">Role Name</h2>
+        <div class="company" id="job-company">Company Name</div>
+        <p>Please complete the form below to submit your application.</p>
       </div>
-      <div class="jd" id="job-about">Loading job description...</div>
-        <a id="job-doc" href="#" target="_blank" style="display:none; margin-top:12px; font-size:14px; color:#570B54; font-weight:600; text-decoration:none;">📄 View JD Document</a>
-    </div>
 
-    <div class="form-section">
-      <h3 style="margin-bottom:16px;color:#0F172A;">Submit your Application</h3>
-      <form id="apply-form">
-        <div class="form-group">
-          <label class="form-label">Full Name *</label>
-          <input type="text" id="f-name" class="form-control" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Email Address *</label>
-          <input type="email" id="f-email" class="form-control" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Phone Number *</label>
-          <input type="tel" id="f-phone" class="form-control" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Upload Resume (PDF only) *</label>
-          <input type="file" id="f-resume" class="form-control" accept=".pdf" style="padding:7px 10px;" required>
-          <div style="font-size:12px;color:#64748B;margin-top:4px;">Max file size 5MB.</div>
-        </div>
+      <div class="form-section">
+        <div class="error-msg" id="error-msg"></div>
         
-        <button type="submit" id="btn-submit" class="btn">Submit Application</button>
-        <div id="form-error" style="color:#DC2626;margin-top:12px;text-align:center;font-size:14px;font-weight:600;"></div>
-      </form>
+        <form id="apply-form">
+          <div class="form-group">
+            <label class="form-label">Full Name *</label>
+            <input type="text" id="f-name" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address *</label>
+            <input type="email" id="f-email" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone Number *</label>
+            <input type="tel" id="f-phone" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Upload Resume (PDF only) *</label>
+            <input type="file" id="f-resume" accept="application/pdf" class="form-control" required>
+          </div>
+          <button type="submit" class="btn" id="submit-btn">Submit Application</button>
+        </form>
+      </div>
     </div>
   </div>
 
-</div>
+  <script src="/shared.js"></script>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetCompany = urlParams.get('company') || 'Unknown Company';
+    const targetRole = urlParams.get('role') || 'Unknown Role';
+    
+    document.getElementById('job-company').textContent = targetCompany;
+    document.getElementById('job-role').textContent = targetRole;
 
-<!-- Include shared.js for SHEET_IDS -->
-<script src="shared.js"></script>
-<script>
-const WEBAPP = '__WEBAPP_URL__';
-
-const urlParams = new URLSearchParams(window.location.search);
-const targetCompany = (urlParams.get('company') || '').toLowerCase().trim();
-const targetRole = (urlParams.get('role') || '').toLowerCase().trim();
-
-async function fetchJobDetails() {
-  if(!targetCompany) {
-    showError("Invalid link: Missing company parameter.");
-    return;
-  }
-  
-  if(!CONFIG_SHEET_ID || CONFIG_SHEET_ID === 'EMPTY_SHEET') {
-    showError("Placement season data is currently unavailable.");
-    return;
-  }
-
-  try {
-    const url = `https://docs.google.com/spreadsheets/d/${CONFIG_SHEET_ID}/gviz/tq?tqx=out:json&sheet=CIRCULAR_DATA&_cb=${new Date().getTime()}`; // Added cache buster
-    const res = await fetch(url);
-    const text = await res.text();
-    const jsonStr = text.replace(/^[^(]*\(/,'').replace(/\);\s*$/,'');
-    const j = JSON.parse(jsonStr);
-    
-    if(!j.table || !j.table.rows) throw new Error("No data found");
-    
-    const rows = j.table.rows.map(row => (row.c||[]).map(cell => cell ? (cell.v!=null ? String(cell.v).trim() : '') : ''));
-    
-    // Find matching company (and role if provided)
-    // Columns: Company Name (0), About (1), Position (2), Education (3), Location (4), CTC (5)
-    let match = null;
-    for(let r of rows) {
-      if(r.length < 6) continue;
-      if(r[0].toLowerCase().trim() === targetCompany) {
-        if(targetRole) {
-          if(r[2].toLowerCase().includes(targetRole)) {
-            match = r;
-            break;
-          }
-        } else {
-          match = r;
-          break;
-        }
-      }
-    }
-    
-    if(!match) {
-      showError(`No active job postings found for "${urlParams.get('company')}".`);
-      return;
-    }
-    
-    // Populate UI
-    document.getElementById('job-company').textContent = match[0];
-    document.getElementById('job-role').textContent = match[2] || 'Various Roles';
-    document.getElementById('job-ctc').textContent = match[5] || 'CTC Disclosed Later';
-    
-    if(match[4]) {
-      document.getElementById('job-location').textContent = match[4];
-      document.getElementById('job-location').style.display = 'inline-block';
-    } else {
-      document.getElementById('job-location').style.display = 'none';
-    }
-    
-    document.getElementById('job-about').innerHTML = (match[1] || match[6] || match[7] || 'Please refer to the detailed JD circular for more information on responsibilities and requirements.').replace(/\n/g, '<br>');
+    document.getElementById('apply-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
       
-      if(match[3]) {
-        document.getElementById('job-education').textContent = '🎓 ' + match[3];
-        document.getElementById('job-education').style.display = 'inline-block';
+      const fileInput = document.getElementById('f-resume');
+      if(fileInput.files.length === 0) return alert("Please upload your resume.");
+      const file = fileInput.files[0];
+      if(file.type !== "application/pdf") return alert("Only PDF resumes are allowed.");
+      if(file.size > 2 * 1024 * 1024) return alert("File size must be under 2MB.");
+      
+      const btn = document.getElementById('submit-btn');
+      btn.textContent = "Submitting...";
+      btn.disabled = true;
+      document.getElementById('error-msg').style.display = 'none';
+
+      try {
+        const reader = new FileReader();
+        reader.onload = async function() {
+          const base64 = reader.result.split(',')[1];
+          
+          const payload = {
+            action: 'submitApplication',
+            configSheetId: CONFIG_SHEET_ID,
+            company: targetCompany,
+            role: targetRole,
+            name: document.getElementById('f-name').value.trim(),
+            email: document.getElementById('f-email').value.trim(),
+            phone: document.getElementById('f-phone').value.trim(),
+            fileName: file.name,
+            mimeType: file.type,
+            fileBase64: base64
+          };
+
+          const res = await fetch(__WEBAPP_URL__, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+          
+          const result = await res.json();
+          if(!result.ok) throw new Error(result.error || "Submission failed");
+          
+          document.getElementById('app-container').style.display = 'none';
+          document.getElementById('success-state').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      } catch(e) {
+        document.getElementById('error-msg').textContent = e.message;
+        document.getElementById('error-msg').style.display = 'block';
+        btn.textContent = "Submit Application";
+        btn.disabled = false;
       }
-      if(match[11]) {
-        document.getElementById('job-date').textContent = '📅 Drive: ' + match[11];
-        document.getElementById('job-date').style.display = 'inline-block';
-      }
-      if(match[8]) {
-        document.getElementById('job-doc').href = match[8];
-        document.getElementById('job-doc').style.display = 'inline-block';
-      }
-    
-    document.getElementById('loading-state').style.display = 'none';
-    document.getElementById('app-container').style.display = 'block';
-    
-  } catch(e) {
-    showError("Could not fetch job details. Please try again later.");
-    console.error(e);
-  }
-}
-
-function showError(msg) {
-  document.getElementById('loading-state').style.display = 'none';
-  document.getElementById('error-state').style.display = 'block';
-  document.getElementById('error-msg').textContent = msg;
-}
-
-function getBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result.split(',')[1]);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-document.getElementById('apply-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  
-  if(!WEBAPP || WEBAPP.startsWith('__')){
-    document.getElementById('form-error').textContent = 'System error: WebApp URL not configured.';
-    return;
-  }
-
-  const btn = document.getElementById('btn-submit');
-  const err = document.getElementById('form-error');
-  const fileInput = document.getElementById('f-resume');
-  
-  if(!fileInput.files || fileInput.files.length === 0) {
-    err.textContent = "Please upload your resume.";
-    return;
-  }
-  
-  const file = fileInput.files[0];
-  if (file.size > 5 * 1024 * 1024) {
-    err.textContent = "Resume is too large. Max 5MB allowed.";
-    return;
-  }
-
-  btn.textContent = 'Uploading & Submitting...';
-  btn.disabled = true;
-  err.textContent = '';
-
-  try {
-    const fileBase64 = await getBase64(file);
-    
-    const payload = {
-      action: 'submitApplication',
-      configSheetId: CONFIG_SHEET_ID,
-      company: document.getElementById('job-company').textContent,
-      role: document.getElementById('job-role').textContent,
-      name: document.getElementById('f-name').value,
-      email: document.getElementById('f-email').value,
-      phone: document.getElementById('f-phone').value,
-      fileBase64: fileBase64,
-      fileName: file.name,
-      mimeType: file.type
-    };
-
-    const res = await fetch(WEBAPP, {
-      method: 'POST',
-      body: JSON.stringify(payload)
     });
-    const data = await res.json();
-    
-    if(data.ok) {
-      document.getElementById('app-container').style.display = 'none';
-      document.getElementById('success-state').style.display = 'block';
-      window.scrollTo(0,0);
-    } else {
-      err.textContent = data.error || 'Submission failed. Please try again.';
-      btn.textContent = 'Submit Application';
-      btn.disabled = false;
-    }
-  } catch (error) {
-    err.textContent = 'Network error. Please check your connection and try again.';
-    btn.textContent = 'Submit Application';
-    btn.disabled = false;
-    console.error(error);
-  }
-});
-
-// Init
-fetchJobDetails();
-</script>
-
+  </script>
 </body>
 </html>
