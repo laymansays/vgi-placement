@@ -1514,10 +1514,6 @@ async function init(){
     setLoadSub('Parsing company list<span class="loader-dots"><span>.</span><span>.</span><span>.</span></span>');
     COMPANIES = parseConfigFromJSON(configJSON, htmlLinks);
 
-    if(!COMPANIES.length){
-      throw new Error('No companies with valid Sheet IDs found. Make sure Column B in your config sheet contains the Google Sheet URL (as a hyperlink or plain URL), and the config sheet is shared as "Anyone with the link → Viewer".');
-    }
-
     // 2. Fetch Admin Data tab (non-fatal)
     setLoadSub('Loading admin data<span class="loader-dots"><span>.</span><span>.</span><span>.</span></span>');
     try {
