@@ -78,8 +78,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#0F172A;line-heig
       <div class="tags">
         <span class="tag highlight" id="job-ctc">5.0 LPA</span>
         <span class="tag" id="job-location">Bangalore</span>
+          <span class="tag" id="job-education" style="display:none;background:#f3e8ff;color:#6b21a8;"></span>
+          <span class="tag" id="job-date" style="display:none;background:#e0f2fe;color:#0369a1;"></span>
       </div>
       <div class="jd" id="job-about">Loading job description...</div>
+        <a id="job-doc" href="#" target="_blank" style="display:none; margin-top:12px; display:inline-block; font-size:14px; color:#570B54; font-weight:600; text-decoration:none;">📄 View JD Document</a>
     </div>
 
     <div class="form-section">
@@ -132,7 +135,7 @@ async function fetchJobDetails() {
   }
 
   try {
-    const url = `https://docs.google.com/spreadsheets/d/${CONFIG_SHEET_ID}/gviz/tq?tqx=out:json&sheet=CIRCULAR_DATA`;
+    const url = `https://docs.google.com/spreadsheets/d/${CONFIG_SHEET_ID}/gviz/tq?tqx=out:json&sheet=CIRCULAR_DATA&_cb=${new Date().getTime()}`; // Added cache buster
     const res = await fetch(url);
     const text = await res.text();
     const jsonStr = text.replace(/^[^(]*\(/,'').replace(/\);\s*$/,'');
@@ -177,7 +180,20 @@ async function fetchJobDetails() {
       document.getElementById('job-location').style.display = 'none';
     }
     
-    document.getElementById('job-about').textContent = match[1] || match[6] || match[7] || 'Please refer to the detailed JD circular for more information on responsibilities and requirements.';
+    document.getElementById('job-about').innerHTML = (match[1] || match[6] || match[7] || 'Please refer to the detailed JD circular for more information on responsibilities and requirements.').replace(/\n/g, '<br>');
+      
+      if(match[3]) {
+        document.getElementById('job-education').textContent = '🎓 ' + match[3];
+        document.getElementById('job-education').style.display = 'inline-block';
+      }
+      if(match[11]) {
+        document.getElementById('job-date').textContent = '📅 Drive: ' + match[11];
+        document.getElementById('job-date').style.display = 'inline-block';
+      }
+      if(match[8]) {
+        document.getElementById('job-doc').href = match[8];
+        document.getElementById('job-doc').style.display = 'inline-block';
+      }
     
     document.getElementById('loading-state').style.display = 'none';
     document.getElementById('app-container').style.display = 'block';
