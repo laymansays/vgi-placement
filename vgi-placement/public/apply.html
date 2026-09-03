@@ -128,9 +128,9 @@
         btn.disabled = true;
         document.getElementById('error-msg').style.display = 'none';
 
-        try {
-          const reader = new FileReader();
-          reader.onload = async function() {
+        const reader = new FileReader();
+        reader.onload = async function() {
+          try {
             const base64 = reader.result.split(',')[1];
             
             const payload = {
@@ -156,14 +156,14 @@
             
             document.getElementById('app-container').style.display = 'none';
             document.getElementById('success-state').style.display = 'block';
-          };
-          reader.readAsDataURL(file);
-        } catch(e) {
-          document.getElementById('error-msg').textContent = e.message;
-          document.getElementById('error-msg').style.display = 'block';
-          btn.textContent = "Submit Application";
-          btn.disabled = false;
-        }
+          } catch(e) {
+            document.getElementById('error-msg').textContent = e.message;
+            document.getElementById('error-msg').style.display = 'block';
+            btn.textContent = "Submit Application";
+            btn.disabled = false;
+          }
+        };
+        reader.readAsDataURL(file);
       });
     });
   </script>
