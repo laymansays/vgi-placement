@@ -376,7 +376,10 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;}
       <span class="sp-nav-title">Placement Portal</span>
     </a>
     <div class="sp-nav-right">
-      <span class="sp-nav-name" id="nav-name"></span>
+      <select style="background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.35); color:#fff; font-weight:600; font-size:13px; border-radius:8px; padding:6px 12px; margin-right:8px; outline:none; font-family:'Inter',sans-serif;" onchange="changeYear(this.value)">
+  <option value="2026-27" style="color:#000;" ${currentYear === '2026-27' ? 'selected' : ''}>2026-27</option>
+  <option value="2025-26" style="color:#000;" ${currentYear === '2025-26' ? 'selected' : ''}>2025-26</option>
+</select><span class="sp-nav-name" id="nav-name"></span>
       <button class="btn-logout" id="logout-btn">Logout</button>
     </div>
   </nav>
@@ -411,7 +414,19 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;}
 /* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
    SHARED UTILITIES
 \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
-const CONFIG_SHEET_ID   = '__SHEET_ID__';
+const SHEET_IDS = {
+  '2025-26': '__SHEET_ID_2025__',
+  '2026-27': '__SHEET_ID_2026__'
+};
+let currentYear = localStorage.getItem('vgi_placement_year') || '2026-27';
+let CONFIG_SHEET_ID = SHEET_IDS[currentYear] || SHEET_IDS['2025-26'];
+if(!CONFIG_SHEET_ID || CONFIG_SHEET_ID.startsWith('__')) {
+  CONFIG_SHEET_ID = '__SHEET_ID__';
+}
+function changeYear(yr) {
+  localStorage.setItem('vgi_placement_year', yr);
+  window.location.reload();
+}
 const CONFIG_TAB_NAME   = 'CONFIG_TAB';
 const ADMIN_TAB_NAME    = 'ADMIN_MODE';
 const STUDENT_TAB_NAME  = 'STUDENT_MASTER';

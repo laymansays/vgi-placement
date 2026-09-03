@@ -335,7 +335,10 @@ body{
   <!-- Nav lives inside hero so it shares the gradient -->
   <nav class="nav">
     <span class="nav-college">Vidyavahini Group of Institutions</span>
-    <span class="nav-year">2025–26</span>
+    <select style="background:rgba(109,14,106,0.22); border:1px solid rgba(211,182,210,0.22); color:rgba(211,182,210,0.90); font-weight:600; font-size:13px; border-radius:999px; padding:3px 10px; margin-left:8px; outline:none;" onchange="changeYear(this.value)">
+      <option value="2026-27" style="color:#000;" ${currentYear === '2026-27' ? 'selected' : ''}>2026-27</option>
+      <option value="2025-26" style="color:#000;" ${currentYear === '2025-26' ? 'selected' : ''}>2025-26</option>
+    </select>
   </nav>
 
   <!-- Central content -->
@@ -513,7 +516,19 @@ body{
 /* ═══════════════════════════════════════════
    COMPANY CAROUSEL
 ═══════════════════════════════════════════ */
-const CONFIG_SHEET_ID_IDX = '__SHEET_ID__';
+const SHEET_IDS = {
+  '2025-26': '__SHEET_ID_2025__',
+  '2026-27': '__SHEET_ID_2026__'
+};
+let currentYear = localStorage.getItem('vgi_placement_year') || '2026-27';
+let CONFIG_SHEET_ID_IDX = SHEET_IDS[currentYear] || SHEET_IDS['2025-26'];
+if(!CONFIG_SHEET_ID_IDX || CONFIG_SHEET_ID_IDX.startsWith('__')) {
+  CONFIG_SHEET_ID_IDX = '__SHEET_ID__';
+}
+function changeYear(yr) {
+  localStorage.setItem('vgi_placement_year', yr);
+  window.location.reload();
+}
 const ADMIN_TAB_IDX       = 'ADMIN_MODE';
 
 const _CHIP_GRADS=[

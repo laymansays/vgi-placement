@@ -23,8 +23,11 @@ const PORT = process.env.PORT || 3000;
 const PUB  = path.join(__dirname, 'public');
 
 /* ── Validate required env vars on startup ─────────────────── */
-const REQUIRED = ['SHEET_ID', 'WEBAPP_URL', 'ADMIN_PIN', 'JOIN_PIN', 'DASHBOARD_PIN'];
+const REQUIRED = ['WEBAPP_URL', 'ADMIN_PIN', 'JOIN_PIN', 'DASHBOARD_PIN'];
 const missing  = REQUIRED.filter(k => !process.env[k]);
+if (!process.env.SHEET_ID && !process.env.SHEET_ID_2025 && !process.env.SHEET_ID_2026) {
+  missing.push('SHEET_ID (or SHEET_ID_2025 / SHEET_ID_2026)');
+}
 if (missing.length) {
   console.error('❌  Missing environment variables:', missing.join(', '));
   console.error('    Set them in Render → Environment, or in a local .env file.');
@@ -34,7 +37,9 @@ if (missing.length) {
 /* ── Inject secrets into any text file ─────────────────────── */
 function inject(text) {
   return text
-    .replace(/__SHEET_ID__/g,      process.env.SHEET_ID)
+    .replace(/__SHEET_ID__/g,       process.env.SHEET_ID)
+    .replace(/__SHEET_ID_2025__/g,  process.env.SHEET_ID_2025 || process.env.SHEET_ID)
+    .replace(/__SHEET_ID_2026__/g,  process.env.SHEET_ID_2026 || '')
     .replace(/__WEBAPP_URL__/g,     process.env.WEBAPP_URL)
     .replace(/__ADMIN_PIN__/g,      process.env.ADMIN_PIN)
     .replace(/__JOIN_PIN__/g,       process.env.JOIN_PIN)

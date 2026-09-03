@@ -5,7 +5,22 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 /* ── CONSTANTS ── */
-const CONFIG_SHEET_ID    = '__SHEET_ID__';
+const SHEET_IDS = {
+  '2025-26': '__SHEET_ID_2025__',
+  '2026-27': '__SHEET_ID_2026__'
+};
+let currentYear = localStorage.getItem('vgi_placement_year') || '2026-27';
+let CONFIG_SHEET_ID = SHEET_IDS[currentYear] || SHEET_IDS['2025-26'];
+// Fallback if 2026 sheet is empty/missing
+if(!CONFIG_SHEET_ID || CONFIG_SHEET_ID.startsWith('__')) {
+  CONFIG_SHEET_ID = '__SHEET_ID__'; // Fallback to whatever is in SHEET_ID
+}
+
+function changeYear(yr) {
+  localStorage.setItem('vgi_placement_year', yr);
+  window.location.reload();
+}
+
 const CONFIG_TAB         = 'CONFIG_TAB';
 const ADMIN_DATA_TAB     = 'ADMIN_MODE';
 const STUDENT_MASTER_TAB = 'STUDENT_MASTER';

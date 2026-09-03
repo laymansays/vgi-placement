@@ -901,7 +901,20 @@ body.admin-mode .modal{border-top:3px solid var(--admin);}
 /* ════════════════════════════════════════════════════
    CONFIG
 ════════════════════════════════════════════════════ */
-const CONFIG_SHEET_ID = '__SHEET_ID__';
+const SHEET_IDS = {
+  '2025-26': '__SHEET_ID_2025__',
+  '2026-27': '__SHEET_ID_2026__'
+};
+let currentYear = localStorage.getItem('vgi_placement_year') || '2026-27';
+let CONFIG_SHEET_ID = SHEET_IDS[currentYear] || SHEET_IDS['2025-26'];
+if(!CONFIG_SHEET_ID || CONFIG_SHEET_ID.startsWith('__')) {
+  CONFIG_SHEET_ID = '__SHEET_ID__';
+}
+function changeYear(yr) {
+  localStorage.setItem('vgi_placement_year', yr);
+  window.location.reload();
+}
+
 const CONFIG_TAB      = 'CONFIG_TAB';   // Main config tab — tab renamed by user
 const ADMIN_DATA_TAB  = 'ADMIN_MODE';   // Admin overrides tab — tab renamed by user
 const JOB_SEEKERS_TAB  = 'JOB_SEEKERS';  // Students looking for jobs post-degree
@@ -1615,7 +1628,10 @@ function renderNav(){
     const c=COMPANIES.find(x=>x.id===cId);
     right=`<nav class="nav-crumb"><span class="crumb" id="n-h">Home</span><span class="crumb-sep">/</span><span class="crumb" id="n-d">Companies</span><span class="crumb-sep">/</span><span class="crumb-active">${c?xe(c.name):''}</span></nav>`;
   }
-  nb.innerHTML=`<div class="navbar"><a class="nav-brand" id="n-brand"><div class="nav-logo"><img src="logo.jpg" alt="VG" style="width:100%;height:100%;object-fit:contain;border-radius:10px;display:block;"/></div><div class="nav-name"><span>Vidyavahini</span><span>First Grade Degree College</span></div></a><div class="nav-right"><a href="index.html" class="btn-nav-home-pd" title="Home">←</a><button class="btn-icon" id="n-theme">🌙</button>${right}</div></div>`;
+  nb.innerHTML=`<div class="navbar"><a class="nav-brand" id="n-brand"><div class="nav-logo"><img src="logo.jpg" alt="VG" style="width:100%;height:100%;object-fit:contain;border-radius:10px;display:block;"/></div><div class="nav-name"><span>Vidyavahini</span><span>First Grade Degree College</span></div></a><div class="nav-right"><a href="index.html" class="btn-nav-home-pd" title="Home">←</a><select class="form-select" style="width: auto; padding: 4px 10px; font-weight: 600; font-size: 13px;" onchange="changeYear(this.value)">
+  <option value="2026-27" ${currentYear === '2026-27' ? 'selected' : ''}>2026-27</option>
+  <option value="2025-26" ${currentYear === '2025-26' ? 'selected' : ''}>2025-26</option>
+</select><button class="btn-icon" id="n-theme">🌙</button>${right}</div></div>`;
   const g=id=>document.getElementById(id);
   g('n-brand').onclick=()=>{ window.location.href='index.html'; };
   g('n-theme').onclick=toggleTheme;
