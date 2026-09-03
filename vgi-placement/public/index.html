@@ -350,6 +350,7 @@ body{
     const y = localStorage.getItem('vgi_placement_year') || '2026-27';
     const b = document.querySelector('#yr-toggle .yr-btn[data-yr="'+y+'"]');
     if(b) b.classList.add('active');
+    document.querySelectorAll('.dyn-year').forEach(el => { el.textContent = y; });
   })();
 </script>
   </nav>
@@ -361,7 +362,7 @@ body{
     <div class="hero-top">
       <div class="hero-eyebrow">
         <span class="eyebrow-dot"></span>
-        PLACEMENT SEASON 2025–26
+        <span class="dyn-year">2025-26</span>
       </div>
       <h1 class="hero-title">
         Campus<br><span class="accent">Placement</span> Dashboard
@@ -420,13 +421,13 @@ body{
   <div class="companies-section" id="companies-section">
     <div class="companies-label">
       <div class="companies-label-line"></div>
-      <span class="companies-label-text">COMPANIES HIRING FROM VIDYAVAHINI · 2025–26</span>
+      <span class="companies-label-text"><span class="dyn-year">2025-26</span></span>
       <div class="companies-label-line right"></div>
     </div>
     <div id="ticker-row-1-wrap" class="ticker-wrap"></div>
     <div id="ticker-row-2-wrap" class="ticker-wrap"></div>
     <!-- Footer merged into hero bottom -->
-    <div class="footer">Vidyavahini First Grade Degree College · Placement Cell · 2025–26</div>
+    <div class="footer">Vidyavahini First Grade Degree College · <span class="dyn-year">2025-26</span></div>
   </div>
 
 </section>

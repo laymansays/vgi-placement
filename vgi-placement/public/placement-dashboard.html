@@ -880,6 +880,7 @@ body.admin-mode .modal{border-top:3px solid var(--admin);}
     const y = localStorage.getItem('vgi_placement_year') || '2026-27';
     const b = document.querySelector('#yr-toggle .yr-btn[data-yr="'+y+'"]');
     if(b) b.classList.add('active');
+    document.querySelectorAll('.dyn-year').forEach(el => { el.textContent = y; });
   })();
 </script></div>
       <div class="pv-group"><span class="pv-label">Column Field</span><select class="pv-select" id="pv-col"><option value="">— None —</option></select></div>
