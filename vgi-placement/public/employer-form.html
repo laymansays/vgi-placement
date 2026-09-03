@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Employer Registration · Vidyavahini Placement</title>
+<link rel="icon" type="image/jpeg" href="logo.jpg"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{--c1:#6D0E6A;--c2:#570B54;--pale:#D3B6D2;--bg:#F8FAFC;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:#0F172A;line-height:1.5;}
+.header{background:var(--c2);color:#fff;padding:16px 24px;display:flex;align-items:center;gap:12px;}
+.header img{width:40px;height:40px;border-radius:8px;}
+.header h1{font-size:18px;font-weight:600;}
+.container{max-width:800px;margin:32px auto;background:#fff;border-radius:12px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);padding:32px;}
+.title{font-size:24px;font-weight:700;margin-bottom:8px;}
+.desc{color:#64748B;font-size:14px;margin-bottom:32px;}
+.form-group{margin-bottom:24px;}
+.form-label{display:block;font-size:14px;font-weight:600;margin-bottom:6px;color:#334155;}
+.form-control{width:100%;padding:10px 14px;border:1px solid #CBD5E1;border-radius:6px;font-family:inherit;font-size:15px;outline:none;transition:border-color .2s;}
+.form-control:focus{border-color:var(--c1);box-shadow:0 0 0 3px rgba(109,14,106,0.1);}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.checkbox-group{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.check-item{display:flex;align-items:center;gap:8px;font-size:15px;cursor:pointer;}
+.check-item input{width:18px;height:18px;accent-color:var(--c1);cursor:pointer;}
+textarea.form-control{resize:vertical;min-height:100px;}
+.btn{background:var(--c2);color:#fff;border:none;padding:12px 24px;font-size:16px;font-weight:600;border-radius:6px;cursor:pointer;width:100%;transition:background .2s;}
+.btn:hover{background:var(--c1);}
+.btn:disabled{opacity:0.6;cursor:not-allowed;}
+.section-title{font-size:18px;font-weight:600;color:var(--c1);margin:32px 0 16px;border-bottom:2px solid var(--pale);padding-bottom:8px;}
+
+/* Success state */
+.success-msg { display:none; text-align:center; padding:48px 24px; }
+.success-msg h2 { color:#16A34A; font-size:24px; margin-bottom:12px; }
+.success-msg p { color:#475569; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <img src="logo.jpg" alt="VGI Logo">
+  <h1>Vidyavahini Placement Cell</h1>
+</div>
+
+<div class="container">
+  <div id="form-container">
+    <h2 class="title">Employer Registration Form</h2>
+    <p class="desc">Please provide the details of your recruitment drive. Our placement cell will get back to you shortly.</p>
+
+    <form id="employer-form">
+      
+      <div class="section-title">Company & Contact Details</div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Company Name *</label>
+          <input type="text" id="f-company" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">HR / POC Name *</label>
+          <input type="text" id="f-poc" class="form-control" required>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Contact Email *</label>
+          <input type="email" id="f-email" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contact Phone *</label>
+          <input type="tel" id="f-phone" class="form-control" required>
+        </div>
+      </div>
+
+      <div class="section-title">Job Requirements</div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Designation / Role *</label>
+          <input type="text" id="f-role" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Job Type *</label>
+          <select id="f-type" class="form-control" required>
+            <option value="">-- Select --</option>
+            <option value="Full-time">Full-time</option>
+            <option value="Internship">Internship</option>
+            <option value="Internship + Full-time">Internship + Full-time</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Job Description *</label>
+        <textarea id="f-jd" class="form-control" placeholder="Key responsibilities, required skills, etc." required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Targeted Degrees * (Select all that apply)</label>
+        <div style="margin-bottom:8px;font-weight:600;font-size:13px;color:#64748B;">Undergraduate (UG)</div>
+        <div class="checkbox-group" style="margin-bottom:16px;">
+          <label class="check-item"><input type="checkbox" name="degree" value="B.Com"> B.Com</label>
+          <label class="check-item"><input type="checkbox" name="degree" value="BBA"> BBA</label>
+          <label class="check-item"><input type="checkbox" name="degree" value="BCA"> BCA</label>
+        </div>
+        <div style="margin-bottom:8px;font-weight:600;font-size:13px;color:#64748B;">Postgraduate (PG)</div>
+        <div class="checkbox-group">
+          <label class="check-item"><input type="checkbox" name="degree" value="M.Com"> M.Com</label>
+          <label class="check-item"><input type="checkbox" name="degree" value="MBA"> MBA</label>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Number of Vacancies (Approx)</label>
+          <input type="text" id="f-vacancies" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Drive Date (Tentative)</label>
+          <input type="date" id="f-date" class="form-control">
+        </div>
+      </div>
+
+      <div class="section-title">Compensation & Contract</div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">CTC Offered (per annum) *</label>
+          <input type="text" id="f-ctc" class="form-control" placeholder="e.g. 3.5 LPA" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Standard Deductions (if any)</label>
+          <input type="text" id="f-deductions" class="form-control" placeholder="e.g. PF, PT, Gratuity">
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Contract / Bond Years</label>
+          <input type="text" id="f-contract" class="form-control" placeholder="e.g. 1 Year, None">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Breach Clause (if applicable)</label>
+          <input type="text" id="f-breach" class="form-control" placeholder="e.g. Penalty of 1 month salary">
+        </div>
+      </div>
+
+      <div class="section-title">Interview Details</div>
+      <div class="form-group">
+        <label class="form-label">Mode of Interview *</label>
+        <div class="checkbox-group" style="grid-template-columns:1fr 1fr;">
+          <label class="check-item"><input type="radio" name="mode" value="In-campus" required> In-campus (Physical)</label>
+          <label class="check-item"><input type="radio" name="mode" value="Online"> Online / Virtual</label>
+        </div>
+      </div>
+
+      <button type="submit" id="btn-submit" class="btn">Submit Registration</button>
+      <div id="form-error" style="color:#DC2626;margin-top:12px;text-align:center;font-size:14px;font-weight:600;"></div>
+    </form>
+  </div>
+
+  <div id="success-container" class="success-msg">
+    <h2>Registration Successful! 🎉</h2>
+    <p>Thank you for submitting your requirements. The VGI Placement Cell will contact you shortly.</p>
+    <button class="btn" style="width:auto;margin-top:24px;" onclick="location.reload()">Submit Another</button>
+  </div>
+</div>
+
+<script>
+const WEBAPP = '__WEBAPP_URL__';
+
+document.getElementById('employer-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  if(!WEBAPP || WEBAPP.startsWith('__')){
+    document.getElementById('form-error').textContent = 'System error: WebApp URL not configured.';
+    return;
+  }
+
+  // Gather data
+  const degrees = Array.from(document.querySelectorAll('input[name="degree"]:checked')).map(el => el.value).join(', ');
+  const modeEl = document.querySelector('input[name="mode"]:checked');
+  const mode = modeEl ? modeEl.value : '';
+
+  if(!degrees) {
+    document.getElementById('form-error').textContent = 'Please select at least one targeted degree.';
+    return;
+  }
+  
+  const payload = {
+    action: 'submitEmployerForm',
+    company: document.getElementById('f-company').value,
+    poc: document.getElementById('f-poc').value,
+    email: document.getElementById('f-email').value,
+    phone: document.getElementById('f-phone').value,
+    role: document.getElementById('f-role').value,
+    type: document.getElementById('f-type').value,
+    jd: document.getElementById('f-jd').value,
+    degrees: degrees,
+    vacancies: document.getElementById('f-vacancies').value,
+    date: document.getElementById('f-date').value,
+    ctc: document.getElementById('f-ctc').value,
+    deductions: document.getElementById('f-deductions').value,
+    contract: document.getElementById('f-contract').value,
+    breach: document.getElementById('f-breach').value,
+    mode: mode
+  };
+
+  const btn = document.getElementById('btn-submit');
+  const err = document.getElementById('form-error');
+  btn.textContent = 'Submitting...';
+  btn.disabled = true;
+  err.textContent = '';
+
+  try {
+    const res = await fetch(WEBAPP, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    
+    if(data.ok) {
+      document.getElementById('form-container').style.display = 'none';
+      document.getElementById('success-container').style.display = 'block';
+    } else {
+      err.textContent = data.error || 'Submission failed. Please try again.';
+      btn.textContent = 'Submit Registration';
+      btn.disabled = false;
+    }
+  } catch (error) {
+    err.textContent = 'Network error. Please check your connection and try again.';
+    btn.textContent = 'Submit Registration';
+    btn.disabled = false;
+  }
+});
+</script>
+
+</body>
+</html>
