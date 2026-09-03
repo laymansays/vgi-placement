@@ -65,6 +65,7 @@ app.get('/placement-dashboard.html',  (req, res) => serveInjected('placement-das
 app.get('/placement-cell.html',       (req, res) => serveInjected('placement-cell.html',      'text/html', res));
 app.get('/placement-report.html',     (req, res) => serveInjected('placement-report.html',    'text/html', res));
 app.get('/employer-form.html',        (req, res) => serveInjected('employer-form.html',       'text/html', res));
+app.get('/apply.html',                (req, res) => serveInjected('apply.html',               'text/html', res));
 
 /* ── JS routes that contain placeholders ───────────────────── */
 app.get('/shared.js',     (req, res) => serveInjected('shared.js',     'application/javascript', res));
