@@ -376,10 +376,23 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;}
       <span class="sp-nav-title">Placement Portal</span>
     </a>
     <div class="sp-nav-right">
-      <select style="background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.35); color:#fff; font-weight:600; font-size:13px; border-radius:8px; padding:6px 12px; margin-right:8px; outline:none; font-family:'Inter',sans-serif;" onchange="changeYear(this.value)">
-  <option value="2026-27" style="color:#000;" ${currentYear === '2026-27' ? 'selected' : ''}>2026-27</option>
-  <option value="2025-26" style="color:#000;" ${currentYear === '2025-26' ? 'selected' : ''}>2025-26</option>
-</select><span class="sp-nav-name" id="nav-name"></span>
+      <style>
+.yr-toggle { display: inline-flex; background: rgba(255,255,255,0.12); border-radius: 99px; padding: 3px; margin: 0 8px; border: 1px solid rgba(255,255,255,0.15); align-items: center; }
+.yr-btn { background: transparent; border: none; color: rgba(255,255,255,0.65); padding: 4px 10px; font-size: 11.5px; font-weight: 700; border-radius: 99px; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+.yr-btn:hover { color: rgba(255,255,255,0.9); }
+.yr-btn.active { background: #fff; color: #6D0E6A; box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
+</style>
+<div class="yr-toggle" id="yr-toggle">
+  <button class="yr-btn" data-yr="2026-27" onclick="changeYear('2026-27')">26-27</button>
+  <button class="yr-btn" data-yr="2025-26" onclick="changeYear('2025-26')">25-26</button>
+</div>
+<script>
+  (function(){
+    const y = localStorage.getItem('vgi_placement_year') || '2026-27';
+    const b = document.querySelector('#yr-toggle .yr-btn[data-yr="'+y+'"]');
+    if(b) b.classList.add('active');
+  })();
+</script><span class="sp-nav-name" id="nav-name"></span>
       <button class="btn-logout" id="logout-btn">Logout</button>
     </div>
   </nav>

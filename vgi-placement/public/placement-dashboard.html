@@ -865,7 +865,23 @@ body.admin-mode .modal{border-top:3px solid var(--admin);}
         oninput="_shFormulaInput(this.value)"/>
     </div>
     <div id="sheet-pivot-panel">
-      <div class="pv-group"><span class="pv-label">Row Field</span><select class="pv-select" id="pv-row"></select></div>
+      <div class="pv-group"><span class="pv-label">Row Field</span><style>
+.yr-toggle { display: inline-flex; background: rgba(255,255,255,0.12); border-radius: 99px; padding: 3px; margin: 0 8px; border: 1px solid rgba(255,255,255,0.15); align-items: center; }
+.yr-btn { background: transparent; border: none; color: rgba(255,255,255,0.65); padding: 4px 10px; font-size: 11.5px; font-weight: 700; border-radius: 99px; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+.yr-btn:hover { color: rgba(255,255,255,0.9); }
+.yr-btn.active { background: #fff; color: #6D0E6A; box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
+</style>
+<div class="yr-toggle" id="yr-toggle">
+  <button class="yr-btn" data-yr="2026-27" onclick="changeYear('2026-27')">26-27</button>
+  <button class="yr-btn" data-yr="2025-26" onclick="changeYear('2025-26')">25-26</button>
+</div>
+<script>
+  (function(){
+    const y = localStorage.getItem('vgi_placement_year') || '2026-27';
+    const b = document.querySelector('#yr-toggle .yr-btn[data-yr="'+y+'"]');
+    if(b) b.classList.add('active');
+  })();
+</script></div>
       <div class="pv-group"><span class="pv-label">Column Field</span><select class="pv-select" id="pv-col"><option value="">— None —</option></select></div>
       <div class="pv-group"><span class="pv-label">Value Field</span><select class="pv-select" id="pv-val"></select></div>
       <div class="pv-group"><span class="pv-label">Aggregation</span>
