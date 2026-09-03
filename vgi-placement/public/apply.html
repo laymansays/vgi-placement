@@ -41,7 +41,7 @@
 
   <div class="container">
     <div id="success-state">
-      <h2>Application Submitted! 🚀</h2>
+      <h2>Application Submitted! &#128640;</h2>
       <p style="color:#475569; line-height:1.5;">Your application has been received successfully.<br>The Placement Cell will contact you with further updates.</p>
     </div>
 
@@ -50,7 +50,8 @@
         <h2 id="job-role">Role Name</h2>
         <div class="company" id="job-company">Company Name</div>
         <p>Please complete the form below to submit your application.</p>
-        <button id="jd-toggle-btn" type="button" style="display:none; margin: 16px auto 0 auto; background: #f1f5f9; color: #570B54; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px;">📄 View JD Document</button>
+        
+        <button id="jd-toggle-btn" type="button" style="display:none; margin: 16px auto 0 auto; background: #f1f5f9; color: #570B54; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px;">&#128196; View JD Document</button>
         <div id="jd-tray" style="display:none; margin-top: 16px; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; height: 400px;">
           <iframe id="jd-iframe" style="width: 100%; height: 100%; border: none;"></iframe>
         </div>
@@ -84,85 +85,86 @@
 
   <script src="/shared.js"></script>
   <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const targetCompany = urlParams.get('company') || 'Unknown Company';
-    const targetRole = urlParams.get('role') || 'Unknown Role';
-    
-    document.getElementById('job-company').textContent = targetCompany;
-    document.getElementById('job-role').textContent = targetRole;
+    document.addEventListener("DOMContentLoaded", function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const targetCompany = urlParams.get('company') || 'Unknown Company';
+      const targetRole = urlParams.get('role') || 'Unknown Role';
+      
+      document.getElementById('job-company').textContent = targetCompany;
+      document.getElementById('job-role').textContent = targetRole;
 
-    
-    const targetDoc = urlParams.get('doc');
-    
-    if (targetDoc) {
-      const toggleBtn = document.getElementById('jd-toggle-btn');
-      const tray = document.getElementById('jd-tray');
-      const iframe = document.getElementById('jd-iframe');
+      const targetDoc = urlParams.get('doc');
       
-      toggleBtn.style.display = 'inline-block';
-      
-      toggleBtn.addEventListener('click', () => {
-        if (tray.style.display === 'none') {
-          iframe.src = targetDoc.replace('/view?usp=sharing', '/preview');
-          tray.style.display = 'block';
-          toggleBtn.textContent = 'Hide JD Document';
-        } else {
-          tray.style.display = 'none';
-          toggleBtn.textContent = '📄 View JD Document';
+      if (targetDoc) {
+        const toggleBtn = document.getElementById('jd-toggle-btn');
+        const tray = document.getElementById('jd-tray');
+        const iframe = document.getElementById('jd-iframe');
+        
+        toggleBtn.style.display = 'inline-block';
+        
+        toggleBtn.addEventListener('click', () => {
+          if (tray.style.display === 'none') {
+            iframe.src = targetDoc.replace('/view?usp=sharing', '/preview');
+            tray.style.display = 'block';
+            toggleBtn.textContent = 'Hide JD Document';
+          } else {
+            tray.style.display = 'none';
+            toggleBtn.innerHTML = '&#128196; View JD Document';
+          }
+        });
+      }
+
+      document.getElementById('apply-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const fileInput = document.getElementById('f-resume');
+        if(fileInput.files.length === 0) return alert("Please upload your resume.");
+        const file = fileInput.files[0];
+        if(file.type !== "application/pdf") return alert("Only PDF resumes are allowed.");
+        if(file.size > 2 * 1024 * 1024) return alert("File size must be under 2MB.");
+        
+        const btn = document.getElementById('submit-btn');
+        btn.textContent = "Submitting...";
+        btn.disabled = true;
+        document.getElementById('error-msg').style.display = 'none';
+
+        try {
+          const reader = new FileReader();
+          reader.onload = async function() {
+            const base64 = reader.result.split(',')[1];
+            
+            const payload = {
+              action: 'submitApplication',
+              configSheetId: CONFIG_SHEET_ID,
+              company: targetCompany,
+              role: targetRole,
+              name: document.getElementById('f-name').value.trim(),
+              email: document.getElementById('f-email').value.trim(),
+              phone: document.getElementById('f-phone').value.trim(),
+              fileName: file.name,
+              mimeType: file.type,
+              fileBase64: base64
+            };
+
+            const res = await fetch(__WEBAPP_URL__, {
+              method: 'POST',
+              body: JSON.stringify(payload)
+            });
+            
+            const result = await res.json();
+            if(!result.ok) throw new Error(result.error || "Submission failed");
+            
+            document.getElementById('app-container').style.display = 'none';
+            document.getElementById('success-state').style.display = 'block';
+          };
+          reader.readAsDataURL(file);
+        } catch(e) {
+          document.getElementById('error-msg').textContent = e.message;
+          document.getElementById('error-msg').style.display = 'block';
+          btn.textContent = "Submit Application";
+          btn.disabled = false;
         }
       });
-    }
-
-    document.getElementById('apply-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const fileInput = document.getElementById('f-resume');
-      if(fileInput.files.length === 0) return alert("Please upload your resume.");
-      const file = fileInput.files[0];
-      if(file.type !== "application/pdf") return alert("Only PDF resumes are allowed.");
-      if(file.size > 2 * 1024 * 1024) return alert("File size must be under 2MB.");
-      
-      const btn = document.getElementById('submit-btn');
-      btn.textContent = "Submitting...";
-      btn.disabled = true;
-      document.getElementById('error-msg').style.display = 'none';
-
-      try {
-        const reader = new FileReader();
-        reader.onload = async function() {
-          const base64 = reader.result.split(',')[1];
-          
-          const payload = {
-            action: 'submitApplication',
-            configSheetId: CONFIG_SHEET_ID,
-            company: targetCompany,
-            role: targetRole,
-            name: document.getElementById('f-name').value.trim(),
-            email: document.getElementById('f-email').value.trim(),
-            phone: document.getElementById('f-phone').value.trim(),
-            fileName: file.name,
-            mimeType: file.type,
-            fileBase64: base64
-          };
-
-          const res = await fetch(__WEBAPP_URL__, {
-            method: 'POST',
-            body: JSON.stringify(payload)
-          });
-          
-          const result = await res.json();
-          if(!result.ok) throw new Error(result.error || "Submission failed");
-          
-          document.getElementById('app-container').style.display = 'none';
-          document.getElementById('success-state').style.display = 'block';
-        };
-        reader.readAsDataURL(file);
-      } catch(e) {
-        document.getElementById('error-msg').textContent = e.message;
-        document.getElementById('error-msg').style.display = 'block';
-        btn.textContent = "Submit Application";
-        btn.disabled = false;
-      }
     });
   </script>
 </body>
