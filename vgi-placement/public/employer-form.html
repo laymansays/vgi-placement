@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
-:root{--c1:#6D0E6A;--c2:#570B54;--pale:#D3B6D2;--bg:#F8FAFC;}
+:root{--c1:#6D0E6A;--c2:#570B54;--pale:#D3B6D2;--bg:#F8FAFC;--gray:#F1F5F9;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:#0F172A;line-height:1.5;}
 .header{background:var(--c2);color:#fff;padding:16px 24px;display:flex;align-items:center;gap:12px;}
@@ -30,7 +30,13 @@ textarea.form-control{resize:vertical;min-height:100px;}
 .btn{background:var(--c2);color:#fff;border:none;padding:12px 24px;font-size:16px;font-weight:600;border-radius:6px;cursor:pointer;width:100%;transition:background .2s;}
 .btn:hover{background:var(--c1);}
 .btn:disabled{opacity:0.6;cursor:not-allowed;}
+.btn-outline{background:transparent;color:var(--c1);border:2px solid var(--c1);padding:10px 20px;}
+.btn-outline:hover{background:var(--gray);}
 .section-title{font-size:18px;font-weight:600;color:var(--c1);margin:32px 0 16px;border-bottom:2px solid var(--pale);padding-bottom:8px;}
+.role-block{background:var(--gray);padding:24px;border-radius:8px;margin-bottom:24px;border:1px solid #E2E8F0;position:relative;}
+.role-block h3{margin-bottom:16px;color:#0F172A;font-size:16px;}
+.btn-remove-role{position:absolute;top:20px;right:20px;background:none;border:none;color:#DC2626;font-size:14px;font-weight:600;cursor:pointer;}
+.btn-remove-role:hover{text-decoration:underline;}
 
 /* Success state */
 .success-msg { display:none; text-align:center; padding:48px 24px; }
@@ -73,85 +79,28 @@ textarea.form-control{resize:vertical;min-height:100px;}
           <input type="tel" id="f-phone" class="form-control" required>
         </div>
       </div>
-
-      <div class="section-title">Job Requirements</div>
       <div class="grid-2">
-        <div class="form-group">
-          <label class="form-label">Designation / Role *</label>
-          <input type="text" id="f-role" class="form-control" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Job Type *</label>
-          <select id="f-type" class="form-control" required>
-            <option value="">-- Select --</option>
-            <option value="Full-time">Full-time</option>
-            <option value="Internship">Internship</option>
-            <option value="Internship + Full-time">Internship + Full-time</option>
-          </select>
-        </div>
-      </div>
-      
-      <div class="form-group">
-        <label class="form-label">Job Description *</label>
-        <textarea id="f-jd" class="form-control" placeholder="Key responsibilities, required skills, etc." required></textarea>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Targeted Degrees * (Select all that apply)</label>
-        <div style="margin-bottom:8px;font-weight:600;font-size:13px;color:#64748B;">Undergraduate (UG)</div>
-        <div class="checkbox-group" style="margin-bottom:16px;">
-          <label class="check-item"><input type="checkbox" name="degree" value="B.Com"> B.Com</label>
-          <label class="check-item"><input type="checkbox" name="degree" value="BBA"> BBA</label>
-          <label class="check-item"><input type="checkbox" name="degree" value="BCA"> BCA</label>
-        </div>
-        <div style="margin-bottom:8px;font-weight:600;font-size:13px;color:#64748B;">Postgraduate (PG)</div>
-        <div class="checkbox-group">
-          <label class="check-item"><input type="checkbox" name="degree" value="M.Com"> M.Com</label>
-          <label class="check-item"><input type="checkbox" name="degree" value="MBA"> MBA</label>
-        </div>
-      </div>
-
-      <div class="grid-2">
-        <div class="form-group">
-          <label class="form-label">Number of Vacancies (Approx)</label>
-          <input type="text" id="f-vacancies" class="form-control">
-        </div>
         <div class="form-group">
           <label class="form-label">Drive Date (Tentative)</label>
           <input type="date" id="f-date" class="form-control">
         </div>
-      </div>
-
-      <div class="section-title">Compensation & Contract</div>
-      <div class="grid-2">
         <div class="form-group">
-          <label class="form-label">CTC Offered (per annum) *</label>
-          <input type="text" id="f-ctc" class="form-control" placeholder="e.g. 3.5 LPA" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Standard Deductions (if any)</label>
-          <input type="text" id="f-deductions" class="form-control" placeholder="e.g. PF, PT, Gratuity">
-        </div>
-      </div>
-      <div class="grid-2">
-        <div class="form-group">
-          <label class="form-label">Contract / Bond Years</label>
-          <input type="text" id="f-contract" class="form-control" placeholder="e.g. 1 Year, None">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Breach Clause (if applicable)</label>
-          <input type="text" id="f-breach" class="form-control" placeholder="e.g. Penalty of 1 month salary">
+          <label class="form-label">Mode of Interview *</label>
+          <select id="f-mode" class="form-control" required>
+            <option value="">-- Select --</option>
+            <option value="In-campus (Physical)">In-campus (Physical)</option>
+            <option value="Online / Virtual">Online / Virtual</option>
+          </select>
         </div>
       </div>
 
-      <div class="section-title">Interview Details</div>
-      <div class="form-group">
-        <label class="form-label">Mode of Interview *</label>
-        <div class="checkbox-group" style="grid-template-columns:1fr 1fr;">
-          <label class="check-item"><input type="radio" name="mode" value="In-campus" required> In-campus (Physical)</label>
-          <label class="check-item"><input type="radio" name="mode" value="Online"> Online / Virtual</label>
-        </div>
+      <div class="section-title">Job Openings</div>
+      
+      <div id="roles-container">
+        <!-- Roles will be inserted here dynamically -->
       </div>
+      
+      <button type="button" id="btn-add-role" class="btn btn-outline" style="margin-bottom:32px;">+ Add Another Position</button>
 
       <button type="submit" id="btn-submit" class="btn">Submit Registration</button>
       <div id="form-error" style="color:#DC2626;margin-top:12px;text-align:center;font-size:14px;font-weight:600;"></div>
@@ -165,8 +114,119 @@ textarea.form-control{resize:vertical;min-height:100px;}
   </div>
 </div>
 
+<template id="role-template">
+  <div class="role-block">
+    <button type="button" class="btn-remove-role" onclick="this.parentElement.remove(); updateRoleNumbers();" style="display:none;">Remove</button>
+    <h3 class="role-heading">Position 1</h3>
+    
+    <div class="grid-2">
+      <div class="form-group">
+        <label class="form-label">Designation / Role *</label>
+        <input type="text" class="form-control f-role" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Job Type *</label>
+        <select class="form-control f-type" required>
+          <option value="">-- Select --</option>
+          <option value="Full-time">Full-time</option>
+          <option value="Internship">Internship</option>
+          <option value="Internship + Full-time">Internship + Full-time</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label">Job Description (Text)</label>
+      <textarea class="form-control f-jd" placeholder="Key responsibilities, required skills, etc."></textarea>
+    </div>
+
+    <div class="form-group" style="background:#fff;padding:12px;border:1px dashed #CBD5E1;border-radius:6px;">
+      <label class="form-label">Upload JD Document (Optional)</label>
+      <input type="file" class="form-control f-jd-file" accept=".pdf,.doc,.docx" style="border:none;padding:0;">
+      <div style="font-size:12px;color:#64748B;margin-top:4px;">Supports PDF or Word doc. If provided, overrides the text above.</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Targeted Degrees * (Select all that apply)</label>
+      <div style="margin-bottom:8px;font-weight:600;font-size:13px;color:#64748B;">Undergraduate (UG)</div>
+      <div class="checkbox-group" style="margin-bottom:16px;">
+        <label class="check-item"><input type="checkbox" class="cb-deg" value="B.Com"> B.Com</label>
+        <label class="check-item"><input type="checkbox" class="cb-deg" value="BBA"> BBA</label>
+        <label class="check-item"><input type="checkbox" class="cb-deg" value="BCA"> BCA</label>
+      </div>
+      <div style="margin-bottom:8px;font-weight:600;font-size:13px;color:#64748B;">Postgraduate (PG)</div>
+      <div class="checkbox-group">
+        <label class="check-item"><input type="checkbox" class="cb-deg" value="M.Com"> M.Com</label>
+        <label class="check-item"><input type="checkbox" class="cb-deg" value="MBA"> MBA</label>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="form-group">
+        <label class="form-label">Number of Vacancies</label>
+        <input type="text" class="form-control f-vacancies">
+      </div>
+      <div class="form-group">
+        <label class="form-label">CTC Offered (per annum) *</label>
+        <input type="text" class="form-control f-ctc" placeholder="e.g. 3.5 LPA" required>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="form-group">
+        <label class="form-label">Standard Deductions</label>
+        <input type="text" class="form-control f-deductions" placeholder="e.g. PF, PT, Gratuity">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contract / Bond Years</label>
+        <input type="text" class="form-control f-contract" placeholder="e.g. 1 Year, None">
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom:0;">
+      <label class="form-label">Breach Clause</label>
+      <input type="text" class="form-control f-breach" placeholder="e.g. Penalty of 1 month salary">
+    </div>
+  </div>
+</template>
+
 <script>
 const WEBAPP = '__WEBAPP_URL__';
+const rolesContainer = document.getElementById('roles-container');
+const template = document.getElementById('role-template');
+
+function addRoleBlock() {
+  const clone = template.content.cloneNode(true);
+  rolesContainer.appendChild(clone);
+  updateRoleNumbers();
+}
+
+function updateRoleNumbers() {
+  const blocks = rolesContainer.querySelectorAll('.role-block');
+  blocks.forEach((block, index) => {
+    block.querySelector('.role-heading').textContent = `Position ${index + 1}`;
+    const removeBtn = block.querySelector('.btn-remove-role');
+    if(blocks.length > 1) {
+      removeBtn.style.display = 'block';
+    } else {
+      removeBtn.style.display = 'none';
+    }
+  });
+}
+
+// Add the first role by default
+addRoleBlock();
+
+document.getElementById('btn-add-role').addEventListener('click', addRoleBlock);
+
+function getBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
 
 document.getElementById('employer-form').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -176,42 +236,74 @@ document.getElementById('employer-form').addEventListener('submit', async (e) =>
     return;
   }
 
-  // Gather data
-  const degrees = Array.from(document.querySelectorAll('input[name="degree"]:checked')).map(el => el.value).join(', ');
-  const modeEl = document.querySelector('input[name="mode"]:checked');
-  const mode = modeEl ? modeEl.value : '';
-
-  if(!degrees) {
-    document.getElementById('form-error').textContent = 'Please select at least one targeted degree.';
-    return;
-  }
-  
-  const payload = {
-    action: 'submitEmployerForm',
-    company: document.getElementById('f-company').value,
-    poc: document.getElementById('f-poc').value,
-    email: document.getElementById('f-email').value,
-    phone: document.getElementById('f-phone').value,
-    role: document.getElementById('f-role').value,
-    type: document.getElementById('f-type').value,
-    jd: document.getElementById('f-jd').value,
-    degrees: degrees,
-    vacancies: document.getElementById('f-vacancies').value,
-    date: document.getElementById('f-date').value,
-    ctc: document.getElementById('f-ctc').value,
-    deductions: document.getElementById('f-deductions').value,
-    contract: document.getElementById('f-contract').value,
-    breach: document.getElementById('f-breach').value,
-    mode: mode
-  };
-
   const btn = document.getElementById('btn-submit');
   const err = document.getElementById('form-error');
-  btn.textContent = 'Submitting...';
+  btn.textContent = 'Preparing files...';
   btn.disabled = true;
   err.textContent = '';
 
   try {
+    const rolesData = [];
+    const blocks = rolesContainer.querySelectorAll('.role-block');
+    
+    for (let i = 0; i < blocks.length; i++) {
+      const block = blocks[i];
+      const degrees = Array.from(block.querySelectorAll('.cb-deg:checked')).map(el => el.value).join(', ');
+      
+      if(!degrees) {
+        err.textContent = `Please select at least one targeted degree for Position ${i+1}.`;
+        btn.textContent = 'Submit Registration';
+        btn.disabled = false;
+        return;
+      }
+      
+      let fileBase64 = null;
+      let fileName = null;
+      let mimeType = null;
+      const fileInput = block.querySelector('.f-jd-file');
+      
+      if (fileInput.files && fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        if (file.size > 5 * 1024 * 1024) {
+           err.textContent = `File for Position ${i+1} is too large. Max 5MB allowed.`;
+           btn.textContent = 'Submit Registration';
+           btn.disabled = false;
+           return;
+        }
+        fileBase64 = await getBase64(file);
+        fileName = file.name;
+        mimeType = file.type;
+      }
+      
+      rolesData.push({
+        role: block.querySelector('.f-role').value,
+        type: block.querySelector('.f-type').value,
+        degrees: degrees,
+        vacancies: block.querySelector('.f-vacancies').value,
+        ctc: block.querySelector('.f-ctc').value,
+        deductions: block.querySelector('.f-deductions').value,
+        contract: block.querySelector('.f-contract').value,
+        breach: block.querySelector('.f-breach').value,
+        jd: block.querySelector('.f-jd').value,
+        fileBase64: fileBase64,
+        fileName: fileName,
+        mimeType: mimeType
+      });
+    }
+
+    const payload = {
+      action: 'submitEmployerForm',
+      company: document.getElementById('f-company').value,
+      poc: document.getElementById('f-poc').value,
+      email: document.getElementById('f-email').value,
+      phone: document.getElementById('f-phone').value,
+      date: document.getElementById('f-date').value,
+      mode: document.getElementById('f-mode').value,
+      roles: rolesData
+    };
+
+    btn.textContent = 'Submitting...';
+
     const res = await fetch(WEBAPP, {
       method: 'POST',
       body: JSON.stringify(payload)
@@ -221,6 +313,7 @@ document.getElementById('employer-form').addEventListener('submit', async (e) =>
     if(data.ok) {
       document.getElementById('form-container').style.display = 'none';
       document.getElementById('success-container').style.display = 'block';
+      window.scrollTo(0,0);
     } else {
       err.textContent = data.error || 'Submission failed. Please try again.';
       btn.textContent = 'Submit Registration';
