@@ -391,7 +391,9 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;}
     const y = localStorage.getItem('vgi_placement_year') || '2026-27';
     const b = document.querySelector('#yr-toggle .yr-btn[data-yr="'+y+'"]');
     if(b) b.classList.add('active');
-    document.querySelectorAll('.dyn-year').forEach(el => { el.textContent = y; });
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.dyn-year').forEach(el => { el.textContent = y; });
+    });
   })();
 </script><span class="sp-nav-name" id="nav-name"></span>
       <button class="btn-logout" id="logout-btn">Logout</button>
