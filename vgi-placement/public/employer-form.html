@@ -293,6 +293,7 @@ document.getElementById('employer-form').addEventListener('submit', async (e) =>
 
     const payload = {
       action: 'submitEmployerForm',
+      configSheetId: typeof CONFIG_SHEET_ID !== 'undefined' ? CONFIG_SHEET_ID : '16cx9a1iRo4nDpcBCSZB0AbO6ig80KlBz0ystYKrUCxo',
       company: document.getElementById('f-company').value,
       poc: document.getElementById('f-poc').value,
       email: document.getElementById('f-email').value,
@@ -327,5 +328,6 @@ document.getElementById('employer-form').addEventListener('submit', async (e) =>
 });
 </script>
 
+<script src="shared.js"></script>
 </body>
 </html>
